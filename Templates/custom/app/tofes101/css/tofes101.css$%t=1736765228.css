@@ -1,0 +1,505 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Assistant;
+    text-align: right;
+    background-color: #FFFFFF;
+    line-height: 17px;
+    height: 100%;
+}
+body{
+    margin-top: 40px;
+}
+h1{
+    text-align: center;
+    color: #646464;
+    font-size: 30px;
+    margin-bottom: 0;
+}
+.noPadding{
+    padding: 0 !important;
+}
+div.logo{
+    text-align: left;
+    margin: auto 0;
+}
+@media screen and (max-width: 770px) {
+    div.logo{
+        text-align: center;
+        margin-bottom: 15px;
+    }
+}
+img.logo{
+    height: 40px;
+    display: none;
+}
+.mb-10{
+    margin-bottom: 10px;
+}
+.mb-5{
+    margin-bottom: 5px !important;
+}
+button[disabled]{
+    cursor: no-drop;
+}
+.invalid{
+    border: red 1px solid !important;
+}
+div.dropdown.bootstrap-select.form-control.invalid{
+    height: 40px;
+}
+
+div.customButtonNumber input[type=number]::-webkit-inner-spin-button,
+div.customButtonNumber input[type=number]::-webkit-outer-spin-button{
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* for firefox */
+div.customButtonNumber input[type=number] {
+    -moz-appearance:textfield;
+}
+
+svg.exportSvg{
+    width: 22px;
+    height: 22px;
+    fill: #FFFFFF;
+    cursor: pointer;
+}
+div.customButtonNumber input{
+    position: relative;
+    height: 50px;
+}
+div.customButtonNumber button.customButtonPlus,
+div.customButtonNumber button.customButtonMinus{
+    position: absolute;
+    left: 19px;
+    width: 20px;
+    height: 20px;
+    background-color: #d8d6d6;
+    border: none;
+    cursor: pointer;
+}
+div.customButtonNumber button.customButtonPlus:hover,
+div.customButtonNumber button.customButtonMinus:hover{
+    background-color: #cac8c8;
+}
+div.customButtonNumber button.customButtonPlus{
+    top: 4px;
+}
+div.customButtonNumber button.customButtonMinus{
+    top: 26px;
+}
+
+div.rowNoRightPadding{
+    padding-right: 0;
+}
+
+.bootstrap-select .dropdown-toggle .filter-option{
+    text-align: right;
+}
+div.myContainer div.wrapperDataToggleContent,
+div.wrapperAnotherSource,
+div.wrapperPartnerIncomeType,
+div.wrapperEmployer{
+    display: none;
+}
+
+/* override bootstrap */
+.custom-radio .custom-control-input:checked ~ .custom-control-label::before,
+.custom-radio .custom-control-input:checked~.custom-control-label::before,
+.custom-control-input:checked ~ .custom-control-label::before,
+.custom-control-input:checked~.custom-control-label::before,
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before,
+.custom-checkbox .custom-control-input:checked~.custom-control-label::before{
+    background-color: #339BAE;
+}
+.custom-file,
+.custom-file-input,
+.custom-file-label{
+    cursor: pointer;
+}
+.offset-md-2 {
+    margin-left: 0;
+}
+.modal-header .close{
+    margin-right: 0;
+    margin-left: auto;
+}
+.modal-content{
+    border: 0;
+}
+/* end */
+
+i.icofont-calendar{
+    font-size: 23px;
+}
+.custom-file-label::after{
+    font-family: IcoFont !important;
+    content: "\f01c";
+    background-color: #339BAE;
+    color: #FFFFFF;
+    padding-top: 1px;
+    font-size: 24px;
+    right: unset;
+    float: left;
+    left: -2px;
+}
+div.line {
+    border-top: 1px solid #339BAE;
+    width: 100%;
+}
+div.lineGray {
+    border-top: 1px solid #bdbdbd;
+    width: 100%;
+}
+div.myContainer{
+    padding: 15px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    background-color: #F6F6F6;
+}
+div.myContainer.smallSpace{
+    margin-bottom: 0;
+}
+
+div.myContainer.withoutPadding{
+    padding: 0;
+}
+
+.padding15{
+    padding: 15px;
+}
+
+.mt20{
+    margin-top: 20px;
+}
+div.myContainer h5{
+    margin: 15px 19px 30px 0;
+    padding-right: 15px;
+    color: #339BAE;
+    font-size: 19px;
+}
+p.description{
+    margin-right: 24px;
+    font-size: 14px;
+    color: #878787;
+}
+.bigMargin{
+    margin-top: 25px;
+}
+.question-mark {
+    color: #339BAE;
+    margin-right: 5px;
+}
+.question-mark-gray{
+    color: #A1A1A1;
+}
+label{
+    color: #646464;
+    font-size: 16px;
+    line-height: 26px;
+}
+div.custom-checkbox label{
+    color: #878787;
+}
+div.headerBlack label{
+    font-size: 17px;
+    line-height: 26px;
+    font-weight: 600;
+}
+label.black,
+span.black{
+    color: #000000;
+}
+div.custom-checkbox label.black{
+    color: black;
+}
+div.exportGroup{
+    margin-top: 20px;
+}
+.exportGroup ul{
+    padding-right: 0;
+}
+.exportGroup li{
+    display: inline-block;
+    list-style: none;
+    border-radius: 50%;
+    height: 44px;
+    width: 45px;
+    background-color: #339BAE;
+    text-align: center;
+    direction: rtl;
+    line-height: 44px;
+    margin-left: 10px;
+}
+.exportGroup li.header-popover{
+    background-color: white;
+}
+.exportGroup li span{
+    height: 22px;
+    width: 22px;
+    color: #FFFFFF;
+}
+.exportGroup li span.header-popover{
+    color: #339BAE;
+}
+div.exportGroup-bottom{
+    margin-top: 26px;
+}
+.requiredFields{
+    color: red;
+}
+.tip{
+    color: #E52020;
+    font-size: 14px;
+}
+h5 div.tip{
+    padding-top: 6px;
+}
+.tip b{
+    font-weight: 700;
+}
+div.wrapperAddChild{
+    text-align: left;
+}
+button#addChild{
+    width: 120px;
+}
+button#addChild,
+#addEmployer,
+#save{
+    color: #FFFFFF;
+    background: #339BAE;
+}
+#save{
+    background: #FF5723;
+}
+#save.withoutManager{
+    background: #0F9D58;
+}
+div.wrapperSign{
+    height: 250px;
+    border: 1px solid #CCCCCC;
+    background-color: #FFFFFF;
+    border-radius: 0.3rem;
+    text-align: center;
+}
+.wrapperCanvas{
+    position: relative;
+    max-width: 440px;
+    height: 150px;
+    margin: 0 auto;
+}
+.wrapperCanvas:before{
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    content: "";
+    background-image: url(../../images/svg/pen.svg);
+    background-repeat: no-repeat;
+    transform: rotate(90deg);
+    height: 49px;
+    width: 49px;
+}
+div.signDescription{
+    margin-top: 5px;
+}
+#clear{
+    width: 105px;
+    background-color: #339BAE;
+    color: #FFFFFF;
+    float: left;
+}
+#clear svg{
+    width: 17px;
+    height: 18px;
+    margin-left: 6px;
+    fill: #FFFFFF;
+}
+div.popover-body ul{
+    list-style: none;
+    padding: 0 8px;
+    text-align: justify;
+}
+div.popover-body ul li{
+    font-size: 14px;
+    padding-bottom: 10px;
+}
+span.titleDescription {
+    font-weight: 500;
+}
+.computerIcon{
+    height: 47px;
+    width: 61px;
+}
+.textGreen{
+    color: #339BAE;
+}
+.closeAndExit,
+.sendEmail{
+    background: #339BAE;
+    color: white;
+}
+.bigHeight{
+    min-height: 76px;
+}
+.sendToManager{
+    margin-top: 30px;
+    margin-bottom: 0;
+}
+svg.emailSent{
+    height: 100px;
+    width: 100px;
+}
+div.firstStep div.error{
+    color: #dc3545;
+}
+div.wrapperLoader,
+div.secondStep{
+    display: none;
+}
+div.sendSuccessTest{
+    margin-top: 15px;
+}
+.loader{
+    float: right;
+    width: 100%;
+    height: 200px;
+    background: transparent url(../../images/preLoader.svg) 50% 50% no-repeat;
+}
+.dirLtr,
+.emailAddress{
+    direction: ltr;
+}
+.dirLtr::placeholder,
+.emailAddress::placeholder{
+    direction: rtl;
+}
+div.customButtonNumber input{
+    padding-right: 20px;
+}
+div.bootstrap-select button.dropdown-toggle{
+    border: 1px solid #ced4da;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+label.error{
+    width: 100%;
+    margin-top: .25rem;
+    font-size: 80%;
+    color: #dc3545;
+}
+.error-border{
+    border: 1px solid red !important;
+    border-radius: 5px;
+}
+#declare-error{
+    padding-right: 2em;
+}
+#partnerIncome-error,
+#otherIncomesSalaryType-error{
+    margin-top: -2%;
+    display: flex;
+}
+label#taxCoordinationIncome-error,
+label#immigrantOrResident-error,
+label#otherIncomes-error,
+label#maritalStatus-error,
+label#sex-error,
+label#israeliResident-error,
+label#memberKibbutzOrMoshav-error,
+label#partnerIdBy-error{
+    margin-top: -2%;
+}
+label#salaryType-error,
+label#idBy-error{
+    margin-top: -5%;
+}
+div.myContainer h5.declare-title{
+    margin-bottom: unset;
+}
+div.custom-checkbox label[for="declare"]{
+    margin-right: 1.2vw;
+    margin-bottom: -1.5vh;
+}
+div.wrapperSign #signature-error{
+    width: 10vw;
+    display: none;
+}
+.header-text{
+    margin-bottom: 0;
+    text-align: center;
+    font-size: 13px;
+}
+.discliamer{
+    font-size: 13px;
+}
+.declare-bottom-row {
+    padding: 10px;
+}
+article.padding15 {
+    padding-right: 20px;
+}
+.tofes101-form{
+    padding-bottom: 20px;
+}
+.tooltip-inner{
+    padding: .5rem .75rem;
+    color: #212529;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+.bs-tooltip-bottom .arrow::before, .bs-tooltip-top .arrow::before{
+    border-bottom-color: white;
+    border-top-color: white;
+}
+svg.question-mark{
+    width: 22px;
+    height: 20px;
+    padding-left: 3px;
+}
+div.lawdesc{
+    text-align: right;
+}
+div.gettingChildAllowance{
+    margin-right: 15px;
+}
+
+@media screen and (max-width: 360px) {
+    canvas#signaturePad{
+        width: 100%;
+        height: 100%;
+    }
+}
+
+div.invalid-feedback-same-id{
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 80%;
+    color: #dc3545;
+}
+
+.removeChild {
+    display: flex;
+    align-items: center;
+    margin-right: 30px;
+    border: none;
+    background: none;
+    color: #E52020;
+    font-weight: 900;
+    height: 20px;
+    margin-top: 42px;
+}
+
+img.meckanoLogo{
+    width: 139px;
+    height: auto;
+}

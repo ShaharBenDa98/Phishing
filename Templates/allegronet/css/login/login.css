@@ -1,0 +1,146 @@
+html {height:100%;padding:0px;margin:0px;border:none}
+
+
+
+ 
+.blueBorder1px {
+	border: 1px solid #01388A;
+	width: 388px;
+	height: 322px;
+	
+}
+.whiteBorder2px {
+	border: 2px solid #FFFFFF;
+	width: 388px;
+	height: 322px;
+}
+
+#passwordReminder {
+	background-attachment: fixed;
+	background-color: #CFE4F4;
+	width:388px;
+	height: 322px;
+}
+
+
+
+
+#mainTable100 {
+	height: 100%;
+	width: 100%;
+	text-align: center;
+}
+
+
+#mainBorderBlue {
+	border-top-width: 0px;
+	border-right-width: 1px;
+	border-bottom-width: 0px;
+	border-left-width: 1px;
+	border-top-style: solid;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-left-style: solid;
+	border-top-color: #6D92BC;
+	border-right-color: #6D92BC;
+	border-bottom-color: #6D92BC;
+	border-left-color: #6D92BC;
+	height: 100%;
+	width: 905px;
+}
+#mainBorderGray {
+	border-top-width: 0px;
+	border-right-width: 1px;
+	border-bottom-width: 0px;
+	border-left-width: 1px;
+	border-top-style: solid;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-left-style: solid;
+	border-top-color: #C4CED7;
+	border-right-color: #C4CED7;
+	border-bottom-color: #C4CED7;
+	border-left-color: #C4CED7;
+	height: 100%;
+	width: 905px;
+	
+}
+
+.ErrText {
+	/*font-family: Verdana, Arial, Helvetica, sans-serif;*/
+	/*font-size: 12px;*/
+	color: #c82828;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.GreenText {
+	/*font-family: Verdana, Arial, Helvetica, sans-serif;*/
+	/*font-size: 12px;*/
+	color: #09FF00;
+	text-decoration: none;
+	line-height: 23px;
+}
+
+.HeaderText {
+	color: #F05000;
+	/*line-height: 23px;*/
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.HeaderGreen {
+  font-weight: bold;
+  font-size: 18px;
+  color: #1ea707;
+}
+
+.HeaderOrange {
+  font-weight: bold;
+  font-size: 18px;
+  color: #F05000;
+}
+
+.HeaderGray {
+  font-weight: bold;
+  font-size: 14px;
+  color: #414042;
+}
+
+.GreenLink:link              { color:#1ea707; font-size: 14px;font-weight: bold;text-decoration:underline; }
+.GreenLink:visited           { color:#1ea707; font-size: 14px;font-weight: bold;text-decoration:underline; }
+.GreenLink:hover             { color:#1ea707; font-size: 14px;font-weight: bold;text-decoration:underline; }
+.GreenLink:active            { color:#1ea707; font-size: 14px;font-weight: bold;text-decoration:underline; }
+
+.OrangeLink:link              { color:#F05000; font-size: 14px;font-weight: bold;text-decoration:underline; }
+.OrangeLink:visited           { color:#F05000; font-size: 14px;font-weight: bold;text-decoration:underline; }
+.OrangeLink:hover             { color:#F05000; font-size: 14px;font-weight: bold;text-decoration:underline; }
+.OrangeLink:active            { color:#F05000; font-size: 14px;font-weight: bold;text-decoration:underline; }
+
+.Title_Gray_First {	background-image: url(images/gray_left.gif)}
+.Title_Gray_Center {	background-image: url(images/gray_center.gif)}
+.Title_Gray_Last {	background-image: url(images/gray_right.gif)}
+
+
+.rememberMeSpan
+{
+  font-weight: bold;
+  line-height: 20px;
+}
+
+.rememberMeCheckBox
+{
+  margin-left: 0;
+}
+
+.RTL .rememberMeCheckBox
+{
+  margin-right: 0;
+}
+
+.SeparatorLine
+{
+    height:1px;
+    border-bottom:1px solid #313030;
+}
+

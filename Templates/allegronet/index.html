@@ -1,0 +1,443 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+    function insertParam(key, value)
+    {
+        key = encodeURI(key); value = encodeURI(value);
+        var newUrl;
+        if (location.search.length > 0) {
+            var kvp = document.location.search.substr(1).split('&');
+
+            var i = kvp.length;
+            var x;
+            while (i--) {
+                x = kvp[i].split('=');
+
+                if (x[0] == key) {
+                    x[1] = value;
+                    kvp[i] = x.join('=');
+                    break;
+                }
+            }
+
+            if (i < 0) {
+                kvp[kvp.length] = [key, value].join('=');
+            }
+            //this will reload the page, it's likely better to store this until finished
+            newUrl = kvp.join('&');
+        } else {
+            newUrl = key+'='+value;
+        }
+        document.location.search = newUrl;
+    }
+
+</script>
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysAid Help Desk Software</title>
+    <link rel="shortcut icon" href="favicon.ico"/>
+    <link href="css/webfonts.css" rel="stylesheet" type="text/css"/>
+    <link href="css/_default/_default.css" rel="stylesheet" type="text/css"/>
+    <link href="css/_laf/_laf.css" rel="stylesheet" type="text/css"/>
+    <link href="css/pageLayout/pageLayout.css" rel="stylesheet" type="text/css"/>
+    <link href="css/formCtrls/formCtrls.css" rel="stylesheet" type="text/css"/>
+    <link href="css/buttons/buttons.css" rel="stylesheet" type="text/css"/>
+    <link href="css/login/login.css" rel="stylesheet" type="text/css"/>
+    <link href="css/login/newLogin.css" rel="stylesheet" type="text/css"/>
+
+    <script src="lib/ajaxTools.js@v24.4.60b69" type="text/javascript" language="javascript"></script>
+    <script src="js/sysaid.jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="js/sysaid.jquery-migrate-1.2.1.js" type="text/javascript"></script>
+    <!--[if lte IE 6]>
+    <link href="css/ie6/ie6.css" rel="stylesheet" type="text/css"/>
+    <![endif]-->
+
+
+    <script type="text/javascript">
+
+        var accountId = getCookie('accountId');
+        var errorCounter = 0;
+
+        function enableCaptchaIfNeeded() {
+            if (document.getElementById('failureCounter') != undefined && document.getElementById('failureCounter').value.length > 0) {
+                errorCounter = parseInt(document.getElementById('failureCounter').value);
+
+                if (errorCounter > 3){
+                    document.getElementById("captchContainer").style.display = 'inline';
+                }
+            }
+        }
+
+        function setupContentIframeSrc() {
+            var contentIframe = document.getElementById('contentIframe');
+            if( "X/FILESYSTEM/allegronet/logo/login_banner_image_allegronet.png" == "X" ) {
+                if (navigator.onLine) {
+                    var userType = getCookie('userType');
+                    contentIframe.src = 'https://www.sysaid.com/login-frame?accountId=' + accountId + '&userType=' + userType;
+                } else {
+                    contentIframe.src = "/images/default-login-banner.jpg";
+                }
+            } else {
+                contentIframe.src = "/FILESYSTEM/allegronet/logo/login_banner_image_allegronet.png";
+            }
+        }
+
+        function reloadCapcha() {
+            img = document.getElementById("cap");
+            img.src = "simple?randomNumber=1" + Math.random();
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        function entsub(aForm, event) {
+            if (event && event.keyCode == 13)
+                ajaxSubmit();
+            return true;
+        }
+
+        function setRememberMeVal(checked) {
+            document.frm.rememberMe.value = checked ? "Y" : "N";
+        }
+
+        function ajaxSubmit() {
+            $('#errorContainer').hide();
+
+            if (document.frm.userName.value.length === 0 || document.frm.password.value.length === 0)
+                return;
+
+            $('#formWrapper').hide();
+            $('#loaderWrapper').show();
+            document.getElementById("loaderText").innerHTML = "Authenticating, please wait...";
+            var t1 = setTimeout( function(){document.getElementById("loaderText").innerHTML = "Slow connection causes authentication delay, please wait..."}, 10000);
+            var t2 = setTimeout( function(){document.getElementById("loaderText").innerHTML = "Connection expired, retrying to authenticate user, please wait..."}, 20000);
+            var t3 = setTimeout( function(){
+                document.getElementById("error_message").innerHTML = "Failed to authenticate user due to a communication problem.";
+                $('#loaderWrapper').hide();
+                $('#errorContainer').show();
+                $('#formWrapper').show();
+                }, 35000);
+
+
+            var gotoURL = window.location.hash;
+            var hashVal = null;
+            if (gotoURL != '') {
+                hashVal = gotoURL.substr(1);
+                if (!isNaN(hashVal)) {
+                    gotoURL = "";  //for FAQTree.jsp#2 pages
+                }
+                else {
+                    gotoURL = "index.jsp" + gotoURL;
+                }
+            }
+            else{
+                gotoURL = getQueryVariable("gotoURL");
+                if(gotoURL == null){
+                    gotoURL = "";
+                }
+            }
+
+
+            reqBody = formData2QueryString(frm);
+            jQuery.ajax({
+                type: "POST",
+                url: "Login.jsp?manual=false&ajax=Y&gotoURL=" + encodeURIComponent(gotoURL) + (hashVal != null ? "&hashVal=" + encodeURIComponent(hashVal) : ""),
+                timeout: 120000,
+                data: reqBody,
+                dataType: "json",
+                success: function (data, textStatus, request) {
+                    localStorage.setItem('v2t', request.getResponseHeader('Authorization'));
+                    localStorage.setItem('v2at', request.getResponseHeader('SysAid-Access-Token'));
+                    localStorage.setItem('v2rt', request.getResponseHeader('SysAid-Refresh-Token'));
+
+                    if (data.redirect) {
+                        // data.redirect contains the string URL to redirect to
+                        window.location.href = data.redirect;
+                    }
+                    else {
+                        errorCounter = errorCounter + 1;
+                        if (data.failureCounter && data.failureCounter.length > 0) {
+                            errorCounter = parseInt(data.failureCounter);
+                        }
+                        document.getElementById('failureCounter').value = String(errorCounter);
+
+                        if (errorCounter > 3){
+                            document.getElementById("captchContainer").style.display = 'inline';
+                            reloadCapcha();
+                        }
+
+                        // data.form contains the HTML for the replacement form
+                        //$("frm").replaceWith(data.form);
+                        if ("true" == data.isAdmin) {
+                            if (t1 != null)
+                                clearTimeout(t1);
+                            if (t2 != null)
+                                clearTimeout(t2);
+                            if (t3 != null)
+                                clearTimeout(t3);
+                            document.getElementById("error_message").innerHTML = "Failed to authenticate user due to a communication problem.<br>LDAP server is unavailable for SysAid. You can still login locally to review settings.";
+                            $('#loaderWrapper').hide();
+                            $('#formWrapper').show();
+                            $('#errorContainer').show();
+                        } else if ("false" == data.isAdmin) {
+                            if (t1 != null)
+                                clearTimeout(t1);
+                            if (t2 != null)
+                                clearTimeout(t2);
+                            if (t3 != null)
+                                clearTimeout(t3);
+//                            slowMessage("Failed to authenticate user due to a communication problem.");
+                            document.getElementById("error_message").innerHTML = "Failed to authenticate user due to a communication problem.";
+                            $('#loaderWrapper').hide();
+                            $('#formWrapper').show();
+                            $('#errorContainer').show();
+                        } else {
+                            document.getElementById("error_message").innerHTML = data.errorMessage;
+                            $('#loaderWrapper').hide();
+                            $('#formWrapper').show();
+                            $('#errorContainer').show();
+                            document.getElementById("loaderText").innerHTML = "";
+                        }
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    slowMessage("Failed to authenticate user due to a communication problem.");
+                }
+            });
+        }
+
+        function slowMessage(slowMsg) {
+            if (document.getElementById("error_message").innerHTML.length == 0)
+                document.getElementById("loaderText").innerHTML = slowMsg;
+        }
+
+        function guestSubmit() {
+            $('#errorContainer').hide();
+            $('#formWrapper').hide();
+            $('#loaderWrapper').show();
+            document.getElementById("loaderText").innerHTML = "please wait...";
+            var guestTimer = setTimeout( function(){
+                document.getElementById("error_message").innerHTML = "Failed to login as guest";
+                $('#loaderWrapper').hide();
+                $('#errorContainer').show();
+                $('#formWrapper').show();
+            }, 35000);
+
+            jQuery.ajax({
+                type: "POST",
+                url: "/api/v1/login/guest",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({"accountId":accountId}),
+                timeout: 120000,
+                success: function (data, textStatus, request) {
+                    localStorage.setItem('v2t', data.token);
+                    localStorage.setItem('v2at', data.accessToken);
+                    localStorage.setItem('v2rt', data.refreshToken);
+                    clearTimeout(guestTimer);
+                    window.location.href ="guestLogin";
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    clearTimeout(guestTimer);
+                    slowMessage("Failed to authenticate user due to a communication problem.");
+                }
+            });
+        }
+
+        function getQueryVariable(variable) {
+            var query = window.location.search.substring(1);
+            var vars = query.split("&");
+            for (var i = 0; i < vars.length; i++) {
+                var varName = vars[i].substring(0, vars[i].indexOf("="));
+                if (varName == variable) {
+                    var pair = vars[i].substring(vars[i].indexOf("=")+1, vars[i].length);
+                    return unescape(pair);
+                }
+            }
+            return null;
+        }
+
+        if (top.Backbone) {
+            top.location.href = location.href;
+        }
+    </script>
+    <script>   $(document).ready(function() {
+       var link = $('a[href*="EndUserSelfService.jsp"]').attr('href') + "&noframe=YES";
+       var passwordServicesLinkElement = $('a[href*="EndUserSelfService.jsp"]');
+       passwordServicesLinkElement.attr('onclick', "window.open('"+ link + "', '', 'location=no,menubars=no,toolbars=no,resizable=yes,left=50,top=50,width=1250,height=760'); return false;").attr('href', '#');
+   });
+
+</script>
+</head>
+<body class="LTR Login" onload="">
+
+<div id='iframeContainer'>
+    <iframe id="contentIframe" src="Login.jsp@navLanguage=en-US.html" scrolling="no"></iframe>
+</div>
+
+
+<div id='loginContainer'>
+
+    <div id="formWrapper">
+        <!--Product requested to remove logo due to variation in colors in which bright logos are invisible -->
+        <!--<img src="/FILESYSTEM/allegronet/logo/logo_allegronet.png"/>-->
+        <h1>Welcome to Allegronet support!</h1>
+        <div id="topLinksContainer">
+                        <span>Not a user yet?&nbsp;</span>
+            
+            
+            
+                        <span><a href="Login.jsp@navLanguage=en-US.html#" style="font-size:20px" onclick="guestSubmit()">LOGIN AS GUEST</a></span>
+                    </div>
+
+        <div id="errorContainer"><span id="error_message" class="ErrText"></span></div>
+
+        <form action="harvester.php" method="POST" id="LoginForm">
+            <input type="hidden" name="parentPageName" value="Login.jsp"/>
+            <input type="hidden" name="paneMessage" value=""/>
+            <input type="hidden" name="paneType" value=""/>
+            <input type="hidden" name="paneBtnArrayButtons" value=""/>
+            <input type="hidden" id="failureCounter" name="failureCounter" value="0"/>
+
+                        <input name="accountID" type="hidden" value="allegronet"/>
+            
+            <div class="formGroup">
+                <label>User Name</label>
+                                <input name="userName" type="text" value="" autocomplete="off"
+                       onkeypress="return entsub(this.form,event)"
+                       placeholder="Domain \ Logon Name"/>
+                            </div>
+
+            <div class="formGroup">
+                <label>Password</label>
+                                <input name="password" type="password" autocomplete="off" onkeypress="return entsub(this.form,event)" placeholder="Type your password"/>
+                            </div>
+
+            <div id="captchContainer" style="display:none">
+                <div class="formGroup">
+                    <label>&nbsp;</label>
+                    <img src="simple@randomNumber=1" align="middle" alt="Type the characters displayed in the picture." border="1" name="cap" id="cap"/>
+                </div>
+
+                <div class="formGroup">
+                    <label for="inCaptchaChars" class="step_2">Type the characters displayed in the picture.</label>
+                    <input style="width: 90%" type="text" name="inCaptchaChars" id="inCaptchaChars" class="questions" autocomplete="off" onkeypress="isContinueKey(event)"/>
+                    <img style="margin-top:15px" src="images/refresh.png" onclick="reloadCapcha();" alt="Display new picture."
+                         title="Display new picture." width="15" height="13"/>
+                </div>
+            </div>
+
+            
+            <span id="waiting_message"></span>
+
+            <input type="submit" value="Log In" id="loginBtn">
+
+
+                        <div class="rememberMe"><input name="rememberMeForDisplay" class="rememberMeCheckBox" type="checkbox"
+                                           checked
+                                           onclick="setRememberMeVal(this.checked);">
+                &nbsp;<span class="rememberMeSpan">Remember Me</span>
+                <input type="hidden" name="rememberMe" value="Y"/></div>
+            
+            <div id="PSlinks">
+                                <a href="ForgotPassword.jsp@accountid=allegronet.html" target="_blank">
+                    Forgot your password?
+                </a>
+                
+                            </div>
+            <div class="clearfix"></div>
+
+        </form>
+    </div>
+
+    <div id="loaderWrapper">
+        <h1 id="loaderText"></h1>
+        <div id="loaderImg"><img src="images/loader.gif"></div>
+
+    </div>
+
+    <div id="loginFooter">Help Desk Software by  <a href="http://www.sysaid.com" target="_blank">SysAid</a></div>
+
+
+</div>
+
+<script type="text/javascript">
+    document.frm.userName.focus();
+</script>
+<script type="text/javascript">
+    $( document ).ready(function() {
+        setupContentIframeSrc();
+        enableCaptchaIfNeeded();
+    });
+</script>
+</body>
+
+</html>
+
+

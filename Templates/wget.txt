@@ -1,0 +1,1 @@
+wget -p -k -E -r -l 1 https://main.timetable.co.il/DefaultLogin.aspx

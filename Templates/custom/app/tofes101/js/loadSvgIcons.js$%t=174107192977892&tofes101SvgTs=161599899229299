@@ -1,0 +1,17 @@
+$(document).ready(function(){
+    let t = 100104;
+    const scriptEl = $('script[src*="loadSvgIcons.js"]').last()[0];
+    if (scriptEl) {
+        const scriptUrl = new URL(scriptEl.src, window.location.href);
+        t = scriptUrl.searchParams.get('tofes101SvgTs');
+    }
+
+    $.ajax({
+        url: `images/svg/tofes101.svg?ts=${t}`,
+        async: false,
+        dataType: 'text',
+        success: function (svg) {
+            $("body").prepend($(svg));
+        }
+    });
+});

@@ -1,0 +1,151 @@
+/* Base Styles */
+/* All */
+*
+{
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	font-family: Arial;
+	font-size: 12px;
+	/*background-color: White;*/
+	color: Black;
+}
+/* Elements */
+HTML
+{
+	/*
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	*/
+}
+BODY
+{
+	/*overflow: auto;*/
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+	/*width: 100%;
+	height: 100%;*/
+}
+TABLE
+{
+	border-collapse: collapse;
+	empty-cells: show;
+}
+TD
+{
+	padding: 0px;
+	margin: 0px;
+}
+IMG
+{
+	margin: 0px 0px 0px 0px;
+	vertical-align: middle;
+}
+A IMG
+{
+	border: 0px;
+}
+A,
+A:visited
+{
+    font-weight: bold;
+    color: #555a7c;
+}
+.LookLikeLink
+{
+    font-weight: bold;
+    color: #555a7c;
+}
+P
+{
+	margin: 0px;
+	padding: 0px;
+}
+XMP
+{
+	padding: 4px;
+	vertical-align: middle;
+	height: 100%;
+	line-height: 25px;
+	margin: 0px;
+	white-space: normal;
+	font-family: courier;
+}
+IFRAME
+{
+	
+}
+BUTTON
+{
+	background-color: #DEDEDE;
+}
+/* Classes */
+.Maxed
+{
+	width: 100%;
+	height: 100%;
+}
+.Maxed_Width
+{
+	width: 100%;
+}
+.xMaxed
+{
+	width: 100%;
+}
+.yMaxed
+{
+	height: 100%;
+}
+.Centered
+{
+	text-align: -moz-center!important;
+	_text-align: center!important;
+}
+.RightAlign
+{
+	text-align: -moz-right!important;
+	_text-align: right!important;
+}
+.RTL
+.RightAlign
+{
+	text-align: -moz-left!important;
+	_text-align: left!important;
+}
+.LeftAlign
+{
+	text-align: -moz-left!important;
+	_text-align: left!important;
+}
+.RTL
+.LeftAlign
+{
+	text-align: -moz-right!important;
+	_text-align: right!important;
+}
+.PaddedBox
+{
+	padding: 5px;
+}
+.FitToContent
+{
+	height: 1px;
+}
+.ScrollerBox
+{
+	padding: 10px;
+	width: 100%;
+	height: 100%;
+	position: relative;
+	overflow: auto;
+}
+.BorderFix_FF
+{
+    width: auto;
+}
+.SubTabBorderFix_FF
+{
+	width: 100%;
+}

@@ -1,0 +1,372 @@
+/* Page Layout */
+
+.MainLayout
+{
+	border: 1px solid #A7A7A7;
+	background-color: #F5F5F5;
+	padding: 2px;
+	width: 100%;
+	height: 100%;
+}
+.Frame
+{
+	/*filter: alpha(opacity=50);*/
+	/*-moz-opacity: 0.5;*/
+}
+.Frame TD
+{
+	/*border: 1px solid blue;*/
+}
+/*
+Frame_Top_Left
+Frame_Top_Center
+Frame_Top_Right
+
+Frame_Header_Left
+Frame_Header_Center
+Frame_Header_Right
+
+Frame_Body_Left
+Frame_Body_Center
+Frame_Body_Right
+
+Frame_Bottom_Left
+Frame_Bottom_Center
+Frame_Bottom_Right
+*/
+
+
+.Frame_Bottom_Left,
+.Frame_Bottom_Right
+{
+	width: 5px;
+	height: 7px;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.Frame_Top_Left,
+.Frame_Top_Right
+{
+	height: 3px;
+}
+.Frame_Top_Left
+{
+	background-image: url(pageFrame/top_left.gif);
+	background-position: left top;
+}
+.RTL
+.Frame_Top_Left
+{
+	background-image: url(pageFrame/top_right.gif);
+	background-position: right top;
+}
+.Frame_Top_Right
+{
+	background-image: url(pageFrame/top_right.gif);
+	background-position: right top;
+}
+.RTL
+.Frame_Top_Right
+{
+	background-image: url(pageFrame/top_left.gif);
+	background-position: left top;
+}
+.Frame_Top_Center
+{
+	background-position: center top;
+	background-repeat: repeat-x;
+	background-image: url(pageFrame/top_center.gif);
+}
+.Frame_Header
+{
+	background-position: top;
+	background-repeat: repeat-x!important;
+	background-image: url(pageFrame/header_bg_dark.gif);
+}
+.Frame_Header_Left,
+.Frame_Header_Right,
+.Frame_Body_Left,
+.Frame_Body_Right
+{
+	background-repeat: repeat-y;
+}
+.Frame_Header_Left
+{
+	background-position: left;
+	background-image: url(pageFrame/header_left.gif);
+}
+.RTL
+.Frame_Header_Left
+{
+	background-position: right;
+	background-image: url(pageFrame/header_right.gif);
+}
+.Frame_Header_Right
+{
+	background-position: right;
+	background-image: url(pageFrame/header_right.gif);
+}
+.RTL
+.Frame_Header_Right
+{
+	background-position: left;
+	background-image: url(pageFrame/header_left.gif);
+}
+.Frame_Header_Center
+{
+	/*Obsolete*/
+
+}
+.Frame_Body_Left
+{
+	background-position: left;
+	background-image: url(pageFrame/body_left.gif);
+}
+.RTL
+.Frame_Body_Left
+{
+	background-position: right;
+	background-image: url(pageFrame/body_right.gif);
+}
+.Frame_Body_Right
+{
+	background-position: right;
+	background-image: url(pageFrame/body_right.gif);
+}
+.RTL
+.Frame_Body_Right
+{
+	background-position: left;
+	background-image: url(pageFrame/body_left.gif);
+}
+.Frame_Body_Center
+{
+
+}
+.Frame_Bottom_Left
+{
+	background-image: url(pageFrame/bottom_left.gif);
+	background-position: left top;
+}
+.RTL
+.Frame_Bottom_Left
+{
+	background-image: url(pageFrame/bottom_right.gif);
+	background-position: right top;
+}
+.Frame_Bottom_Right
+{
+	background-image: url(pageFrame/bottom_right.gif);
+	background-position: right top;
+}
+.RTL
+.Frame_Bottom_Right
+{
+	background-image: url(pageFrame/bottom_left.gif);
+	background-position: left top;
+}
+.Frame_Bottom_Center
+{
+	background-position: center;
+	background-repeat: repeat-x;
+	background-image: url(pageFrame/bottom_center.gif);
+}
+
+/* Page Header */
+.Page_Header
+{
+	height: 83px;
+	background-position: top;
+	background-repeat: repeat-x!important;
+	background-image: url(images/page_header_bg.gif);
+}
+.Page_Header_Layout
+{
+	background-position: right 1px;
+	background-repeat: no-repeat;
+	background-image: url(images/page_header_bgImage.gif);
+	border-bottom: 1px solid #C3C5CA;
+	/*C3C5CA*/
+}
+.RTL
+.Page_Header_Layout
+{
+	background-image: url(images/page_header_bgImage_rtl.gif);
+	background-position: left 1px;
+}
+.Page_Header TD
+{
+
+}
+.Logo
+{
+	width: 140px;
+	padding: 0 12px;
+	white-space: nowrap;
+}
+.Logo IMG
+{
+
+}
+.Logo SPAN
+{
+	vertical-align: middle;
+}
+
+.Header_Toolbar
+{
+	height: 1px;
+	/*text-align: -moz-right;
+	_text-align: right;*/
+	padding: 10px;
+	padding-right: 4px;
+	padding-bottom: 2px;
+}
+.RTL
+.Header_Toolbar
+{
+	/*text-align: -moz-left;
+	_text-align: left;*/
+
+}
+.Header_Toolbar TD
+{
+	padding-left: 5px;
+	padding-right: 5px;
+	color: White;
+}
+.Header_Toolbar TD *
+{
+	color: White;
+}
+.Header_Toolbar TD LABEL
+{
+	padding-bottom: 5px;
+}
+.Header_Toolbar TD IMG
+{
+	vertical-align: top;
+}
+/* Page Toolbar */
+.Page_Toolbar
+{
+	height: 36px;
+	background-color: #F6F6F9;
+
+}
+.MainToolbar_Box
+{
+	vertical-align: middle;
+}
+
+/* Page Content */
+.Page_Content
+{
+	background-color: #F6F6F9;
+	padding: 0px 8px 2px 0px;
+}
+.RTL
+.Page_Content
+{
+	padding: 0px 0px 2px 8px;
+}
+.Pane
+{
+	padding: 2px 0px 0px 4px;
+}
+.RTL
+.Pane
+{
+	padding: 2px 4px 0px 0px;
+}
+#MainPane
+{
+	width: 100%;
+	padding-left: 8px;
+}
+.RTL
+#MainPane
+{
+	padding-right: 8px;
+	padding-left: 0px;
+}
+#LeftPane,
+#RightPane
+{
+	width: 180px!important;
+	padding-top: 2px;
+	vertical-align: top;
+}
+.LeftPane .ScrollerBox
+{
+	background-color: #757897;
+}
+
+
+/**/
+BODY.login
+{
+
+}
+BODY.login #MainPane
+{
+	padding-top: 44px;
+}
+.Login_BG
+{
+	background-image: url(login/loginPanel_bg_320.png);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 588px;
+	height: 320px;
+	vertical-align: top;
+}
+
+td.Logo img {
+    max-width: 200px;
+    max-height: 30px;
+}
+
+
+.Login_Form_Box
+{
+
+}
+#LoginForm
+{
+	position: relative;
+
+}
+.LoginWrapper
+{
+	position: absolute;
+	width: 588px;
+	height: 224px;
+	top: -300px;
+	left: 0px;
+	_left: -290px;
+}
+.LoginWrapper .Form_Ctrl
+{
+	float: none!important;
+}
+.LoginWrapper .Form_Ctrl TR
+{
+
+}
+.LoginWrapper .Form_Ctrl .Form_Ctrl_Fields
+{
+	vertical-align: middle;
+	height: 35px;
+}
+.LoginWrapper .Form_Ctrl .Form_Ctrl_Label,
+.LoginWrapper .Form_Ctrl .Form_Ctrl_Label *
+{
+	color: #3aac02;
+}
+
+
+.PaddingCells
+{
+  padding-bottom: 1px;
+}

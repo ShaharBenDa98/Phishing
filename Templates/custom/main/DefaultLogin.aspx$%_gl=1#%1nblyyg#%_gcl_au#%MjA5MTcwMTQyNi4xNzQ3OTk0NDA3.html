@@ -1,0 +1,168 @@
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+
+
+<head>
+        <style type="text/css">
+            * {
+                box-sizing: border-box;
+            }
+    </style>
+
+    <title>
+	TimeTable - דף כניסה
+</title>
+        <script src='https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadCallback&render=explicit' async defer></script>
+
+      <!-- Add viewport meta tag below -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  
+
+    <style type="text/css">
+        .RegisterButton {
+            border: 1px solid #616d7e;
+            border-radius: 6px;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 12.5pt;
+            padding-top: 8px;
+            background-color: #25408f;
+            color:white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+            .RegisterButton:hover {
+                background-color: #0066ff;
+            }
+
+            .RegisterButton:active {
+                background-color: #0066ff;
+            }      
+
+    </style>
+
+     <script type="text/javascript">
+           function onRecaptchaLoadCallback() {
+               grecaptcha.render('recaptchaControl', {
+                   'sitekey': '6Ld48lMgAAAAAEBJM89S2J2JS4W0TVj3CJYvmumd'
+               });
+           }
+
+
+           function togglePasswordVisibility() {
+               var passwordInput = document.getElementById('txtPass');
+               if (passwordInput.type === 'password') {
+                   passwordInput.type = 'text';
+               } else {
+                   passwordInput.type = 'password';
+               }
+           }
+      
+
+       </script>
+
+
+
+</head>
+<body style="">
+    <form method="post" action="DefaultLogin.aspx%3F_gl=1*1nblyyg*_gcl_au*MjA5MTcwMTQyNi4xNzQ3OTk0NDA3.html" id="form1">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="cngVIqoANJGfeOufMWma5yxEKXOiFVLmDYCpLTKS/lWQcCFHpM1isNWW18wTDqZIGWkxVyQtKwK+ly7ZW+X04Qd8dkwdDg2nQKr1WLrhw0rhEpKhVigEpelh3GM+FHinF04F7P9Gu/4mTi5lmpLm7q4y1wTCYW3c97EnnanNaIdl363YS8OAS5Jo2Sq1ITVHmfZrKYzTuvN4R8nveLQLHAA4PXY=" />
+
+<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="11BD1A95" />
+<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="i8DyPE4xJ6fRsHvg1b9daFd0YPvJPJUUsB4Sdwle30ApQPcUpw/UTUwBPKb3u77ldySI/BLk6uPuDARmDzEdxVuKVy/8vAz1+KuS16+f9ycVg7uGe3gfE0C/BsDey3uaO3U7heczUSOHTjVZVOouk1hbEJ+aVfnmgskYyJyq//vSfp+dti/K3ACD92knW5QP4CKZZw==" />
+        <div style="border: 1px solid #616d7e; direction: rtl; margin: 10% auto; text-align: right; display: block; width: 400px; box-shadow: 0px 0px 10px #616d7e; padding: 10px; font-family: arial, Helvetica, sans-serif; overflow: visible;">
+            <div id="boxDebugNotifier" style="text-align:left;color:red;"></div>
+            <div style="text-align: center;height:120px;">
+             
+                <a href="https://timetable.co.il">
+                  <img src="Graphics/images/logos/NewMitugLogo.png" style="width: 350px;" alt="Timetable logo" />
+                </a>
+            </div>
+
+               <div id="loaderDiv" style="text-align: center; padding-bottom: 25px; height: 60px; display: none;">
+               <img src="Images/MainLoader.gif" alt="בטעינה..."/>
+             </div>
+
+            
+
+            
+
+
+            
+
+            <div id="loginDiv" style="padding: 10px; font-size: 14.5pt;">
+
+        
+
+            <div id="loginBox" style="padding: 10px; font-size: 14.5pt;">
+
+                <div style="margin: 5px 0px 0px 0px; color: #616d7e;">
+                    שם משתמש/דואר אלקטרוני
+                </div>
+                <div style="border: 1px solid #C0C7CF; margin: 5px 0px 0px 0px;">
+                    <input name="txtUsername" type="text" id="txtUsername" autocomplete="current-username" style="border: none; font-size: 14pt; width: 100%; box-sizing: border-box; -moz-box-sizing: border-box;" />
+                </div>
+                <div style="margin: 5px 0px 0px 0px; color: #616d7e;">
+                    סיסמה
+                </div>
+                <div style="border: 1px solid #C0C7CF; margin: 5px 0px 0px 0px; position: relative;text-align: left; direction: ltr;">
+                    <input name="txtPass" type="password" id="txtPass" autocomplete="current-password" style="border: none; font-size: 14pt; width: calc(100% - 30px); box-sizing: border-box; -moz-box-sizing: border-box;" />
+                    <button type="button" onclick="togglePasswordVisibility();" style="position: absolute; right: 0; top: 0; border: none; background: none;">
+                        <img src="Structure/Images/eye_small.png" alt="הצג/הסתר סיסמה" style="width: 20px; height: 20px;" />
+                    </button>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <input type="submit" name="btnLogin" value="כניסה" id="btnLogin" style="border-radius: 5px; background-color: #0000ff;color:white; font-size: 20px;" />
+                </div>
+              </div>
+                <a id="btnForgotPassowrd" href="javascript:__doPostBack(&#39;btnForgotPassowrd&#39;,&#39;&#39;)" style="padding-top: 10px; display: block; text-decoration: unset; font-size: 16px; text-align: center;">שכחת סיסמה? לא מצליח להתחבר?</a>
+
+                <div style="margin: 15px 0px 0px 0px; text-align: right; font-size: 12pt;">
+                    <span id="lblHelp" style="color: Red;"></span>
+                </div>
+
+                <div style="display: flex; align-items: center; margin-top: 35px;">
+                    <input id="chkRememberMe" type="checkbox" name="chkRememberMe" />
+                    <span style="font-size: 17px; padding-bottom: 1px; margin-right: 3px;">זכור אותי במחשב זה</span>
+                </div>
+
+
+                <div class="g-recaptcha" id="recaptchaControl"  data-sitekey="6Ld48lMgAAAAAEBJM89S2J2JS4W0TVj3CJYvmumd" data-callback="onRecaptchaVerify"></div>
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px;">
+                    <!-- Right-aligned items (New links) -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                        <a href="https://timetable.co.il" style="margin-bottom: 5px;font-size:14px;">מתעניין במוצר</a>
+                        <a href="https://timetable.co.il/contact/" style="font-size:14px;margin-left:30px;">צור קשר</a>
+                    </div>
+
+                    <!-- Left-aligned items (Existing content) -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <div style="color: #000000; padding-right: 6px; margin-bottom: 3px;">עובד חדש?</div>
+                        <a href="L/Register.aspx.html" style="display: inline-block; width: 95px; height: 35px; text-decoration: none;" class="RegisterButton">רישום לאתר
+                        </a>
+                    </div>
+                </div>
+
+                     
+            </div>
+
+       
+        </div>
+    
+
+<script type="text/javascript">
+//<![CDATA[
+document.getElementById('recaptchaControl').style.display = 'none';//]]>
+</script>
+</form>
+</body>
+</html>

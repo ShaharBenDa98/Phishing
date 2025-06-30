@@ -1,0 +1,4560 @@
+var welcomeDialog = {
+    el: null,
+    open: false,
+    init: false,
+    currentStep: 1,
+    company: null,
+    show: function() {
+        this.initialize();
+    },
+
+    initialize: function() {
+        this.company = Application.company;
+        this.el = $("#welcome-dialog");
+        if (this.init) {
+            $("#welcome-dialog").jqmShow();
+            return;
+        }
+        var self = this;
+        $("#welcome-dialog").jqm({modal: true});
+        $("#welcome-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a,a.welcome-button, a.add-employees");
+        this.init = true;
+        this.fillForm();
+        this.bindEvents();
+    },
+
+    bindEvents: function () {
+
+        this.el.find(".next").click(() => {
+            let currentStep = this.currentStep;
+            let nextStep = ++this.currentStep;
+            this.el.find(".step[data-step='"+currentStep+"']").addClass("hidden");
+            this.el.find(".step[data-step='"+nextStep+"']").removeClass("hidden");
+            this.el.find(".step-number[data-step-number='"+currentStep+"']").removeClass("step-number-current");
+            this.el.find(".step-number[data-step-number='"+currentStep+"']").addClass("step-number-past");
+            this.el.find(".step-number[data-step-number='"+nextStep+"']").addClass("step-number-current");
+        });
+        this.el.find(".back").click(() => {
+            let currentStep = this.currentStep;
+            let prevStep = --this.currentStep;
+            this.el.find(".step[data-step='"+currentStep+"']").addClass("hidden");
+            this.el.find(".step[data-step='"+prevStep+"']").removeClass("hidden");
+            this.el.find(".step-number[data-step-number='"+currentStep+"']").removeClass("step-number-current");
+            this.el.find(".step-number[data-step-number='"+currentStep+"']").addClass("step-number-past");
+            this.el.find(".step-number[data-step-number='"+prevStep+"']").addClass("step-number-current");
+        });
+
+        this.el.find('a.add-employees').click(() => {
+            location.href = '#employees';
+        });
+
+        this.el.find('input.save').click(() => {
+            this.save();
+        });
+
+        this.el.find(".companyNumber, .deductions").on("keypress", function(e) {
+            if (!(/[0-9]/.test(String.fromCharCode(e.which))) && e.key !== "Backspace" && e.key !== "Tab") {
+                e.preventDefault();
+            }
+        });
+
+        this.el.find('input.workMonthStartValue').on("focus", ()=>{
+            this.el.find('input.workMonthStart').prop("checked", true);
+        });
+
+    },
+
+    fillForm: function() {
+        const cnt = this.el;
+        let companyTimezoneOptions = "";
+        Application.timezones.models.forEach((model)=> {
+            const timezoneValue = model.get("value");
+            const timezoneText = model.get("text");
+            companyTimezoneOptions += `<option value="${timezoneValue}">${timezoneText}</option>`;
+        });
+        cnt.find("select.companyTimezone").append(companyTimezoneOptions);
+
+        cnt.find("select.companyTimezone option[value='" + this.company.get("companyTimezone")+"']").prop("selected","selected");
+        cnt.find("select.companyTimezone").trigger("change");
+
+        cnt.find("select").each((idx, el)=> {
+            Utils.initMultiselect($(el), false, true, false, el.options[el.selectedIndex].value);
+        });
+    },
+
+    save: function() {
+
+        const self = this;
+        const workMonthStart = this.el.find("input.workMonthStart:checked").val() || this.el.find("input.workMonthStartValue").val();
+
+        this.company.save({
+
+            workMonthStart: workMonthStart,
+            summaryTimeFormat: this.el.find("input.summaryTimeFormat:checked").val(),
+            restDays: this.el.find('input[name=restDays]:checked').val(),
+
+            businessType: Application.selectVal(this.el, "businessType"),
+            profession: Application.selectVal(this.el, "profession"),
+            companyTimezone: Application.selectVal(this.el, "companyTimezone"),
+            companyLanguage: Application.selectVal(this.el, "companyLanguage"),
+            companyNumber: this.el.find("input.companyNumber").val(),
+            deductions: this.el.find("input.deductions").val(),
+
+        }, {
+            mb: true,
+            mbSuccess: tpl.mb.companySaved,
+            mbError: tpl.mb.error,
+            mbProgress: tpl.mb.saving,
+            success: function() {
+                const date = Application.splitDay(Application.getDefaultEnd());
+                const {start, end} = Application.datesForWorkMonth(date.month + 1, date.year, "-");
+                Application.setDefaultStart(start);
+                Application.setDefaultEnd(end);
+            },
+            error: function(e) {
+                if(e === -1) {
+                    self.el.find('.step').addClass("hidden");
+                    self.el.find('#step-2').removeClass("hidden");
+
+                    self.currentStep = 2;
+                    self.el.find(".step-number[data-step-number='2']").addClass("step-number-current");
+                    self.el.find(".step-number[data-step-number='4']").removeClass("step-number-current");
+                    self.el.find(".step-number[data-step-number='3']").removeClass("step-number-past");
+                    var inp = self.el.find("input.workMonthStartValue");
+                    var err = inp.metadata({type: "attr", name: "json"}).workMonthStart;
+
+                    if (err) {
+                        FieldInformation.customFieldError(inp, err);
+                    }
+                }
+            }
+        });
+    },
+}
+
+var helpDialog = {
+    open: false,
+    init: false,
+    item: null,
+    show: function (id) {
+        this.initialize();
+        this.loadContent(id);
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#help-dialog").jqmShow();
+            return;
+        }
+        var self = this;
+        $("#help-dialog").jqm({modal: true});
+        $("#help-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        this.init = true;
+    },
+
+    showPreloader: function () {
+        $("#help-dialog").find("h2,div.help-content").hide();
+        $("#help-dialog").find("div.big-preloader").show();
+    },
+
+    loadContent: function (id) {
+        var helpItem = new HelpItem({id: id}), self = this;
+        this.showPreloader();
+        helpItem.fetch({
+            success: function () {
+                self.showContent(helpItem);
+            },
+
+            error: function (code) {
+
+            }
+        });
+    },
+
+    showContent: function (o) {
+        let title, content;
+        title = o.get("title");
+        content = o.get("content");
+        // in future, we would like to use different text for english
+        // if(Application.user.get('userLanguage') == "Hebrew"){
+        //     title = o.get("title");
+        //     content = o.get("content");
+        // }else{
+        //     title = o.get("titleEn");
+        //     content = o.get("contentEn");
+        // }
+        $("#help-dialog").find("div.big-preloader").hide();
+        $("#help-dialog").find("h2").show().find("span").text(title).show();
+        $("#help-dialog").find("div.help-content").html(content).show();
+    }
+}
+
+var passwordDialog = {
+    open: false,
+    init: false,
+    user: null,
+    isSelfChange: false,
+    isStrongPassword: false,
+    show: function (user) {
+        this.user = user;
+        this.initialize();
+        $("div.innerview-save-box a.btnWithLoader").parent().removeClass("edited");
+        $("div.innerview-save-box a.btnWithLoader").show();
+    },
+
+    initialize: function () {
+        const self = this;
+        self.isSelfChange = this.user.get('userType') === 1;
+        self.isSelfChange ? $("div.current-password-container").show() : $("div.current-password-container").hide();
+
+
+        if (this.init) {
+            $("#password-dialog").jqmShow();
+            return;
+        }
+
+        $("#password-dialog").jqm({
+            modal: true,
+            onHide: function (hash) {
+                $("#password-dialog").find("input.confirm-password, input.new-password, input.current-password").val("");
+                $("#password-dialog meter#password-strength-meter").val("");
+                $("#password-dialog div.wrapperPasswordStrength").hide();
+                hash.o.remove();
+                hash.w.hide();
+
+                const $current_password_input = $("#password-dialog").find("input.current-password");
+                self.initFieldErrors($current_password_input);
+
+            }
+        });
+        $("#password-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        $("#password-dialog a.save-and-close").click(function (e) {
+            var newPwd = $("#password-dialog input.new-password").val();
+            if (self.isStrongPassword && Application.validPassword(newPwd, self.user)) {
+                self.savePassword(e);
+            } else {
+                ConfirmTooltip.show({
+                    adj: $("#password-dialog").find("input.meterPassword"),
+                    text: tpl.errorPassword,
+                    image: tpl.iconTooltipNotify,
+                    showCancel: false,
+                    manual: false
+                }, null);
+            }
+        });
+        this.init = true;
+        Application.initMeterStrengthPassword($("#password-dialog"), this);
+        this.bindShowPassEvents();
+        this.bindInputErrorEvents();
+    },
+
+    bindShowPassEvents: function () {
+        $("#password-dialog svg.show-pass").on("mousedown mouseup", function (e) {
+            var $input = $(e.target).prev();
+
+            if (e.type == "mousedown") {
+                $input.attr("type", "text");
+            } else {
+                $input.attr("type", "password");
+            }
+        });
+
+        $("#password-dialog svg.show-pass").on("mouseleave", function (e) {
+            $(e.target).prev().focus();
+        });
+    },
+
+    initFieldErrors : function ($input) {
+        if ($input.hasClass("input-error")) {
+            $input.removeClass("input-error");
+            $input.closest(".v").find(".input-error-message").text("");
+        }
+    },
+
+    bindInputErrorEvents : function () {
+        //Clears error when changing the field
+        const self = this;
+        $("#password-dialog").on("keydown", "input.current-password", function (e) {
+            const $input = $(this);
+            self.initFieldErrors($input);
+        });
+    },
+
+    showInputError: function (input, errorMessage) {
+
+    input.addClass("input-error");
+    input.closest(".v").find(".input-error-message").text(errorMessage);
+
+},
+
+    savePassword: function (e) {
+        const self = this;
+        var elPwd = $("#password-dialog input.new-password"),
+            elPwdConf = $("#password-dialog input.confirm-password");
+
+        const currentPasswordInput = $("#password-dialog input.current-password");
+        const currentPasswordValue = this.isSelfChange ? currentPasswordInput.val() : null;
+
+        var newPwd = elPwd.val(),
+            confirmPwd = elPwdConf.val();
+
+        if (this.isSelfChange && !currentPasswordValue) {
+            const errorMessage = tpl.login_errors.currentPasswordEmpty;
+            this.showInputError(currentPasswordInput, errorMessage);
+            return;
+        }
+
+        if (newPwd != confirmPwd) {
+            NoticeTooltip.show({
+                adj: elPwdConf,
+                showConfirm: false,
+                showCancel: false,
+                text: elPwdConf.metadata({type: "attr", name: "json"}).error,
+                image: tpl.iconTooltipNotify
+            }, e);
+            return;
+        }
+
+        $("#password-dialog a.save-and-close.btnWithLoader").addClass("showLoader");
+        this.user.setPassword(currentPasswordValue, newPwd, function (isSuccess,code=null) {
+            Utils.applyMeckanoResButton($("#password-dialog"), isSuccess, tpl.buttons.saveAndClose);
+            if(!isSuccess){
+                let errorMessage = "";
+
+                function showErrorToolTip () {
+
+                    NoticeTooltip.show({
+                        adj: elPwd,
+                        showConfirm: true,
+                        showCancel: false,
+                        text: errorMessage,
+                        image: tpl.iconTooltipNotify,
+                        onConfirm: function (e, context) {
+                            elPwd.val('');
+                            elPwdConf.val('');
+                        }
+                    }, e);
+                }
+
+                switch (parseInt(code)){
+                    default : case 11 :
+                        errorMessage = tpl.login_errors.samePassword;
+                        showErrorToolTip();
+                        break;
+                    case 112 :
+                        errorMessage= tpl.login_errors.recentPassword;
+                        showErrorToolTip();
+                        break;
+                    case -6 :
+                        errorMessage= tpl.login_errors.currentPasswordEmpty;
+                        self.showInputError(currentPasswordInput, errorMessage);
+                        break;
+
+                    case -7 :
+                        errorMessage= tpl.login_errors.currentPasswordIncorrect;
+                        self.showInputError(currentPasswordInput, errorMessage);
+                        break;
+                }
+
+            }else{
+                // pasword changed successfully
+                $("#password-dialog").jqmHide();
+                Application.messageBar.showSuccess(tpl.login_errors.passwordChanged);
+            }
+        });
+    }
+};
+
+let ExportSalaryFileToEmailDialog = {
+    modalId : "#export-salary-file-to-email-dialog",
+    open : false ,
+    init : false ,
+
+    show: function(){
+        this.initialize();
+        this.open = true;
+        $(this.modalId).find('form').show();
+        $(this.modalId).find('.success-holder').hide();
+        $(this.modalId).find('input').focus();
+    },
+
+    hide : function(){
+        if(this.open){
+            $(this.modalId).jqmHide();
+            this.open = false;
+        }
+    },
+
+    initialize : function(){
+        if(this.init){
+            $(this.modalId).jqmShow();
+            return;
+        }
+
+        var self = this;
+        $(self.modalId).jqm({modal: true});
+        $(self.modalId).jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        $(self.modalId + " .close-btn").click(function (e) {
+            $(self.modalId).jqmHide();
+        });
+        this.init = true;
+    },
+}
+
+
+var summaryUploadUsersDialog = {
+    open: false,
+    init: false,
+    user: null,
+    summary: null,
+
+    show: function (summary) {
+        this.summary = summary;
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#summary-user-upload-dialog").jqmShow();
+            return;
+        }
+        var self = this;
+        $("#summary-user-upload-dialog").jqm({modal: true});
+        $("#summary-user-upload-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        var view = new summaryUploadUserDialogView($("#summary-user-upload-dialog").find("div.dialog-content"), this.summary, this.mainView);
+        $("#summary-user-upload-dialog a.save-and-close").click(function (e) {
+            $("#summary-user-upload-dialog").jqmHide();
+        });
+        this.init = true;
+    },
+};
+
+var accountUserDialog = {
+    init: false,
+    mainView: null,
+    callback: null,
+    view: null,
+
+    show: function (mainView, fn) {
+        this.callback = ($.isFunction(fn)) ? fn : null;
+        this.mainView = mainView;
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            this.resetFields()
+            $("#accountUser-dialog").jqmShow();
+            return;
+        }
+        $("#accountUser-dialog").jqm({modal: true});
+        $("#accountUser-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        this.view = new accountUserDialogView($("#accountUser-dialog").find("div.dialog-content"), this.mainView);
+        this.view.setSaveCallback(this.callback);
+        this.init = true;
+    },
+
+    resetFields: function(){
+        this.view.el.find('select.managerRoles').val('').trigger("change.select2").trigger("change");
+    }
+};
+
+var logoutDialog = {
+    init: false,
+    callback: null,
+
+    show: function () {
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#logout-dialog").jqmShow();
+            return;
+        }
+        $("#logout-dialog").jqm({modal: true});
+        $("#logout-dialog").jqmShow();
+        var view = new logoutDialogView($("#logout-dialog").find("div.view div.content"));
+        this.init = true;
+    },
+};
+
+var logoutDialogView = Backbone.View.extend({
+    tpl: null,
+    el: null,
+
+    initialize: function (target) {
+        this.loadTemplates();
+        this.el = $(this.tpl());
+        target.empty().append(this.el);
+        this.el.find("a.save-and-close").click(function () {
+            $("#logout-dialog").jqmHide();
+            Application.navigateLogout();
+        });
+    },
+
+    loadTemplates: function () {
+        this.tpl = _.template($("#logoutDialogView").html());
+    }
+});
+
+var ContractDialog = {
+    open: false,
+    init: false,
+    user: null,
+    mainObjCall: null,
+    show: function (mainObjCall) {
+        this.mainObjCall = mainObjCall;
+        this.initialize();
+    },
+
+    initialize: function () {
+        var self = this;
+        if (this.init) {
+            $("#contract-dialog").jqmShow();
+            return;
+        }
+        $("#contract-dialog").jqm({modal: true});
+        $("#contract-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        var editor = new ContractEditView($("#contract-dialog").find("div.dialog-content"), new Contract());
+        editor.setSaveCallback(function (contract, isNew) {
+            $("#contract-dialog").jqmHide();
+            if (isNew) {
+                self.mainObjCall.refreshContractList();
+            }
+        });
+        this.init = true;
+    }
+}
+
+
+var tasksReportDialog = {
+    open: false,
+    init: false,
+    user: null,
+    entries: null,
+    callback: null,
+    clockGenerated: null,
+
+    show: function (entries, fn, clockGenerated) {
+        this.entries = entries;
+        this.callback = $.isFunction(fn) ? fn : null;
+        this.clockGenerated = clockGenerated;
+        this.initialize();
+
+    },
+
+    initialize: function () {
+        var self = this;
+        if (this.init) {
+            $("#tasksReport-dialog").jqmShow();
+            return;
+        }
+        $("#tasksReport-dialog").jqm({modal: true});
+        $("#tasksReport-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        $("div#dialogs div#tasksReport-dialog div.close-area a").on('click', function (event) {
+            if (self.callback) {
+                self.callback();
+            }
+        });
+        var editor = new ProjectReportDialogView($("#tasksReport-dialog").find("div.dialog-content"), this.entries, this.clockGenerated);
+        editor.setSaveCallback(this.callback);
+        this.init = true;
+    }
+};
+
+
+var overrideShiftsDialog = {
+    open: false,
+    init: false,
+    row: null,
+    contract: null,
+    EmployeeReportRowView: null,
+    cb: null,
+    show: function (row, contract, EmployeeReportRowView, cb = null) {
+        this.EmployeeReportRowView = EmployeeReportRowView;
+        this.row = row;
+        this.contract = contract;
+        this.initialize();
+        this.cb = cb;
+    },
+
+
+    initialize: function () {
+
+        if (this.init) {
+            $("#overrideShifts-dialog").jqmShow();
+            return;
+        }
+        $("#overrideShifts-dialog").jqm({modal: true});
+        $("#overrideShifts-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+
+        var editor = new overrideShiftsDialogView($("#overrideShifts-dialog").find("div.dialog-content"), this.row, this.contract, this.EmployeeReportRowView);
+        var self = this;
+        $("div#dialogs div.close-area a").on('click', function (event) {
+
+        });
+        editor.setSaveCallback((view) => {
+            if (this.cb) this.cb();
+            $("#overrideShifts-dialog").jqmHide();
+        });
+
+    }
+};
+
+var forgetReportingDialog = {
+    open: false,
+    init: false,
+    mainObjCall: null,
+    callbackForgetReporting: null,
+
+    show: function (mainObjCall, callbackForgetReporting) {
+        this.mainObjCall = mainObjCall;
+        this.callbackForgetReporting = $.isFunction(callbackForgetReporting) ? callbackForgetReporting : null;
+        this.initialize();
+    },
+
+    initialize: function () {
+        $("#forget-reporting-dialog").jqm({modal: true});
+        $("#forget-reporting-dialog").jqmShow();
+        var view = new forgetReportingDialogView($("#forget-reporting-dialog").find("div.view div.content"), this.mainObjCall);
+        view.setCallback(this.callbackForgetReporting);
+        this.init = true;
+    },
+};
+
+var dailyQuestionsReportDialog = {
+    open: false,
+    init: false,
+    row: null,
+    EmployeeReportView: null,
+    show: function (row, EmployeeReportView) {
+        this.EmployeeReportView = EmployeeReportView;
+        this.row = row;
+        this.initialize();
+    },
+
+
+    initialize: function () {
+
+        if (this.init) {
+            $("#dailyQuestions-dialog").jqmShow();
+            return;
+        }
+        $("#dailyQuestions-dialog").jqm({modal: true});
+        $("#dailyQuestions-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+
+        var editor = new dailyQuestionsDialogView($("#dailyQuestions-dialog").find("div.dialog-content"), this.row);
+        var self = this;
+        $("div#dialogs div.close-area a").on('click', function (event) {
+
+        });
+        editor.setSaveCallback(function (view) {
+            $("#dailyQuestions-dialog").jqmHide();
+        });
+
+    }
+};
+
+var questionsDialog = {
+    open: false,
+    init: false,
+    isOut: null,
+    workClock: null,
+    dfr: null,
+
+    show: function (isOut, workClock, dfr) {
+        this.isOut = isOut;
+        this.workClock = workClock;
+        this.dfr = dfr;
+        this.initialize();
+    },
+
+    initialize: function () {
+        var self = this;
+        $("#question-dialog").jqm({modal: true});
+        $("#question-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        $("div#dialogs div#question-dialog div.close-area a").on('click', function (event) {
+            self.dfr.resolve();
+        });
+        var view = new questionsDialogView($("#question-dialog").find("div.view div.content"), this.workClock, this.isOut, this.dfr);
+        this.init = true;
+    },
+};
+
+var closeCompanyDialog = {
+    open: false,
+    init: false,
+    company: null,
+    editor: null,
+    mainView: null,
+
+    show: function (mainView) {
+        this.mainView = mainView;
+        this.initialize();
+    },
+
+    initialize: function () {
+        var self = this;
+        if (this.init) {
+            $("#close-company-dialog").jqmShow();
+            return;
+        }
+
+        $("#close-company-dialog").jqm({modal: true});
+        $("#close-company-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        var editor = new closeCompanyDialogView($("#close-company-dialog").find("div.view div.content"));
+        this.init = true;
+    }
+}
+
+var smsPackagesDialog = {
+    open: false,
+    init: false,
+    company: null,
+    editor: null,
+    mainView: null,
+
+    show: function (mainView) {
+        this.mainView = mainView;
+        this.initialize();
+    },
+
+    initialize: function () {
+        var self = this;
+        if (this.init) {
+            $("#sms-packages-dialog").jqmShow();
+            return;
+        }
+
+        $("#sms-packages-dialog").jqm({modal: true});
+        $("#sms-packages-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        var editor = new smsPackagesDialogView($("#sms-packages-dialog").find("div.view div.content"));
+        editor.setSaveCallback(function (view) {
+            var smsQuantity = Application.company.get("smsQuantity");
+            var smsUsed = Application.company.get("smsUsed");
+            self.mainView.el.find("span.used").text(smsQuantity - smsUsed);
+            self.mainView.el.find("span.quantity").text(smsQuantity);
+            $("#sms-packages-dialog").jqmHide();
+        });
+    }
+}
+
+var subscriberRegistrationDialog = {
+    open: false,
+    init: false,
+    mainView: null,
+
+    show: function (mainView) {
+        this.mainView = typeof mainView !== "undefined" ? mainView : null;
+        this.initialize();
+    },
+
+    initialize: function () {
+        var self = this;
+        if (this.init) {
+            $("#subscriber-registration-dialog").jqmShow();
+            return;
+        }
+        $("#subscriber-registration-dialog").jqm({modal: true});
+        $("#subscriber-registration-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a,a.welcome-button");
+        var editor = new subscriberRegistrationDialogView($("#subscriber-registration-dialog").find("div.dialog-content"));
+        if (this.mainView) {
+            editor.setSaveCallback(function () {
+                self.mainView.initialize(self.mainView.target);
+            });
+        }
+    }
+};
+
+var freeReportingDialog = {
+    open: false,
+    init: false,
+    user: null,
+    entries: null,
+    userId: null,
+    start: null,
+    end: null,
+    EmployeeReportView: null,
+    tab: null,
+    editor: null,
+
+    show: function (entries, userId, start, end, EmployeeReportView, tab = null, callback=null) {
+        this.EmployeeReportView = EmployeeReportView;
+        this.callback = callback;
+        this.entries = entries;
+        this.userId = userId;
+        this.start = start;
+        this.end = end;
+        this.tab = tab;
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#freeReporting-dialog").jqmShow();
+            return;
+        }
+        $("#freeReporting-dialog").jqm({modal: true});
+        $("#freeReporting-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        $("body").addClass('dialog-open');
+
+        this.editor = new freeReportingDialogView($("#freeReporting-dialog").find("div.dialog-content"), this.entries, this.userId, this.tab, this.callback);
+        const self = this;
+        const attendance = this.editor.el.find("div.dialog-content li.attendance");
+        $("div#dialogs div.close-area a").on('click', function (event) {
+            attendance.click();
+            self.EmployeeReportView.el.find("a.free-reporting svg").show();
+            self.EmployeeReportView.el.find("img.FreeReporting-preloader").hide();
+            $("body").removeClass('dialog-open');
+        });
+        this.editor.setSaveCallback(function (view) {
+            $("#freeReporting-dialog").jqmHide();
+            $("body").removeClass('dialog-open');
+            self.EmployeeReportView.el.find("a.free-reporting svg").show();
+            self.EmployeeReportView.el.find("img.FreeReporting-preloader").hide();
+            self.EmployeeReportView.clickRefreshData(self.userId, self.start, self.end);
+        });
+    },
+}
+
+var ProjectDialog = {
+    open: false,
+    init: false,
+    start: null,
+    end: null,
+    userId: null,
+    user: null,
+    show: function (start, end, userId) {
+
+        this.initialize();
+        this.start = start;
+        this.end = end;
+        this.userId = userId;
+
+    },
+
+    initialize: function () {
+
+        if (this.init) {
+            $("#contract-dialog").jqmShow();
+            return;
+        }
+        $("#contract-dialog").jqm({modal: true});
+        $("#contract-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+
+        var task = new Task();
+        //self.view = new TaskView(Application.contentElement(), task);
+        var editor = new TaskView($("#contract-dialog").find("div.dialog-content"), task);
+        var self = this;
+
+        editor.setSaveCallback(function (view) {
+
+
+            $("#contract-dialog").jqmHide();
+            Application.router.navigate("ProjectReportSummery/" + self.start + "/" + self.end + "/" + self.userId, true);
+        });
+
+        this.init = false;
+    }
+}
+
+
+var ProjectDialogForUser = {
+    open: false,
+    init: false,
+    start: null,
+    end: null,
+    userId: null,
+    user: null,
+    show: function (start, end, userId) {
+
+        this.initialize();
+        this.start = start;
+        this.end = end;
+        this.userId = userId;
+
+    },
+
+    initialize: function () {
+
+        if (this.init) {
+            $("#contract-dialog").jqmShow();
+            return;
+        }
+        $("#contract-dialog").jqm({modal: true});
+        $("#contract-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+
+        var task = new Task();
+        //self.view = new TaskView(Application.contentElement(), task);
+
+        var editor = new TaskView($("#contract-dialog").find("div.dialog-content"), task);
+        var self = this;
+
+        editor.setSaveCallback(function (view) {
+            $("#contract-dialog").jqmHide();
+            Application.router.navigate("projectReport/" + self.start + "/" + self.end + "/" + self.userId, true);
+        });
+
+        this.init = false;
+    }
+}
+
+const customDialog = {
+    init: false,
+    show: function (params, fnDiscard, fnCancel) {
+        this.initialize(params);
+        this.bindEvents(fnDiscard, fnCancel);
+        $("#custom-dialog").jqmShow();
+    },
+
+    initialize: function ({title, body, svgName, svgWidth = "27px", svgHeigth = "27px", showCancel = true}) {
+        const el = $("#custom-dialog");
+        if (title) {
+            el.find(".title-container span").text(title);
+            (svgName) ? el.find(".title-container svg use").attr("xlink:href", "#" + svgName).show() : el.find(".title-container svg").hide();
+            el.find(".title-container svg").width(svgWidth);
+            el.find(".title-container svg").height(svgHeigth);
+            el.find(".title-container").show();
+        } else {
+            el.find(".title-container").hide();
+        }
+        el.find("p.body-text").html(body);
+        showCancel ? el.find("a.cancel").show() : el.find("a.cancel").hide();
+        el.jqm({modal: true});
+        this.init = true;
+    },
+
+    bindEvents: function (fnDiscard, fnCancel) {
+        $("#custom-dialog").find("a.discard,a.cancel,div.close-area a").unbind("click");
+        $("#custom-dialog").find("a.discard").click(function () {
+            if ($.isFunction(fnDiscard)) {
+                fnDiscard();
+            }
+            $("#custom-dialog").jqmHide();
+        });
+        $("#custom-dialog").find("a.cancel,div.close-area a").click(function () {
+            if ($.isFunction(fnCancel)) {
+                fnCancel();
+            }
+            $("#custom-dialog").jqmHide();
+        });
+    }
+}
+
+var saveDialog = {
+    init: false,
+    show: function (fnDiscard, fnCancel) {
+        this.initialize();
+        $("#save-dialog").find("a.discard,a.cancel,div.close-area a").unbind("click");
+        $("#save-dialog").find("a.discard").click(function () {
+            if ($.isFunction(fnDiscard)) {
+                fnDiscard();
+            }
+            $("#save-dialog").jqmHide();
+        });
+        $("#save-dialog").find("a.cancel,div.close-area a").click(function () {
+            if ($.isFunction(fnCancel)) {
+                fnCancel();
+            }
+            $("#save-dialog").jqmHide();
+        });
+
+        $("#save-dialog").jqmShow();//.jqmAddClose("div#dialogs div.close-area a");
+    },
+
+    initialize: function () {
+        if (this.init) {
+            return;
+        }
+        $("#save-dialog").jqm({modal: true});
+        this.init = true;
+
+    }
+}
+
+var DepartmentDialog = {
+    cnt: null,
+    init: false,
+    adjElm: null,
+    departments: null,
+    users: null,
+    source: null,
+    fnClick: null,
+    defaults: {
+        showRoot: false,
+        showNotAssociated: true,
+        showInactive: false,
+        withUsers: false,
+        withCheckbox: false,
+        noCheckboxOnSecondLevel: false,
+        withNoAssociate: false,
+        noAssociateText: null,
+        closeOnSelect: true,
+        offsetLeft: 0,
+        offsetTop: 0,
+        initialElement: null,
+        callback: null,
+        onCancel: null,
+        hideNA: false,
+        startCollapsed: false,
+        multipleChoice: false,
+    },
+    conf: {},
+
+    show: function ($elm, params) {
+        var self = this;
+        this.departments = Application.departments;
+        this.users = Application.users;
+        $.extend(this.conf, this.defaults, params);
+        this.adjElm = $elm;
+        if (!this.init) {
+            this.cnt = $("#DepartmentDialog").click(function (e) {
+                e.stopPropagation();
+            });
+            this.init = true;
+        }
+
+        this.fnClick = function () {
+            self.hide();
+        };
+
+        $("html").click(this.fnClick);
+
+        this.render();
+    },
+
+    hide: function () {
+        if (this.conf.onCancel && $.isFunction(this.conf.onCancel)) {
+            this.conf.onCancel(this.selectedItems());
+        }
+        this.cnt.slideUp("fast");
+        $("html").unbind("click", this.fnClick);
+    },
+
+    buildTreeHtml: function (root, userDepartments) {
+        var self = this;
+        var html = "";
+
+        var showUsers = this.conf.hasOwnProperty("withUsers") ? this.conf.withUsers : true;
+
+        if (userDepartments[root.get("id")] && showUsers) {
+            userDepartments[root.get("id")].forEach(function (item) {
+                if (item.get("activeState") == 1) {
+                    html += `<li id="${item.get('id')}" >${item.fullName()}</li>`;
+                }
+            });
+        }
+
+        if (root.sub && root.sub.length) {
+            (root.sub).forEach(function (dep) {
+                html += `<li class="folder" id="${dep.get('id')}" >${dep.get('name')}<ul>`;
+                html += self.buildTreeHtml(dep, userDepartments);
+                html += `</ul></li>`;
+            });
+        }
+
+        return html;
+    },
+
+    render: function () {
+        var self = this;
+        var root = this.departments.structure();
+        this.cnt.find("ul.root-treeview").empty();
+
+        var treeHtml = ""
+        if (self.conf.showRoot) {
+            treeHtml += `<li id="${root.get('id')}" >${root.get("name")}<ul>`;
+        }
+
+        if (this.conf.withNoAssociate) {
+            treeHtml += `<li class="folder" id="0" class="not-associated">${tpl.noFiltering}</li>`;
+        }
+
+        treeHtml += this.buildTreeHtml(root, this.users.byDepartments(false));
+
+        if (self.conf.showRoot) {
+            treeHtml += '<ul></li>';
+        }
+
+        this.cnt.find("ul.root-treeview").html(treeHtml);
+
+        var isRtl = Application.user.get("userLanguage") == "Hebrew";
+        var tree = this.cnt.find("div.tree-bg").fancytree({
+            selectMode: (self.conf.multipleChoice ? 2 : 1),
+            checkbox: self.conf.withCheckbox,
+            autoCollapse: false,
+            rtl: isRtl,
+            select: function (event, data) {
+                if (data.node.selected && data.node.key === "0") {
+                    self.cnt.find("div.tree-bg").fancytree();
+                }
+                var selectedItems = self.selectedItems();
+                if (self.conf.closeOnSelect) {
+                    self.hide();
+                }
+                self.conf.callback(selectedItems);
+            }
+        });
+
+        if (self.conf.showRoot) {
+            this.cnt.find("ul.ui-fancytree li:first span.fancytree-expander").trigger("click");
+        }
+
+        this.tree = tree.fancytree('getTree');
+        this.markSelectedItems();
+        this.cnt.find("ul.root-treeview .expandable-hitarea").trigger("click");
+
+        //set offset
+        if (this.adjElm) {
+            var position = this.adjElm.position();
+
+            if (this.conf.hasOwnProperty("source")) {
+                this.cnt.css({
+                    top: position.top + this.adjElm.height() + 100,
+                    right: position.left + 100
+                }).css("z-index", "10000").css("position", "fixed");
+            } else {
+                this.cnt.css({
+                    top: position.top + this.adjElm.height(),
+                    left: position.left
+                }).css("z-index", "10000");
+            }
+        }
+        this.cnt.slideDown("fast");
+    },
+
+    selectedItems: function (selectedNodes = false) {
+        return (selectedNodes || this.tree.getSelectedNodes()).map(function (item) {
+            if (!!item.folder) {
+                return Application.departments.get(item.key);
+            } else {
+                return Application.users.get(item.key);
+            }
+        });
+    },
+
+    markSelectedItems: function () {
+        var self = this;
+        if (self.conf.initialElement) {
+            var initialElement = $.isArray(self.conf.initialElement) ? self.conf.initialElement : [self.conf.initialElement];
+            this.tree.toDict(true, function (dict, node) {
+                initialElement.forEach(function (item) {
+                    if (item.id == dict.key) {
+                        node.setSelected();
+                        if (dict.folder) {
+                            node.setExpanded();
+                        } else {
+                            node.parent.setExpanded();
+                        }
+                    }
+                });
+            });
+        }
+    }
+}
+
+var MissingDialog = {
+    init: false,
+    el: null,
+    conf: null,
+    params: null,
+    visible: false,
+    fnCancel: null,
+    searchFilter: "",
+    defaults: {
+        adj: null,
+        offsetTop: 0,
+        offsetLeft: 0,
+        showConfirm: true,
+        showCancel: true,
+        onCancel: null,
+        onSelect: null,
+        manual: false,
+        offetLeft: 0
+    },
+    show: function (params, evt) {
+        let isFirst = true;
+        if (evt) {
+            evt.stopPropagation();
+            isFirst = false;
+        }
+        if (!this.init) {
+            this.el = $("#MissingDialog").click(function (e) {
+                e.stopPropagation();
+            }).css("position", "absolute");
+            this.init = true;
+        }
+        if (this.visible) {
+            //function already set anyway
+            this.fnCancel(null);
+            this.hideFast();
+            this.visible = false;
+        }
+        let conf = {}, self = this, pos;
+        $.extend(conf, this.defaults, params);
+        this.conf = conf;
+        if (conf.manual) {
+            //was not opened with event, so it should discard on first click on body
+            isFirst = true;
+        }
+        //set content
+
+        if (conf.adj) {
+            let w = conf.adj.width(), tw = this.el.width(), th = this.el.height();
+            pos = conf.adj.offset()
+            pos.left += (w - tw) / 2 + conf.offsetLeft
+            pos.top += conf.adj.height();
+        } else {
+            pos = {top: 0, left: 0};
+        }
+
+        pos.top += conf.offsetTop;
+        pos.left += conf.offsetLeft;
+
+        self.missings = Application.filterMissingsByPermissions(conf.absenceId);
+        if(conf.user){
+            let user = Application.user;
+            if(!Application.user.isEmployee()){
+                user = Application.users.get({id: conf.user});
+            }
+            self.missings = Utils.filterMissingsByWatchPermissions(self.missings, user);
+        }
+
+        let ul = this.el.find("ul");
+        this.conf = conf;
+        this.params = params;
+        this.searchFilter = "";
+        this.el.find("input.missingSearch").val("");
+
+        this.renderMissings(self.missings);
+
+        this.fnCancel = function (e) {
+            if (isFirst) {
+                isFirst = false;
+                return;
+            }
+            if ($.isFunction(self.conf.onCancel)) {
+                self.conf.onCancel(e, self);
+            }
+            self.hide();
+        };
+
+        $("html").click(self.fnCancel);
+        this.visible = true;
+        this.el.css({
+            left: pos.left,
+            top: pos.top
+        }).slideDown(Application.tooltipAnimationDuration);
+
+        self.searchInput = new SearchInputView(this.el.find(".search-container"), this.onInputSearch.bind(this), { onInput: true } )
+    },
+
+    onInputSearch: function(searchFilter) {
+        this.searchFilter = searchFilter;
+        this.renderMissings(this.missings);
+    },
+
+    renderMissings: function(missings) {
+        const self = this;
+        const ul = this.el.find("ul");
+
+        ul.empty();
+        if (!this.searchFilter) ul.append(this.noneMissingRow());
+
+        const regex = new RegExp(this.searchFilter, 'i');
+        for (let i in missings) {
+            let m = missings[i];
+            if (m.disabled || !regex.test(m.description)) {
+                continue;
+            }
+
+            const notReportDays = _.isArray(m?.notReportDays) ? m.notReportDays : [];
+            const dayOfWeek = this.params?.dayOfWeek ? this.params.dayOfWeek.split(',') : [];
+            const currentDayOfWeek = dayOfWeek[dayOfWeek.length - 1];
+
+            if(Application.user.isManager() || !notReportDays.includes(currentDayOfWeek)){
+                const li = this.missingRow(m);
+                ul.append(li);
+            }
+        }
+
+        ul.find("li").unbind("click").click(function () {
+            if ($.isFunction(self.conf.onSelect)) {
+                self.conf.onSelect($(this).data("obj"));
+            }
+            self.hide();
+        });
+    },
+
+    missingRow: function (missing) {
+        return $("<li />").data("obj", missing).text(missing.description);
+    },
+
+    noneMissingRow: function () {
+        return $("<li />").text(tpl.missingsNone).data("obj", null);
+    },
+
+    hide: function () {
+        if (this.el) {
+            this.el.slideUp(Application.tooltipAnimationDuration);
+            $("html").unbind("click", this.fnClick);
+        }
+        this.visible = false;
+    },
+
+    hideFast: function () {
+        this.el.hide();
+        $("html").unbind("click", this.fnCancel);
+        this.visible = false;
+    },
+}
+
+var ConfirmTooltip = {
+    init: false,
+    el: null,
+    conf: null,
+    visible: false,
+    fnCancel: null,
+    showHeaderClose: null,
+    textBtnCancel: null,
+    textBtnConfirm: null,
+    textBtnConfirm2 : null ,
+    defaults: {
+        adj: null,
+        offsetTop: -10,
+        offsetLeft: 18,
+        showConfirm: true,
+        showComfirm2: true,
+        showCancel: true,
+        onCancel: null,
+        onCancelBtnOnly: null,
+        onConfirm: null,
+        onConfirm2 : null ,
+        text: null,
+        image: null,
+        manual: false,
+        withoutAutoHideInConfirm: true,
+        withoutAutoHideInConfirm2:true
+    },
+    show: function (params, evt) {
+        var isFirst = true;
+        if (evt) {
+            evt.stopPropagation();
+            isFirst = false;
+        }
+
+        if (!this.init) {
+            this.el = $("#tooltip-confirm").click(function (e) {
+                e.stopPropagation();
+            }).css("position", "absolute");
+            this.init = true;
+        }
+        if (this.visible) {
+            //function already set anyway
+            this.fnCancel(null);
+            this.hideFast();
+            this.visible = false;
+        }
+        var conf = {}, self = this, pos;
+        $.extend(conf, this.defaults, params);
+        if (conf.manual) {
+            //was not opened with event, so it should discard on first click on body
+            isFirst = false;
+        }
+        //set content
+        if (conf.text) {
+            this.el.find("div.text").html(conf.text);
+        } else {
+            this.el.find("div.text").html("");
+        }
+        if (conf.image) {
+            this.el.find("div.icon > img").attr("src", conf.image);
+        } else {
+            this.el.find("div.icon > img").attr("src", "");
+        }
+
+        if (conf.adj) {
+            let w = conf.adj.width(), tw = this.el.width(), th = this.el.height();
+            pos = conf.adj.offset();
+            pos.left += (w - tw) / 2;
+            pos.top -= th;
+        } else {
+            pos = {top: 0, left: 0};
+        }
+
+        pos.top += conf.offsetTop;
+        pos.left += conf.offsetLeft;
+        this.el.find("a").unbind("click");
+        if (conf.showConfirm) {
+            this.el.find("a.tooltip-confirm").css({visibility: "visible"}).show().click(function (e) {
+                if ($.isFunction(self.conf.onConfirm)) {
+                    self.conf.onConfirm(e, self);
+                }
+
+                if (conf.withoutAutoHideInConfirm) {
+                    self.hide();
+                }
+            });
+        } else {
+            this.el.find("a.tooltip-confirm").css({visibility: "hidden"});
+        }
+
+        if (conf.showConfirm2) {
+            this.el.find("a.tooltip-confirm-2").css({visibility: "visible"}).show().click(function (e) {
+                if ($.isFunction(self.conf.onConfirm2)) {
+                    self.conf.onConfirm2(e, self);
+                }
+
+                if (conf.withoutAutoHideInConfirm2) {
+                    self.hide();
+                }
+            });
+        } else {
+            this.el.find("a.tooltip-confirm-2").css({visibility: "hidden"});
+        }
+
+        this.fnCancel = function (e) {
+            if (isFirst) {
+                isFirst = false;
+                return;
+            }
+            if ($.isFunction(self.conf.onCancel)) {
+                self.conf.onCancel(e, self);
+            }
+            self.hide();
+        };
+        if (conf.showCancel) {
+            this.el.find("a.tooltip-cancel").show().unbind("click").click(function (e) {
+                self.fnCancel(e);
+                if ($.isFunction(conf.onCancelBtnOnly)) {
+                    conf.onCancelBtnOnly(e, self);
+                }
+            });
+        } else {
+            this.el.find("a.tooltip-cancel").hide();
+        }
+        if (conf.showHeaderClose) {
+            this.el.find(".headerClose").css("visibility", "visible").click(function () {
+                self.hide();
+                self.el.find(".headerClose").css("visibility", "hidden");
+            });
+        }
+        if (conf.textBtnConfirm) {
+            this.el.find(".btnConfirmText").text(conf.textBtnConfirm);
+        }else{
+            this.el.find(".btnConfirmText").text(tpl.confirmTooltipConfirm);
+        }
+        if (conf.textBtnConfirm2) {
+            this.el.find(".btnConfirmText2").text(conf.textBtnConfirm2);
+        }else{
+            this.el.find(".btnConfirmText2").text(tpl.confirmTooltipConfirm);
+        }
+        if (conf.textBtnCancel) {
+            this.el.find(".btnCancelText").text(conf.textBtnCancel);
+        }else{
+            this.el.find(".btnCancelText").text(tpl.confirmTooltipCancel);
+        }
+
+        $("html").click(self.fnCancel);
+        this.visible = true;
+        this.conf = conf;
+        this.el.css({
+            left: pos.left,
+            top: pos.top
+        }).fadeIn(Application.tooltipAnimationDuration);
+    },
+
+    hide: function () {
+        if (this.el) {
+            this.el.fadeOut(Application.tooltipAnimationDuration);
+            $("html").unbind("click", this.fnClick);
+        }
+        this.visible = false;
+    },
+
+    hideFast: function () {
+        this.el.hide();
+        $("html").unbind("click", this.fnClick);
+        this.visible = false;
+    },
+
+    changeText: function (newText) {
+        this.el.find("div.text").html(newText);
+    },
+
+    removeConfirmButton: function () {
+        this.el.find("a.tooltip-confirm").css({visibility: "hidden"});
+    },
+
+    initialize: function () {
+
+    }
+}
+
+var NoticeTooltip = ConfirmTooltip;
+
+var LineTooltip = {
+    init: false,
+    el: null,
+    visible: false,
+    conf: null,
+    timer: null,
+    defaults: {
+        adj: null,
+        offsetTop: 0,
+        offsetLeft: 0,
+        text: null
+    },
+    show: function (params, evt) {
+        if (!this.init) {
+            this.el = $("#tooltip-line");
+            this.init = true;
+        }
+        if (this.visible) {
+            this.hide();
+        }
+        this.el.stopTime();
+        this.conf = {};
+        $.extend(this.conf, this.defaults, params);
+        this.el.find("span.content").text((this.conf.text) ? this.conf.text : "");
+        this.el.css({"visibility": "hidden", "z-index": "9999"}).show();
+        var pos, tw = this.el.width(), th = this.el.height();
+        if (this.conf.adj) {
+            var w = this.conf.adj.width(), h = this.conf.adj.height();
+            pos = this.conf.adj.offset();
+            pos.left += (w - tw) / 2;
+            pos.left += this.conf.offsetLeft;
+            pos.top -= h * 2;
+        } else {
+            pos = {left: 0, top: 0};
+        }
+        this.el.find("div.arrow").css({
+            right: (tw) / 2 - 8
+        });
+        this.el.css({
+            left: pos.left,
+            top: pos.top
+        }).hide().css("visibility", "visible");
+        //show with delay
+        var self = this;
+        this.el.oneTime(Application.lineTooltipDelay + "s", function () {
+            self.el.fadeIn(Application.tooltipAnimationDuration);
+        })
+    },
+
+    hide: function () {
+        if (this.el) {
+            this.el.hide().stopTime();
+        }
+        this.visible = false;
+    }
+}
+
+var InfoTooltip = {
+    init: false,
+    el: null,
+    visible: false,
+    conf: null,
+    timer: null,
+    defaults: {
+        adj: null,
+        offsetTop: 0,
+        offsetLeft: 0,
+        text: null
+    },
+    show: function (params, evt) {
+        if (params.adj) {
+            if (params.adj.data("_infoDisabled") == true) {
+                //tooltip disabled by error dialog
+                return;
+            }
+        }
+        if (!this.init) {
+            this.el = $("#tooltip-info");
+            this.init = true;
+        }
+        if (this.visible) {
+            this.hide();
+        }
+        this.el.stopTime();
+        this.conf = {};
+        $.extend(this.conf, this.defaults, params);
+        this.el.find("div.text").text((this.conf.text) ? this.conf.text : "");
+        this.el.css("visibility", "hidden").show();
+        var pos, tw = this.el.width();
+        if (this.conf.adj) {
+            var w = this.conf.adj.width(), sh = this.el.height();
+            pos = this.conf.adj.offset();
+            pos.left += (w - tw) / 2;
+            pos.top -= sh;
+        } else {
+            pos = {left: 0, top: 0};
+        }
+        pos.top += this.conf.offsetTop;
+        pos.left += this.conf.offsetLeft;
+        this.el.css({
+            left: pos.left,
+            top: pos.top
+        }).hide().css("visibility", "visible");
+
+        //show with delay
+        var self = this;
+        this.el.oneTime(Application.lineTooltipDelay + "s", function () {
+            self.el.fadeIn(Application.tooltipAnimationDuration);
+        })
+    },
+
+    hide: function () {
+        if (this.el) {
+            this.el.hide().stopTime();
+        }
+        this.visible = false;
+    }
+}
+
+var ReportTooltip = {
+    init: false,
+    el: null,
+    conf: null,
+    visible: false,
+    fnCancel: null,
+    defaults: {
+        adj: null,
+        offsetTop: 0,
+        offsetLeft: 0,
+        showConfirm: true,
+        showCancel: true,
+        closeOnConfirm: true,
+        onCancel: null,
+        onConfirm: null,
+        cancelText: null,
+        confirmText: null,
+        confirmButton: null,
+        html: null,
+        image: null,
+        manual: false,
+        position: 'top' // Default position
+    },
+
+    show: function (params, evt) {
+        var isFirst = true;
+        if (evt) {
+            evt.stopPropagation();
+            isFirst = false;
+        }
+        if (!this.init) {
+            this.el = $("#ReportTooltip").click(function (e) {
+                e.stopPropagation();
+            }).css("position", "absolute");
+            this.init = true;
+        }
+        if (this.visible) {
+            this.fnCancel(null);
+            this.hideFast();
+            this.visible = false;
+        }
+
+        var conf = {}, self = this, pos;
+        $.extend(conf, this.defaults, params);
+        if (conf.manual) {
+            isFirst = true;
+        }
+
+        // Set content
+        this.el.find("div.tooltip-content").empty();
+        if (conf.html) {
+            this.el.find("div.tooltip-content").html(conf.html);
+        }
+        this.el.find("div.tooltip-image").empty();
+        if (conf.image) {
+            this.el.find("div.tooltip-image").append($("<img alt='' />").attr("src", conf.image));
+        }
+
+        // Calculate position
+        if (conf.adj) {
+            var w = conf.adj.outerWidth(),
+                h = conf.adj.outerHeight(),
+                tw = this.el.outerWidth(),
+                th = this.el.outerHeight();
+            pos = conf.adj.offset();
+
+            switch (conf.position) {
+                case 'left':
+                    pos.left -= tw;
+                    pos.top += (h - th) / 2;
+                    $('#ReportTooltip').addClass("position-left-tooltip");
+
+                    $('#ReportTooltip').removeClass("position-right-tooltip");
+                    $('#ReportTooltip').removeClass("position-bottom-tooltip");
+                    $('#ReportTooltip').removeClass("position-top-tooltip");
+                    break;
+                case 'right':
+                    pos.left += w;
+                    pos.top += (h - th) / 2;
+                    $('#ReportTooltip').addClass("position-right-tooltip");
+
+                    $('#ReportTooltip').removeClass("position-left-tooltip");
+                    $('#ReportTooltip').removeClass("position-bottom-tooltip");
+                    $('#ReportTooltip').removeClass("position-top-tooltip");
+                    break;
+                case 'bottom':
+                    pos.left += (w - tw) / 2;
+                    pos.top += h;
+                    $('#ReportTooltip').addClass("position-bottom-tooltip");
+
+                    $('#ReportTooltip').removeClass("position-right-tooltip");
+                    $('#ReportTooltip').removeClass("position-left-tooltip");
+                    $('#ReportTooltip').removeClass("position-top-tooltip");
+                    break;
+                case 'top':
+                default:
+                    $('#ReportTooltip').addClass("position-top-tooltip");
+
+                    $('#ReportTooltip').removeClass("position-right-tooltip");
+                    $('#ReportTooltip').removeClass("position-bottom-tooltip");
+                    $('#ReportTooltip').removeClass("position-left-tooltip");
+                    pos.left += (w - tw) / 2;
+                    pos.top -= th;
+                    break;
+            }
+        } else {
+            pos = { top: 0, left: 0 };
+        }
+
+        pos.top += conf.offsetTop;
+        pos.left += conf.offsetLeft;
+
+        this.el.find("a").unbind("click");
+        if (conf.showConfirm) {
+            this.el.find("a.tooltip-confirm, a.tooltip-confirm-button").click(function (e) {
+                if ($.isFunction(self.conf.onConfirm)) {
+                    self.conf.onConfirm(e, self);
+                }
+                if (conf.closeOnConfirm) {
+                    self.hide();
+                }
+            }).find("span").text(conf.confirmText);
+
+            if (conf.confirmButton) {
+                this.el.find("a.tooltip-confirm").hide();
+                this.el.find("a.tooltip-confirm-button").show().addClass("simple-btn");
+                this.el.find("a.tooltip-confirm-button").text(conf.confirmText);
+            } else {
+                this.el.find("a.tooltip-confirm-button").hide();
+                this.el.find("a.tooltip-confirm").show().css({ visibility: "visible" });
+            }
+        } else {
+            this.el.find("a.tooltip-confirm").show().css({ visibility: "hidden" });
+            this.el.find("a.tooltip-confirm-button").hide();
+        }
+
+        this.fnCancel = function (e) {
+            if (isFirst) {
+                isFirst = false;
+                return;
+            }
+            if ($.isFunction(self.conf.onCancel)) {
+                self.conf.onCancel(e, self);
+            }
+            self.hide();
+        };
+        if (conf.showCancel) {
+            this.el.find("a.tooltip-cancel").css({ visibility: "visible" }).click(function (e) {
+                self.fnCancel(e);
+            }).find("span").text(conf.cancelText);
+        } else {
+            this.el.find("a.tooltip-cancel").css({ visibility: "hidden" });
+        }
+
+        if (conf.showClose) {
+            this.el.find("a.tooltip-close").css({ visibility: "visible" }).click(function (e) {
+                self.fnCancel(e);
+            });
+        } else {
+            this.el.find("a.tooltip-close").css({ visibility: "hidden" });
+        }
+
+        $("html").click(self.fnCancel);
+        this.visible = true;
+        this.conf = conf;
+        this.el.css({
+            left: pos.left,
+            top: pos.top
+        }).fadeIn(Application.tooltipAnimationDuration);
+    },
+
+    recalculatePosition: function (adj) {
+        if (!this.conf) return;
+
+        var w = adj.outerWidth(),
+            h = adj.outerHeight(),
+            tw = this.el.outerWidth(),
+            th = this.el.outerHeight(),
+            pos = adj.offset();
+
+        switch (this.conf.position) {
+            case 'left':
+                pos.left -= tw;
+                pos.top += (h - th) / 2;
+                break;
+            case 'right':
+                pos.left += w;
+                pos.top += (h - th) / 2;
+                break;
+            case 'bottom':
+                pos.left += (w - tw) / 2;
+                pos.top += h;
+                break;
+            case 'top':
+            default:
+                pos.left += (w - tw) / 2;
+                pos.top -= th;
+                break;
+        }
+
+        pos.top += this.conf.offsetTop;
+        pos.left += this.conf.offsetLeft;
+
+        this.el.css({
+            left: pos.left,
+            top: pos.top
+        });
+    },
+
+    hide: function () {
+        if (this.el) {
+            this.el.fadeOut(Application.tooltipAnimationDuration);
+            $("html").unbind("click", this.fnClick);
+        }
+        this.visible = false;
+    },
+
+    hideFast: function () {
+        this.el.hide();
+        $("html").unbind("click", this.fnClick);
+        this.visible = false;
+    }
+};
+
+
+var AlertSendForTooltip = {
+    init: false,
+    el: null,
+    conf: null,
+    visible: false,
+    fnCancel: null,
+    fnClick: null,
+    defaults: {
+        adj: null,
+        offsetTop: 0,
+        offsetLeft: 0,
+        showConfirm: true,
+        showCancel: true,
+        closeOnConfirm: true,
+        onCancel: null,
+        onConfirm: null,
+        cancelText: null,
+        confirmText: null,
+        html: null,
+        image: null,
+        manual: false,
+        title: null,
+    },
+    show: function (params, evt) {
+
+        $('#ReportTooltip').removeClass("position-left-tooltip");
+        $('#ReportTooltip').removeClass("position-right-tooltip");
+        $('#ReportTooltip').removeClass("position-bottom-tooltip");
+        $('#ReportTooltip').removeClass("position-top-tooltip");
+
+        var isFirst = true;
+        if (evt) {
+            evt.stopPropagation();
+            isFirst = false;
+        }
+        if (!this.init) {
+            this.el = $("#ReportTooltip").click(function (e) {
+                e.stopPropagation();
+            }).css("position", "absolute");
+            this.init = true;
+        }
+        if (this.visible) {
+            //function already set anyway
+            this.fnCancel(null);
+            this.hideFast();
+            this.visible = false;
+        }
+        var conf = {}, self = this, pos;
+        $.extend(conf, this.defaults, params);
+        if (conf.manual) {
+            //was not opened with event, so it should discard on first click on body
+            isFirst = true;
+        }
+        //set content
+        this.el.find("div.tooltip-content").empty();
+        if (conf.html) {
+            this.el.find("div.tooltip-content").html(conf.html);
+        }
+        if (conf.title) {
+            this.el.find("div.tooltip-content h3").html(conf.title);
+        }
+        this.el.find("div.tooltip-image").empty();
+        if (conf.image) {
+            this.el.find("div.tooltip-image").append($("<img alt='' />").attr("src", conf.image));
+        }
+        if (conf.adj) {
+            var w = conf.adj.width(), tw = this.el.width(), th = this.el.height();
+            pos = conf.adj.offset()
+            pos.left += (w - tw) / 2
+            pos.top -= th;
+        } else {
+            pos = {top: 0, left: 0};
+        }
+
+        pos.top += conf.offsetTop;
+        pos.left += conf.offsetLeft;
+        this.el.find("a").unbind("click");
+        if (conf.showConfirm) {
+            this.el.find("a.tooltip-confirm").css({visibility: "visible"}).click(function (e) {
+                if ($.isFunction(self.conf.onConfirm)) {
+                    self.conf.onConfirm(e, self);
+                }
+                if (conf.closeOnConfirm) {
+                    self.hide();
+                }
+            }).find("span").text(conf.confirmText)
+        } else {
+            this.el.find("a.tooltip-confirm").css({visibility: "hidden"});
+        }
+
+        this.fnCancel = function (e) {
+            if (isFirst) {
+                isFirst = false;
+                return;
+            }
+            if ($.isFunction(self.conf.onCancel)) {
+                self.conf.onCancel(e, self);
+                //self.hide();
+            }
+        };
+
+        if (conf.showCancel) {
+            this.el.find("a.tooltip-cancel").css({visibility: "visible"}).click(function (e) {
+                if(self.conf.onCancel){
+                    self.hide();
+                }
+            }).find("span").text(conf.cancelText);
+        } else {
+            this.el.find("a.tooltip-cancel").css({visibility: "hidden"});
+        }
+
+        this.el.find('a.tooltip-button.tooltip-close').unbind('click').click(() => self.hide());
+        $("html").click(self.fnCancel);
+
+        this.visible = true;
+        this.conf = conf;
+        this.el.css({
+            left: pos.left,
+            top: pos.top
+        }).fadeIn(Application.tooltipAnimationDuration);
+
+        $("html").click(function (e) {
+            if ($(e.target).parents(".ui-multiselect-menu").length == 0 && e.target.id.indexOf("ui-multiselect") === -1) {
+                self.hide();
+            }
+        });
+    },
+
+    recalculatePosition: function (adj) {
+        var w = adj.width(), tw = this.el.width(), th = this.el.height();
+        pos = adj.offset()
+        pos.left += (w - tw) / 2
+        pos.top -= th;
+        this.el.css({
+            left: pos.left,
+            top: pos.top
+        });
+    },
+
+    hide: function () {
+        if (this.el) {
+            this.el.fadeOut(Application.tooltipAnimationDuration);
+            $("html").unbind("click", this.fnClick);
+        }
+        this.visible = false;
+    },
+
+    hideFast: function () {
+        this.el.hide();
+        $("html").unbind("click", this.fnClick);
+        this.visible = false;
+    }
+}
+
+var notActiveDialog_opened = false;
+
+var notActiveDialog = {
+    init: false,
+
+    timer_show: null,
+    minutes_show: 45,
+
+    timer_logout: null,
+    minutes_logout: 47,
+
+    show: function (fnDiscard, fnCancel, sender) {
+        this.initialize();
+
+        notActiveDialog_opened = true;
+
+        $("#not-active-dialog").find("button.discard,button.cancel,div.single-close-area button").unbind("click");
+
+        $("#not-active-dialog").find("button.discard,div.single-close-area button").click(function () {
+            $("#not-active-dialog").jqmHide();
+            notActiveDialog_opened = false;
+            if ($.isFunction(fnDiscard)) {
+                fnDiscard(sender);
+            }
+        });
+
+        $("#not-active-dialog").find("button.cancel").click(function () {
+            $("#not-active-dialog").jqmHide();
+            notActiveDialog_opened = false;
+            if ($.isFunction(fnCancel)) {
+                fnCancel(sender);
+            }
+        });
+
+        $("#not-active-dialog").jqmShow();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            return;
+        }
+        $("#not-active-dialog").jqm({modal: true});
+        this.init = true;
+    },
+
+    startTimer: function (sender) {
+        if (!sender) sender = this;
+        const self = this;
+
+        const showMe = function (sender) {
+            sender.show(sender.resetTimer, sender.logOut, sender);
+        }
+
+        const timeout_show = self.minutes_show * 60 * 1000;
+        const timeout_logout = self.minutes_logout * 60 * 1000;
+
+        sender.timer_show = setTimeout(showMe, timeout_show, sender);
+
+        sender.timer_logout = setTimeout(sender.logOut, timeout_logout);
+    },
+
+    resetTimer: function (sender) {
+        if (!sender) sender = this;
+        sender.stopTimer(sender);
+        sender.startTimer(sender);
+    },
+
+    stopTimer: function (sender) {
+        if (!sender) sender = this;
+        clearTimeout(sender.timer_show);
+        clearTimeout(sender.timer_logout);
+
+        sender.timer_show = null;
+        sender.timer_logout = null;
+    },
+
+    logOut: function () {
+        var ll = $("#current-user a.logout").attr("href");
+        window.location.replace(ll);
+    },
+
+    setEvents: function () {
+        var self = this;
+
+        $("body").delegate("*", "click", function () {
+            if (notActiveDialog_opened) {
+            } else {
+                self.resetTimer();
+            }
+        });
+        this.startTimer();
+    }
+}
+
+var updateCreditCardDialog = {
+    open: false,
+    init: false,
+    company: null,
+    editor: null,
+
+    show: function (company, editor) {
+        this.company = company;
+        this.editor = editor;
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#updateCreditCard-dialog").jqmShow();
+            return;
+        }
+
+        $("#updateCreditCard-dialog").jqm({modal: true});
+        $("#updateCreditCard-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+
+        var editor = new updateCreditCardDialogView($("#updateCreditCard-dialog").find("div.dialog-content"), this.company, this.editor);
+    }
+}
+
+var powerUpsDialog = {
+    init: false,
+    powerUps: null,
+    type: null,
+    powerUpsView: null,
+
+    show: function (powerUps, type, powerUpsView) {
+        this.powerUps = powerUps;
+        this.type = type;
+        this.powerUpsView = powerUpsView;
+
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#powerUps-dialog").jqmShow();
+            return;
+        }
+
+        $("#powerUps-dialog").jqm({modal: true});
+        $("#powerUps-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+
+        var editor = new powerUpsDialogView($("#powerUps-dialog").find("div.dialog-content"), this.powerUps, this.type);
+
+        var self = this;
+        editor.setSaveCallback(function (view) {
+            $("#powerUps-dialog").jqmHide();
+            self.powerUpsView.loadData();
+            if (view.powerUps.attributes.powerUpsKey === 'api' || view.powerUps.attributes.powerUpsKey == 'expenseReimbursement')
+                location.reload();
+            Application.router.navigate("powerUps", true);
+        });
+    }
+}
+
+var kioskDialog = {
+    init: false,
+    kiosk: null,
+    mainView: null,
+    type: null,
+
+    show: function (kiosk, mainView, type) {
+        this.kiosk = kiosk;
+        this.mainView = mainView;
+        this.type = type;
+
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#kiosk-dialog").jqmShow();
+            return;
+        }
+
+        $("#kiosk-dialog").jqm({modal: true});
+        $("#kiosk-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+
+        var editor = new kioskPopupView($("#kiosk-dialog").find("div.dialog-content"), this.kiosk, this.type, this.mainView);
+
+        var self = this;
+        editor.setSaveCallback(function (row, type) {
+            var isUpdatedMode = type == "updated" ? true : false;
+            var lastId = row.kiosk.attributes.id;
+            self.mainView.loadData();
+            $("div.explanation").show();
+            $("div.wrapperPassword").show();
+            $("div.innerview-save-box a.btn-small-cancel span").text(tpl.close);
+            if (isUpdatedMode) {
+                Application.router.navigate("kiosk", true);
+            } else {
+                Application.router.navigate("kiosk/" + lastId, true);
+            }
+        });
+    }
+}
+
+var NotificationDialog = {
+    init: false,
+    notificationType: null,
+    dataAllNotifications: null,
+
+    show: function (notificationType, dataAllNotifications) {
+        this.notificationType = notificationType;
+        this.dataAllNotifications = dataAllNotifications;
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#notification-dialog").jqmShow();
+            return;
+        }
+
+        $("#notification-dialog").jqm({modal: true});
+        $("#notification-dialog").jqmShow().jqmAddClose("div#dialogs div.close-area a");
+
+        new NotificationPopupView($("#notification-dialog").find("div.dialog-content"), this.notificationType, this.dataAllNotifications);
+    }
+}
+
+var systemAlertsDialog = {
+    init: false,
+    systemAlert: null,
+
+    show: function (systemAlert) {
+        this.systemAlert = systemAlert;
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#systemAlert-dialog").jqmShow();
+            return;
+        }
+        const isHebrew = Application.user.get("userLanguage") === "Hebrew";
+        $("#systemAlert-dialog .dialog-content .title").html(this.systemAlert.get(isHebrew ? "title_he" : "title_en"));
+        $("#systemAlert-dialog .dialog-content .text").html(this.systemAlert.get(isHebrew ? "text_he" : "text_en"));
+
+        $("#systemAlert-dialog").jqm({modal: true});
+        $("#systemAlert-dialog").jqmShow().jqmAddClose("div#dialogs div.single-close-area a,a.welcome-button");
+        this.init = true;
+    }
+}
+
+var signatureDialog = {
+    init: false,
+    conf: {},
+
+    show: function (conf) {
+        $.extend(this.conf, conf);
+        this.initialize();
+    },
+
+    initialize: function () {
+        $('.wrapperSign button#clear').click();
+
+        if (this.init) {
+            $("#signature-dialog").jqmShow();
+            return;
+        }
+
+        if (typeof this.conf.title != "undefined") {
+            $("#signature-dialog").find("div.title").text(this.conf.title);
+        }
+        if (typeof this.conf.subtitle != "undefined") {
+            $("#signature-dialog").find("div.text").text(this.conf.subtitle);
+        }
+        $('.wrapperSign').signaturePad({
+            drawOnly: true,
+            lineColour: "#DDDDDD",
+            lineTop: 149,
+            penColour: "#0000ff",
+            penWidth: 3,
+            clear: "#clear"
+        });
+        $("#signature-dialog").jqm({modal: true});
+        $("#signature-dialog").jqmShow().jqmAddClose("div#dialogs div.single-close-area a,a.welcome-button");
+
+        this.init = true;
+    }
+}
+
+var userCommentDialog = {
+    init: false,
+    conf: {},
+    tpl: null,
+
+    show: function (files, conf) {
+        $.extend(this.conf, conf);
+        this.files = files || null;
+        this.initialize();
+    },
+
+    initialize: function () {
+        var filesContainer = $("#user-comment-dialog").find("div.user-comment-files-to-upload");
+        filesContainer.empty();
+        if (this.files) {
+            this.files.forEach(function (file, i) {
+                var fileView = new UserCommentFileView(file, i);
+                filesContainer.append(fileView.render());
+            });
+        }
+
+        if (this.init) {
+            $("#user-comment-dialog").jqmShow();
+            return;
+        }
+
+        if (typeof this.conf.title != "undefined") {
+            $("#user-comment-dialog").find("div.title").text(this.conf.title);
+        }
+        if (typeof this.conf.subtitle != "undefined") {
+            $("#user-comment-dialog").find("div.text").text(this.conf.subtitle);
+        }
+
+        $("#user-comment-dialog").jqm({modal: true});
+        $("#user-comment-dialog").jqmShow().jqmAddClose("div#dialogs div.single-close-area a,a.welcome-button");
+
+        this.init = true;
+    }
+}
+
+var userContractDialog = {
+    init: false,
+    contract: null,
+    updateContract: null,
+    el: null,
+    newContractId: null,
+
+    show: function (parent, contract, updateContract, employeeIds) {
+        this.updateContract = updateContract;
+        this.contract = contract;
+        this.employeeIds = employeeIds;
+        this.parent = parent;
+        this.initialize();
+    },
+
+    getData: function () {
+
+    },
+
+    initialize: function () {
+        this.el = $("#userContract-dialog");
+
+        if (this.init) {
+            this.el.find("select[name='empContractDate']").val("3").trigger("change.select2").trigger("change");
+            this.el.jqmShow();
+            return;
+        }
+
+        Utils.initMultiselect(this.el.find("select[name='empContractDate']"), false, true, false);
+        $("#userContract-dialog").find("select[name='empContractDate']").val("3").trigger("change.select2");
+
+        this.el.jqm({
+            modal: true,
+            onHide: function (hash) {
+                // place to clean up something if needed
+                hash.w.hide();
+                hash.o.remove();
+            }
+        });
+        this.el.jqmShow().jqmAddClose("div#dialogs div.single-close-area a");
+
+        this.bindEvents();
+    },
+
+    bindEvents: function () {
+        var self = this;
+
+        this.el.find("select[name='empContractDate']").change(function () {
+            if ($(this).val() == 4) {
+                self.el.find("div.emp-contract-date-dt").show();
+            } else {
+                self.el.find("div.emp-contract-date-dt").hide();
+            }
+        });
+
+        this.el.find("input.empContractDate_dt").datepicker({
+            dateFormat: Application.dateFormat(),
+            prevText: "",
+            nextText: "",
+        });
+
+        this.el.find("div.open-datepicker").click(function () {
+            self.el.find("input.empContractDate_dt").datepicker("show");
+        });
+
+        this.el.find("button#save").click(function () {
+            var $self = $(this);
+            var contractId = self.el.find("select.contractsList option:checked").val();
+            if (self.employeeIds.length != 0 && self.contract.get("id") != contractId) {
+                ConfirmTooltip.show({
+                    adj: $self,
+                    text: tpl.moveToContractTooltipMessage,
+                    image: tpl.iconTooltipNotify,
+                    onCancel: function (e, sender) {
+                        self.el.find("select.contractsList option:selected").prop("selected", false);
+                        self.el.find(`select.contractsList option[value='${self.contract.get("id")}']`).prop("selected", true);
+                        self.el.find("select.contractsList").multiselect("refresh");
+                        self.newContractId = null;
+                    },
+                    onConfirm: function (e, sender) {
+                        self.newContractId = contractId;
+                        self.onSubmit.call(self);
+                    }
+                }, null);
+            } else {
+                self.onSubmit.call(self);
+            }
+        });
+
+        this.init = true;
+    },
+
+    onHide: function () {
+        this.contract = null;
+        this.el.jqmHide();
+    },
+
+    onSubmit: function () {
+        var self = this;
+        var sendForValue = this.el.find("input[name=sendedFor]:checked").val();
+
+        var employeeIds = [];
+        switch (sendForValue) {
+            case "0":
+                for (var i in Application.users.models) {
+                    if (Application.users.models[i].get("activeState") != 1) {
+                        continue;
+                    }
+                    employeeIds.push(Application.users.models[i].get("id"));
+                }
+                break;
+            case "1":
+                var departmentIds = [];
+                self.el.find("select.departmentList :selected").each(function (i, selected) {
+                    if ($(selected).val() == "na") {
+                        departmentIds.push(0);
+                    } else {
+                        departmentIds.push(parseInt($(selected).val()));
+                    }
+                });
+
+                for (var i in Application.users.models) {
+                    if (Application.users.models[i].get("activeState") != 1) {
+                        continue;
+                    }
+                    if (departmentIds.indexOf(Application.users.models[i].get("departmentId")) != -1) {
+                        employeeIds.push(Application.users.models[i].get("id"));
+                    }
+                }
+                break;
+            case "2":
+                self.el.find("select.employeeList :selected").each(function (i, selected) {
+                    employeeIds[i] = parseInt($(selected).val());
+                });
+                break;
+        }
+
+        var empIdsNoContract = self.employeeIds.filter(function (userId) {
+            return employeeIds.indexOf(parseInt(userId)) == -1;
+        });
+
+        var empIds = [];
+        var newContractId = null;
+
+        if (this.el.find("input[name='moveContract']").is(":checked") && this.newContractId) {
+            newContractId = this.newContractId;
+            empIds = self.employeeIds;
+        } else {
+            empIds = employeeIds.filter(function (userId) {
+                return self.employeeIds.indexOf(parseInt(userId)) == -1;
+            });
+        }
+
+        var empContractManualDate = null;
+        var empContractDate = self.el.find("select[name='empContractDate']").val();
+        if (empContractDate == 4) {
+            empContractManualDate = self.el.find("input[name='empContractManualDate']").val();
+        }
+
+        self.updateContract(self.parent, empIds, empIdsNoContract, empContractDate, empContractManualDate, newContractId, self.el.find("button#save"));
+
+        setTimeout(function () {
+            self.el.find("div.dep-select button, div.dep-select button span").bind("click", function () {
+                self.el.find("input.sendedForDep").prop("checked", true);
+            });
+            self.el.find("div.emp-select button, div.emp-select button span").bind("click", function () {
+                self.el.find("input.sendedForEmp").prop("checked", true);
+            });
+        }, 500)
+    },
+
+    showLoader: function(){
+        this.el.find('div.line.dialog-content div.title').hide();
+        this.el.find('div.line.dialog-content div.view-wrapperalertSendFor-line').hide();
+        this.el.find('div.wrapperButtons').hide();
+        this.el.find('div.big-preloader').show();
+    },
+
+    hideLoader: function(){
+        this.el.find('div.big-preloader').hide();
+        this.el.find('div.line.dialog-content div.title').show();
+        this.el.find('div.line.dialog-content div.view-wrapperalertSendFor-line').show();
+        this.el.find('div.wrapperButtons').show();
+    }
+}
+
+var employeeReportEmailDialog = {
+    init: false,
+    userId: null,
+    start: null,
+    end: null,
+    el: null,
+
+    show: function (userId, start, end) {
+        this.userId = userId;
+        this.start = start;
+        this.end = end;
+
+        this.initialize();
+    },
+    bindEvents: function () {
+        var self = this;
+        this.el.find("input[name='email']").on("change", function () {
+            if (!self.validateEmail()) {
+                self.showTooltip();
+            }
+        });
+
+        this.el.find("button#save").click(function () {
+            if (!self.validateEmail()) {
+                return false;
+            }
+            $(this).attr("disabled", true).addClass("showLoader");
+            var data = {
+                email: self.el.find("input[name='email']").val(),
+                userId: self.userId,
+                start: self.start,
+                end: self.end
+            };
+
+            var text = self.el.find("textarea[name='text']").val();
+
+            if (text.length > 0) {
+                data.text = text;
+            }
+
+            var employeeEmail = new employeeReportEmail();
+            employeeEmail.save(data, {
+                mb: true,
+                mbSuccess: tpl.reportSent,
+                success: function (res) {
+                    self.el.find("button#save").attr("disabled", false);
+                    ;
+                },
+                error: function (e) {
+                    self.el.find("button#save").attr("disabled", false);
+                }
+            });
+
+            self.el.jqmHide();
+        });
+        this.init = true;
+    },
+    validateEmail: function () {
+        var re = /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/;
+        return re.test(this.el.find("input[name='email']").val().toLowerCase());
+    },
+    showTooltip: function () {
+        var input = this.el.find("input[name='email']");
+        input.focus();
+
+        ConfirmTooltip.show({
+            adj: input,
+            text: tpl.validEmailTextErr,
+            image: tpl.iconTooltipNotify,
+            showConfirm: true,
+            showCancel: false,
+            manual: false
+        }, null);
+    },
+    initialize: function () {
+        var self = this;
+        this.el = $("#employeeReportEmail-dialog");
+        this.el.find("button#save").attr("disabled", false);
+
+        if (this.init) {
+            this.el.jqmShow();
+            return;
+        }
+
+        this.bindEvents();
+        this.el.jqm({
+            modal: true,
+            onHide: function (hash) {
+                self.clearInputs();
+                hash.w.hide();
+                hash.o.remove();
+            }
+        });
+        this.el.jqmShow().jqmAddClose("div#dialogs div.single-close-area a");
+    },
+    clearInputs: function () {
+        this.el.find("input[name='email']").val("");
+        this.el.find("textarea[name='text']").val("");
+    }
+}
+
+var systemUpdateNotificationDialog = {
+    init: false,
+    conf: {},
+    data: null,
+    tpl: null,
+    archived: false,
+
+
+    show: function (data = null, parent) {
+        this.parent = parent;
+        this.data = data;
+        this.clearModalFields();
+        this.initialize();
+        this.setFieldsData();
+        return this;
+    },
+
+    getInstance: function () {
+        return this;
+    },
+
+    setEditorsDirection: function () {
+        this.editorHe.format('align', 'right');
+        this.editorHe.format('direction', 'rtl');
+        this.editorEn.format('align', 'left');
+        this.editorEn.format('direction', 'ltr');
+    },
+
+    bindEvents: function () {
+        const self = this;
+
+        $("#systemUpdateNotification-dialog")
+            .find("input[data-value='moderator'], input[data-value='manager'], input[data-value='employee']")
+            .change(function () {
+                if ($(this).is(":checked")) {
+                    if ($("#systemUpdateNotification-dialog").find("input.usersTypes:checked").length == 3) {
+                        $("#systemUpdateNotification-dialog")
+                            .find("input[data-value='moderator'], input[data-value='manager'], input[data-value='employee']")
+                            .prop("checked", false);
+
+                        $("#systemUpdateNotification-dialog")
+                            .find("input[data-value='all']")
+                            .prop("checked", true);
+                    } else {
+                        $("#systemUpdateNotification-dialog")
+                            .find("input[data-value='all']")
+                            .prop("checked", false);
+                    }
+                }
+            });
+        $("#systemUpdateNotification-dialog")
+            .find("input[data-value='all']")
+            .change(function () {
+                if ($(this).is(":checked")) {
+                    $("#systemUpdateNotification-dialog")
+                        .find("input[data-value='moderator'], input[data-value='manager'], input[data-value='employee']")
+                        .prop("checked", false);
+                }
+            });
+
+        $("div#systemUpdateNotification-dialog").find("button.systemUpdateNotification-btn-save").click(function () {
+            self.save();
+        });
+
+        $("div#systemUpdateNotification-dialog").find("button.systemUpdateNotification-btn-delete").click(function () {
+            self.delete();
+        });
+        $("div#systemUpdateNotification-dialog").find("button.systemUpdateNotification-btn-archive-in").click(function () {
+            self.archived = 1;
+            self.save();
+            Application.SystemUpdateNotificationUser.loadData();
+            self.parent.parent.renderNotifications();
+        });
+        $("div#systemUpdateNotification-dialog").find("button.systemUpdateNotification-btn-archive-out").click(function () {
+            self.archived = 0;
+            self.save();
+            Application.SystemUpdateNotificationUser.loadData();
+            self.parent.parent.renderNotifications();
+        });
+    },
+
+    showPreloader: function () {
+        $("div#systemUpdateNotification-dialog").find(".wrapperSignButtons button").hide();
+        $("div#systemUpdateNotification-dialog").find(".big-preloader").show();
+    },
+
+    hidePreloader: function () {
+        $("div#systemUpdateNotification-dialog").find(".wrapperSignButtons button").show();
+        $("div#systemUpdateNotification-dialog").find(".big-preloader").hide();
+    },
+
+    setFieldsData: function () {
+        if (this.data) {
+            $("div#systemUpdateNotification-dialog").find("input[name='notificationtId']").val(this.data.get("id"));
+            $("div#systemUpdateNotificationEditor-he div.ql-editor").html(this.data.get("textHe"));
+            $("div#systemUpdateNotificationEditor-en div.ql-editor").html(this.data.get("textEn"));
+            if ($.isArray(this.data.get("usersTypes"))) {
+                this.data.get("usersTypes").forEach(function (type) {
+                    $("div#systemUpdateNotification-dialog").find(`input[value='${type}']`).prop("checked", true);
+                });
+            } else {
+                $("div#systemUpdateNotification-dialog").find("input[data-value='all']").prop("checked", true);
+            }
+        }
+    },
+
+    initialize: function () {
+        const isFromArchived = this.parent.attributes && this.parent.attributes.archived;
+
+        if (isFromArchived) {
+            $("#systemUpdateNotification-dialog").find(".systemUpdateNotification-btn-archive-in").hide();
+            $("#systemUpdateNotification-dialog").find(".systemUpdateNotification-btn-archive-out").show();
+        } else {
+            $("#systemUpdateNotification-dialog").find(".systemUpdateNotification-btn-archive-in").show();
+            $("#systemUpdateNotification-dialog").find(".systemUpdateNotification-btn-archive-out").hide();
+        }
+
+        if (this.init) {
+            this.setEditorsDirection();
+            $("#systemUpdateNotification-dialog").jqmShow();
+            return;
+        }
+
+        const toolbarOptions = [
+            ['bold', 'italic', 'underline', 'strike'],
+            [{'list': 'ordered'}, {'list': 'bullet'}],
+            [{'indent': '-1'}, {'indent': '+1'}],
+            [{'direction': 'rtl'}],
+            [{'align': []}],
+            ['link']
+        ];
+
+        this.editorHe = new Quill("#systemUpdateNotificationEditor-he", {
+            modules: {
+                toolbar: toolbarOptions
+            },
+            bounds: document.body,
+            placeholder: "",
+            theme: 'snow'
+        });
+
+        this.editorEn = new Quill("#systemUpdateNotificationEditor-en", {
+            modules: {
+                toolbar: toolbarOptions
+            },
+            bounds: document.body,
+            placeholder: "",
+            theme: 'snow'
+        });
+
+        $("#systemUpdateNotification-dialog").jqm({modal: true});
+        $("#systemUpdateNotification-dialog").jqmShow().jqmAddClose("div#dialogs div.single-close-area a,a.welcome-button");
+        this.setEditorsDirection();
+        this.bindEvents();
+        this.init = true;
+    },
+
+    validateFields: function () {
+        let isValid = true;
+        const target = $("div#systemUpdateNotification-dialog").find("button.systemUpdateNotification-btn-save");
+
+        if ($("div#systemUpdateNotificationEditor-en div.ql-editor").hasClass("ql-blank") ||
+            $("div#systemUpdateNotificationEditor-he div.ql-editor").hasClass("ql-blank")) {
+            ConfirmTooltip.show({
+                adj: target,
+                text: tpl.systemUpdateNotificationDialog["textMissing"],
+                image: tpl.iconTooltipNotify,
+                showConfirm: false,
+                showCancel: true,
+                manual: false
+            }, null);
+
+            isValid = false;
+        } else if ($("div#systemUpdateNotification-dialog").find("input.usersTypes:checked").length == 0) {
+            ConfirmTooltip.show({
+                adj: target,
+                text: tpl.systemUpdateNotificationDialog["userTypeMissing"],
+                image: tpl.iconTooltipNotify,
+                showConfirm: false,
+                showCancel: true,
+                manual: false
+            }, null);
+
+            isValid = false;
+        }
+        return isValid;
+    },
+
+    getData: function () {
+        const textHe = this.editorHe.root.innerHTML;
+        const textEn = this.editorEn.root.innerHTML;
+        const id = $("div#systemUpdateNotification-dialog").find("input[name='notificationtId']").val();
+        const usersTypes = $("div#systemUpdateNotification-dialog").find("input.usersTypes:checked").map(function () {
+            return $(this).val();
+        }).get();
+
+        const data = {textHe, textEn, archived: this.archived};
+        data.id = id || null;
+
+        if (usersTypes[0] != "") {
+            data.usersTypes = usersTypes;
+        }
+
+        return data;
+    },
+
+    save: function () {
+        const self = this;
+
+        if (!this.validateFields()) {
+            return;
+        }
+
+        self.showPreloader();
+
+        const data = this.getData();
+        const sun = new SystemUpdateNotification();
+        sun.save(data, {
+                success: function (res) {
+                    $("div#systemUpdateNotification-dialog").jqmHide();
+                    const mainView = self.parent.parent || self.parent;
+                    if (data.id) {
+                        mainView.notifications = mainView.notifications.map(function (notification) {
+                            if (notification.get("id") == data.id) {
+                                return res;
+                            }
+                            return notification;
+                        });
+                    } else {
+                        mainView.notifications.unshift(res)
+                    }
+                    mainView.renderNotifications();
+                    self.hidePreloader()
+                },
+                error: function (code) {
+                    self.hidePreloader()
+                },
+            }
+        );
+    },
+
+    delete: function () {
+        const self = this;
+        const data = this.getData();
+
+        if (data.id) {
+            const sun = new SystemUpdateNotification({id: data.id});
+
+            self.showPreloader()
+
+            sun.destroy({
+                    success: function (res) {
+                        $("div#systemUpdateNotification-dialog").jqmHide();
+                        const mainView = self.parent.parent ? self.parent.parent : self.parent;
+                        mainView.notifications = mainView.notifications.filter(function (notification) {
+                            return notification.get("id") != data.id;
+                        })
+                        mainView.renderNotifications();
+                        self.hidePreloader()
+                    },
+                    error: function (code) {
+                        self.hidePreloader()
+
+                    },
+                }
+            );
+        }
+    },
+
+    clearModalFields: function () {
+        $("div#systemUpdateNotification-dialog").find("input[name='notificationtId']").val("");
+        $("div#systemUpdateNotificationEditor-he div.ql-editor").html("");
+        $("div#systemUpdateNotificationEditor-en div.ql-editor").html("");
+        $("div#systemUpdateNotification-dialog").find("input.usersTypes:checked").prop("checked", false);
+    }
+}
+
+const employeeAddAbsenceDialog = {
+    init: false,
+    el: null,
+    userId: null,
+
+    show: function (userId) {
+        this.userId = userId;
+        this.initialize();
+    },
+
+    initialize: function () {
+        var self = this;
+        this.el = $("#employeeAddAbsence-dialog");
+        $("body").addClass("dialog-open");
+        if (this.init) {
+            this.el.jqmShow();
+            Application.getDatePicker(this.el.find("div.input-bg-datepicker.datepicker-start-end input"), null, null, true);
+            return;
+        }
+
+        this.el.jqm({
+            modal: true,
+            onHide: function (hash) {
+                hash.w.hide();
+                hash.o.remove();
+                self.emptyFields();
+                $("body").removeClass("dialog-open");
+            }
+        });
+        this.el.jqmShow().jqmAddClose("div#dialogs div.single-close-area a");
+
+
+        this.missings = Application.filterMissingsByPermissions();
+        const user = Application.users.get({'id': this.userId});
+        this.missings = Utils.filterMissingsByWatchPermissions(this.missings, user);
+
+        this.el.find(".open-datepicker").click(function () {
+            $(this).parents("div:first").find("input").trigger("focus");
+        });
+
+        this.renderFields();
+        this.init = true;
+    },
+
+    renderFields: function (userId = null) {
+        //Permit to initialize a render of this object without popup
+        if (userId) {
+            this.el = $("div.report-inner-view.absence-view");
+            let user = Application.user;
+            if(!Application.user.isEmployee()){
+                user = Application.users.get({id: userId});
+            }
+            this.missings = Application.filterMissingsByPermissions();
+            this.missings = Utils.filterMissingsByWatchPermissions(this.missings, user);
+            this.userId = userId;
+        }
+
+        const self = this;
+        const selectInput = this.el.find("select.typeAbsence");
+        selectInput.empty();
+
+        let typeAbsenceOptions = `<option value="0">${tpl.missingsNone}</option>`;
+        for (let i = 0; i < this.missings.length; i++) {
+            if (!this.missings[i].disabled) {
+                typeAbsenceOptions += `<option value="${this.missings[i].id}">${this.missings[i].description}</option>`;
+            }
+        }
+        selectInput.append(typeAbsenceOptions);
+        Utils.initMultiselect(selectInput, false, true, false);
+        Application.getDatePicker(this.el.find("div.input-bg-datepicker.datepicker-start-end input"), null, null, true);
+
+        var firstWeekDay = Application.company.get("firstWeekDay");
+        var options = this.el.find("input[type='checkbox'].days");
+
+        for (let i = 0, j = firstWeekDay; i < 5; i++, j++) {
+            if (j == 7) j = 0;
+            $(options[j]).attr("checked", true);
+        }
+
+        self.el.find("div.settings").click(function () {
+            if (self.el.find("svg.arrowIcon").hasClass("open")) {
+                self.el.find("svg.arrowIcon").removeClass("open");
+                self.el.find("div.days, div.comment").hide();
+                self.el.find("div.view").css("height", "248px");
+            } else {
+                self.el.find("svg.arrowIcon").addClass("open");
+                self.el.find("div.days, div.comment").show();
+                self.el.find("div.view").css("height", "406px");
+            }
+        });
+    },
+
+    emptyFields: function () {
+        this.el.find("div.datepicker-start-end input").val("");
+        $("#ReportTooltip").find("ul.qq-upload-list").empty();
+        $("#ReportTooltip").find("input.description").val("");
+        this.el.find("div.missingDocWrapper").hide();
+        this.el.find("select.typeAbsence").val("");
+        this.el.find("textarea.comment").val("");
+        this.documentFile = null;
+    },
+
+    showPreloader: function () {
+        this.el.find("div.wrapperButtons,div.employeeAddAbsence-content").hide();
+        this.el.find("div.big-preloader").show();
+    },
+
+    hidePreloader: function () {
+        this.el.find("div.wrapperButtons,div.employeeAddAbsence-content").show();
+        this.el.find("div.big-preloader").hide();
+    },
+
+    unBindEvent: function () {
+        const element = $("div.report-inner-view.absence-view");
+        element.find("div.settings").unbind("click");
+    }
+}
+
+
+const employeeQuickReport = {
+    el: null,
+    firstLoad: true,
+
+    show: function () {
+        this.el = $("div.report-inner-view.quick-report-view");
+        this.render();
+    },
+
+    render: function () {
+        const self = this;
+        Application.getDatePicker(self.el.find("div.datepicker-start-end.quick-report input"), false, null, true);
+
+        self.el.find("input.report-entry").mask("99:99");
+
+        self.el.find("span.check-in-mask").click(function () {
+            self.editCheckin();
+        });
+
+        self.el.find("span.check-in-mask").focus(() => {
+            self.editCheckin();
+        })
+
+        self.el.find("span.check-out-mask").click(function () {
+            self.editCheckout();
+        });
+
+        self.el.find("span.check-out-mask").focus(() => {
+            self.editCheckout();
+        })
+
+        const firstWeekDay = Application.company.get("firstWeekDay");
+        const options = this.el.find("input[type='checkbox'].days");
+        for (let i = 0, j = firstWeekDay; i < 5; i++, j++) {
+            if (j === 7) j = 0;
+            $(options[j]).attr("checked", true);
+        }
+
+        self.el.find("div.quick-report-settings").click(function () {
+            if (self.el.find("svg.quick-report-icon").hasClass("open")) {
+                self.el.find("svg.quick-report-icon").removeClass("open");
+                self.el.find("div.days.quick-report-setting,  div.comment.quick-report-setting,  div.ignoreEvents.quick-report-setting").hide();
+            } else {
+                self.el.find("svg.quick-report-icon").addClass("open");
+                self.el.find("div.days.quick-report-setting, div.comment.quick-report-setting, div.ignoreEvents.quick-report-setting").show();
+            }
+        });
+    },
+
+    editCheckin: function () {
+        const self = this;
+        const inputReportEntry = self.el.find("div.check-in input.report-entry");
+        const spanReportEntry = self.el.find("div.check-in span.check-in-mask");
+
+        spanReportEntry.hide();
+        inputReportEntry.show().focus();
+        inputReportEntry.focusout(() => {
+            self.checkInputTime(inputReportEntry)
+            spanReportEntry.text(inputReportEntry.val());
+            inputReportEntry.hide();
+            spanReportEntry.show();
+        })
+    },
+
+    editCheckout: function () {
+        const self = this;
+        const inputReportEntry = self.el.find("div.check-out input.report-entry");
+        const spanReportEntry = self.el.find("div.check-out span.check-out-mask");
+
+        spanReportEntry.hide();
+        inputReportEntry.show().focus();
+        inputReportEntry.focusout(() => {
+
+            self.checkInputTime(inputReportEntry);
+            spanReportEntry.text(inputReportEntry.val());
+            inputReportEntry.hide();
+            spanReportEntry.show();
+        })
+    },
+
+    checkInputTime: function (input) {
+        if (/^[0-9]{2}:__/.test(input.val())) {
+            let nval = input.val().substring(0, 2) + ":00";
+            input.val(nval);
+        } else if (!/^[0-9]{2}:[0-9]{2}/.test(input.val())) {
+            input.val("");
+        }
+    },
+
+    resetFields: function () {
+        this.el.find("div.datepicker-start input").val("");
+        this.el.find("div.datepicker-end input").val("");
+        this.el.find("div.check-in input.report-entry").text("");
+        this.el.find("div.check-out input.report-entry").text("");
+        this.el.find("textarea.comment").val("");
+
+    },
+
+    unBindEvent: function () {
+        const element = $("div.report-inner-view.quick-report-view");
+        element.find("div.quick-report-settings").unbind("click");
+        element.find("span.check-in-mask").unbind("focus");
+        element.find("span.check-out-mask").unbind("focus");
+    }
+}
+
+var notApprovedIpDialog = {
+    tpl: null,
+    el: null,
+    parent: null,
+
+    show: function (parent, isOut) {
+        this.loadTemplates();
+        this.el = $(this.tpl());
+        this.parent = parent;
+        this.parent.el.append(this.el);
+        this.isOut = isOut
+        this.bindEvents();
+    },
+
+    loadTemplates: function () {
+        this.tpl = _.template($("#approvedIpPopup").html());
+    },
+
+    bindEvents: function () {
+        var self = this;
+
+        this.el.find(".cancel").click(function () {
+            self.el.remove();
+        });
+
+        this.el.find(".approve").click(function () {
+            self.parent.setTimeEntry(self.isOut)
+            self.el.remove();
+            if (self.isOut === true) {
+                self.parent.el.find("div.dataInfo").hide("slow");
+            }
+        });
+
+    },
+};
+
+var disclaimerDialog = {
+    open: false,
+    init: false,
+    el: null,
+    callback: null,
+
+    show: function (callback) {
+        this.callback = callback;
+        this.el = $("#disclaimer-dialog");
+        if (!this.init) {
+            this.initialize();
+            this.bindEvents();
+        } else {
+            this.el.jqmShow();
+        }
+    },
+
+    initialize: function () {
+        const self = this;
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        this.el.find("div.close-area a").on('click', function (e) {
+            self.el.jqmHide();
+        });
+
+        this.init = true;
+    },
+
+    bindEvents: function () {
+        const self = this;
+        this.el.find(".disclaimer-dialog-save-answer").click(function () {
+            let value = self.el.find('input#disclaimer-dialog-location').is(":checked");
+            self.callback(value ? 2 : null);
+            self.el.jqmHide();
+        });
+    }
+};
+
+var systemAlertAdminDialog = {
+    init: false,
+    conf: {},
+    data: null,
+    tpl: null,
+    disabled: false,
+    archived: 0,
+
+    show: function (data = null, parent) {
+        this.parent = parent;
+        this.data = data;
+        this.clearModalFields();
+        this.initialize();
+        this.setFieldsData();
+        return this;
+    },
+
+    getInstance: function () {
+        return this;
+    },
+
+    setEditorsDirection: function () {
+        this.editorHe.format('align', 'right');
+        this.editorHe.format('direction', 'rtl');
+        this.editorEn.format('align', 'left');
+        this.editorEn.format('direction', 'ltr');
+    },
+
+    bindEvents: function () {
+        const self = this;
+
+        $("#systemAlertAdmin-dialog")
+            .find("input[data-value='moderator'], input[data-value='manager'], input[data-value='employee']")
+            .change(function () {
+                if ($(this).is(":checked")) {
+                    if ($("#systemAlertAdmin-dialog").find("input.usersTypes:checked").length == 3) {
+                        $("#systemAlertAdmin-dialog")
+                            .find("input[data-value='moderator'], input[data-value='manager'], input[data-value='employee']")
+                            .prop("checked", false);
+
+                        $("#systemAlertAdmin-dialog")
+                            .find("input[data-value='all']")
+                            .prop("checked", true);
+                    } else {
+                        $("#systemAlertAdmin-dialog")
+                            .find("input[data-value='all']")
+                            .prop("checked", false);
+                    }
+                }
+            });
+
+        $("#systemAlertAdmin-dialog")
+            .find("input[data-value='all']")
+            .change(function () {
+                if ($(this).is(":checked")) {
+                    $("#systemAlertAdmin-dialog")
+                        .find("input[data-value='moderator'], input[data-value='manager'], input[data-value='employee']")
+                        .prop("checked", false);
+                }
+            });
+
+        $("#systemAlertAdmin-dialog")
+            .find("select.popupType")
+            .change(function () {
+            });
+
+        $("div#systemAlertAdmin-dialog").find("button.systemAlertAdmin-btn-save").click(function () {
+            self.save();
+        });
+
+        $("div#systemAlertAdmin-dialog").find("button.systemAlertAdmin-btn-delete").click(function () {
+            self.delete();
+        });
+
+        $("div#systemAlertAdmin-dialog").find("button.systemAlertAdmin-btn-archive-in").click(function () {
+            self.archived = 1;
+            self.save();
+            self.parent.loadData();
+        });
+        $("div#systemAlertAdmin-dialog").find("button.systemAlertAdmin-btn-archive-out").click(function () {
+            self.archived = 0;
+            const dateCreated = self.parent.alert.get("dateCreated");
+            localStorage.removeItem(`meckano_${dateCreated}`);
+
+            self.save();
+            self.parent.loadData();
+        });
+    },
+
+    showPreloader: function () {
+        $("div#systemAlertAdmin-dialog").find(".wrapperSignButtons button").hide();
+        $("div#systemAlertAdmin-dialog").find(".big-preloader").show();
+    },
+
+    hidePreloader: function () {
+        $("div#systemAlertAdmin-dialog").find(".wrapperSignButtons button").show();
+        $("div#systemAlertAdmin-dialog").find(".big-preloader").hide();
+    },
+
+    setFieldsData: function () {
+        if (this.data) {
+            $("div#systemAlertAdmin-dialog").find("input[name='notificationtId']").val(this.data.get("id"));
+            $("div#systemAlertAdminEditor-he div.ql-editor").html(this.data.get("text_he"));
+            $("div#systemAlertAdminEditor-en div.ql-editor").html(this.data.get("text_en"));
+            if ($.isArray(this.data.get("usersTypes"))) {
+                this.data.get("usersTypes").forEach(function (type) {
+                    $("div#systemAlertAdmin-dialog").find(`input[value='${type}']`).prop("checked", true);
+                });
+            } else {
+                $("div#systemAlertAdmin-dialog").find("input[data-value='all']").prop("checked", true);
+            }
+            $("div#systemAlertAdmin-dialog").find(".systemAlertAdmin-btn-delete").show();
+            $("div#systemAlertAdmin-dialog").find("select.suppliers").val(this.data.get("suppliers")).trigger("change.select2");
+        } else {
+            $("div#systemAlertAdmin-dialog").find(".systemAlertAdmin-btn-delete").hide();
+        }
+    },
+
+    initialize: function () {
+        const isFromArchived = this.parent.attributes && this.parent.attributes.archived === 1;
+
+        if (isFromArchived) {
+            $("#systemAlertAdmin-dialog").find(".systemAlertAdmin-btn-archive-in").hide();
+            $("#systemAlertAdmin-dialog").find(".systemAlertAdmin-btn-archive-out").show();
+        } else {
+            $("#systemAlertAdmin-dialog").find(".systemAlertAdmin-btn-archive-out").hide();
+            $("#systemAlertAdmin-dialog").find(".systemAlertAdmin-btn-archive-in").show();
+        }
+
+        if (this.init) {
+            this.setEditorsDirection();
+            $("#systemAlertAdmin-dialog").jqmShow();
+            return;
+        }
+
+        var toolbarOptions = [
+            ['bold', 'italic', 'underline', 'strike'],
+            [{'list': 'ordered'}, {'list': 'bullet'}],
+            [{'indent': '-1'}, {'indent': '+1'}],
+            [{'direction': 'rtl'}],
+            [{'align': []}],
+            ['link']
+        ];
+
+        this.editorHe = new Quill("#systemAlertAdminEditor-he", {
+            modules: {
+                toolbar: toolbarOptions
+            },
+            bounds: document.body,
+            placeholder: "",
+            theme: 'snow'
+        });
+
+        this.editorEn = new Quill("#systemAlertAdminEditor-en", {
+            modules: {
+                toolbar: toolbarOptions
+            },
+            bounds: document.body,
+            placeholder: "",
+            theme: 'snow'
+        });
+
+        $("#systemAlertAdmin-dialog").jqm({modal: true});
+        $("#systemAlertAdmin-dialog").jqmShow().jqmAddClose("div#dialogs div.single-close-area a,a.welcome-button");
+        this.setEditorsDirection();
+        this.bindEvents();
+        this.setSuppliersSelect();
+        this.init = true;
+
+        $("div#systemAlertAdmin-dialog").find("select.alertType").selectbox().change(function () {
+            let alertType = $(this).val();
+            switch (alertType) {
+                case '1':
+                    $("div#systemAlertAdminEditor-he div.ql-editor").html(tpl.systemAlertAdminDialog.applicationHe);
+                    $("div#systemAlertAdminEditor-en div.ql-editor").html(tpl.systemAlertAdminDialog.applicationEn);
+                    break;
+                case '2':
+                    $("div#systemAlertAdminEditor-he div.ql-editor").html(tpl.systemAlertAdminDialog.reportsHe);
+                    $("div#systemAlertAdminEditor-en div.ql-editor").html(tpl.systemAlertAdminDialog.reportsEn);
+                    break;
+                case '3':
+                    $("div#systemAlertAdminEditor-he div.ql-editor").html(tpl.systemAlertAdminDialog.telephonyHe);
+                    $("div#systemAlertAdminEditor-en div.ql-editor").html(tpl.systemAlertAdminDialog.telephonyEn);
+                    break;
+                default:
+                    $("div#systemAlertAdminEditor-he div.ql-editor").html("");
+                    $("div#systemAlertAdminEditor-en div.ql-editor").html("");
+                    break;
+            }
+        });
+
+    },
+
+    setSuppliersSelect: function() {
+        const self = this;
+        const $select = $("div#systemAlertAdmin-dialog").find("select.suppliers");
+        Utils.initMultiselect($select, true, false, true, null, tpl.selectSuppliers);
+        $select.data('select2').$dropdown.addClass('front');
+
+        const billingManager = new BillingManager({type: "suppliers"});
+        billingManager.fetch({
+            success: function(data) {
+                const suppliers = data.attributes;
+                let options = "";
+                for (var k in suppliers) {
+                    if (suppliers.hasOwnProperty(k)) {
+                        options += "<option value='" + k + "'>" + suppliers[k] + "</option>";
+                    }
+                }
+                $select.append(options);
+                $select.val(self.data.get("suppliers")).trigger("change.select2");
+            },
+            error: function(code) {
+
+            }
+        });
+    },
+
+    validateFields: function () {
+        var isValid = true;
+        var target = $("div#systemAlertAdmin-dialog").find("button.systemAlertAdmin-btn-save");
+
+        if ($("div#systemAlertAdminEditor-en div.ql-editor").hasClass("ql-blank") ||
+            $("div#systemAlertAdminEditor-he div.ql-editor").hasClass("ql-blank")) {
+            ConfirmTooltip.show({
+                adj: target,
+                text: tpl.systemUpdateNotificationDialog["textMissing"],
+                image: tpl.iconTooltipNotify,
+                showConfirm: false,
+                showCancel: true,
+                manual: false
+            }, null);
+
+            isValid = false;
+        } else if ($("div#systemAlertAdmin-dialog").find("input.usersTypes:checked").length == 0) {
+            ConfirmTooltip.show({
+                adj: target,
+                text: tpl.systemUpdateNotificationDialog["userTypeMissing"],
+                image: tpl.iconTooltipNotify,
+                showConfirm: false,
+                showCancel: true,
+                manual: false
+            }, null);
+
+            isValid = false;
+        }
+        return isValid;
+    },
+
+    getData: function () {
+        var text_he = this.editorHe.root.innerHTML;
+        var text_en = this.editorEn.root.innerHTML;
+        var id = $("div#systemAlertAdmin-dialog").find("input[name='notificationtId']").val();
+        var usersTypes = $("div#systemAlertAdmin-dialog").find("input.usersTypes:checked").map(function () {
+            return $(this).val();
+        }).get();
+        const suppliers = $("div#systemAlertAdmin-dialog").find("select.suppliers").val();
+
+        const data = {text_he, text_en, disabled: this.disabled, archived: this.archived};
+        data.id = id || null;
+
+        if (usersTypes[0] != "") {
+            data.usersTypes = usersTypes;
+        }
+        if ( suppliers.length ) {
+            data.suppliers = suppliers;
+        }
+        return data;
+    },
+
+    save: function () {
+        const self = this;
+
+        if (!this.validateFields()) {
+            return;
+        }
+
+        self.showPreloader();
+
+        const data = this.getData();
+        const systemAlert = new SystemAlert();
+        systemAlert.save(data, {
+                success: function (res) {
+                    $("div#systemAlertAdmin-dialog").jqmHide();
+                    var mainView = self.parent.parent || self.parent;
+                    if (data.id) {
+                        mainView.alerts = mainView.alerts.map(function (alert) {
+                            if (alert.get("id") == data.id) {
+                                return res;
+                            }
+                            return alert;
+                        });
+                    } else {
+                        mainView.alerts.unshift(res);
+                    }
+                    mainView.renderAlerts();
+                    self.hidePreloader();
+                },
+                error: function (code) {
+                    self.hidePreloader();
+                },
+            }
+        );
+    },
+
+    delete: function () {
+        const self = this;
+        let data = this.getData();
+
+        if (data.id) {
+            const systemAlert = new SystemAlert({id: data.id});
+
+            self.showPreloader()
+
+            systemAlert.destroy({
+                    success: function (res) {
+                        $("div#systemAlertAdmin-dialog").jqmHide();
+                        let mainView = self.parent.parent ? self.parent.parent : self.parent;
+                        mainView.alerts = mainView.alerts.filter(function (alert) {
+                            return alert.get("id") != data.id;
+                        });
+                        mainView.renderAlerts();
+                        self.hidePreloader()
+                    },
+                    error: function (code) {
+                        self.hidePreloader()
+                    },
+                }
+            );
+        }
+    },
+
+    clearModalFields: function () {
+        $("div#systemAlertAdmin-dialog").find("input[name='notificationtId']").val("");
+        $("div#systemAlertAdminEditor-he div.ql-editor").html("");
+        $("div#systemAlertAdminEditor-en div.ql-editor").html("");
+        $("div#systemAlertAdmin-dialog").find("input.usersTypes:checked").prop("checked", false);
+    }
+}
+
+const systemUpdateHelpDialog = {
+    init: false,
+    el: null,
+    conf: {},
+    data: null,
+    tpl: null,
+    archived: false,
+    hebrewEditorEl: null,
+    englishEditorEl: null,
+
+
+    show: function (data = null, parent) {
+        this.parent = parent;
+        this.data = data;
+        this.el = $("div#systemHelp-dialog");
+        this.hebrewEditorEl = $("div#systemHelpEditor-he");
+        this.englishEditorEl = $("div#systemHelpEditor-en");
+        this.switch_tpl = _.template($("#switchboxConfirm").html());
+        this.initialize();
+        this.clearModalFields();
+        this.setFieldsData();
+        this.hidePreloader();
+        return this;
+    },
+
+    getInstance: function () {
+        return this;
+    },
+
+    setEditorsDirection: function () {
+        this.editorHe.format('align', 'right');
+        this.editorHe.format('direction', 'rtl');
+        this.editorEn.format('align', 'left');
+        this.editorEn.format('direction', 'ltr');
+    },
+
+    bindEvents: function () {
+        const self = this;
+        this.el.find("button.systemHelp-btn-save").click(function () {
+            self.save();
+        });
+    },
+
+    showPreloader: function () {
+        this.el.find(".wrapperSignButtons button").hide();
+        this.el.find(".big-preloader").show();
+    },
+
+    hidePreloader: function () {
+        this.el.find(".wrapperSignButtons button").show();
+        this.el.find(".big-preloader").hide();
+    },
+
+    setFieldsData: function () {
+        if (this.data) {
+            this.el.find("input[name='helpId']").val(this.data.get("id"));
+            this.el.find("input[name='id']").val(this.data.get("id")).attr('disabled', true);
+            this.el.find("input.switchboxConfirm").attr('checked', this.data.get("siteDisplay") == 'Y');
+
+            this.el.find("input[name='desc1']").val(this.data.get("title"));
+            this.hebrewEditorEl.find("div.ql-editor").html(this.data.get("content"))
+
+            this.el.find("input[name='desc3']").val(this.data.get("titleEn"));
+            this.englishEditorEl.find("div.ql-editor").html(this.data.get("contentEn"));
+        } else {
+            this.el.find("input[name='id']").attr('disabled', false);
+        }
+    },
+
+    initialize: function () {
+        if (this.init) {
+            this.setEditorsDirection();
+            this.el.jqmShow();
+            return;
+        }
+
+        var toolbarOptions = [
+            ['bold', 'italic', 'underline', 'strike'],
+            [{'list': 'ordered'}, {'list': 'bullet'}],
+            [{'indent': '-1'}, {'indent': '+1'}],
+            [{'direction': 'rtl'}],
+            [{'align': []}],
+            ['link']
+        ];
+
+        this.editorHe = new Quill("#systemHelpEditor-he", {
+            modules: {
+                toolbar: toolbarOptions
+            },
+            bounds: document.body,
+            placeholder: "",
+            theme: 'snow'
+        });
+
+        this.editorEn = new Quill("#systemHelpEditor-en", {
+            modules: {
+                toolbar: toolbarOptions
+            },
+            bounds: document.body,
+            placeholder: "",
+            theme: 'snow'
+        });
+
+        this.el.find('span.systemHelp-dialog-siteDisplay').html(this.switch_tpl());
+
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs div.single-close-area a,a.welcome-button");
+        this.setEditorsDirection();
+        this.bindEvents();
+        this.init = true;
+    },
+
+    validateFields: function () {
+        let errorMessage = "";
+        let isValid = true;
+        const target = this.el.find("systemHelp-btn-save");
+
+        if (this.hebrewEditorEl.find("div.ql-editor").hasClass("ql-blank") ||
+            this.hebrewEditorEl.find("div.ql-editor").hasClass("ql-blank")) {
+            errorMessage = tpl.systemUpdateHelpDialog.textMissing;
+            isValid = false;
+        } else if (this.el.find("input[name='desc1']").val() == "" || this.el.find("input[name='desc3']").val() == "") {
+            errorMessage = tpl.systemUpdateHelpDialog.titleMissing;
+            isValid = false;
+        } else if (this.el.find("input[name='id']").val() == "") {
+            errorMessage = tpl.systemUpdateHelpDialog.idMissing;
+            isValid = false;
+        }
+
+        if (!isValid) {
+            ConfirmTooltip.show({
+                adj: target,
+                text: errorMessage,
+                image: tpl.iconTooltipNotify,
+                showConfirm: false,
+                showCancel: true,
+                manual: false
+            }, null);
+        }
+
+        return isValid;
+    },
+
+    getData: function () {
+        const id = this.el.find("input[name='id']").val();
+        const helpId = this.el.find("input[name='helpId']").val();
+        const siteDisplay = this.el.find("input.switchboxConfirm").is(":checked") ? 'Y' : 'N';
+        const desc1 = this.el.find("input[name='desc1']").val();
+        const desc2 = this.editorHe.root.innerHTML;
+        const desc3 = this.el.find("input[name='desc3']").val();
+        const desc4 = this.editorEn.root.innerHTML;
+
+        let type = helpId !== "0" ? "update" : "create";
+
+        const data = {
+            id, type, desc1, desc2, desc3, desc4, siteDisplay
+        };
+
+        return data;
+    },
+
+    save: function () {
+        const self = this;
+
+        if (!this.validateFields()) {
+            return;
+        }
+
+        self.showPreloader();
+
+        const data = this.getData();
+        const suh = new SystemUpdateHelp();
+        suh.save(data, {
+                success: function (res) {
+                    self.el.jqmHide();
+                    self.parent.loadData();
+                    self.hidePreloader();
+                },
+                error: function (code) {
+                    self.hidePreloader();
+                },
+            }
+        );
+    },
+
+    clearModalFields: function () {
+        this.hebrewEditorEl.find("div.ql-editor").html("");
+        this.englishEditorEl.find("div.ql-editor").html("");
+        this.el.find("input[name='id']").val("");
+        this.el.find("input[name='helpId']").val("0");
+        this.el.find("input.switchboxConfirm").prop("checked", false);
+        this.el.find("input[name='desc1']").val("");
+        this.el.find("input[name='desc3']").val("");
+    }
+}
+
+const systemUpdateFilesLinksDialog = {
+    init: false,
+    el: null,
+    conf: {},
+    data: null,
+    tpl: null,
+    archived: false,
+    hebrewEditorEl: null,
+    englishEditorEl: null,
+
+
+    show: function (data = null, parent, types = null) {
+        this.parent = parent;
+        this.types = types;
+        this.data = data;
+        this.el = $("div#systemFileLinks-dialog");
+        this.switch_tpl = _.template($("#switchboxConfirm").html());
+        this.initialize();
+        this.clearModalFields();
+        this.setFieldsData();
+        this.hidePreloader();
+        return this;
+    },
+
+    getInstance: function () {
+        return this;
+    },
+
+    bindEvents: function () {
+        const self = this;
+        this.el.find("button.systemFileLink-btn-save").click(function () {
+            self.save();
+        });
+
+        this.el.find('select#groups').change(e => {
+            if (e.target.value === 'new') {
+                self.el.find('div.systemFileLink-dialog-groups-input-inline').css('width', '515px');
+                self.el.find('input[name="newGroup"]').show();
+            } else {
+                self.el.find('div.systemFileLink-dialog-groups-input-inline').css('width', '272px');
+                self.el.find('input[name="newGroup"]').hide();
+            }
+        });
+
+        this.el.find('input[name="type"]').change(e => {
+            if (e.target.value === SystemHelp.TYPE_FILE) {
+                this.el.find('span.systemFileLink-dialog-label').text(tpl.linksAdminDialog.file);
+                self.el.find('div.file-upload').show();
+                let val = self.data ? self.data.get("link").split('/').reverse()[0] : "";
+                self.el.find("input.text-link")
+                    .css('width', '350px')
+                    .attr('disabled', true)
+                    .val(val);
+            } else {
+                this.el.find('span.systemFileLink-dialog-label').text(tpl.linksAdminDialog.link);
+                self.el.find('div.file-upload').hide();
+                let val = self.data ? self.data.get("link") : "";
+                self.el.find("input.text-link")
+                    .css('width', '83%')
+                    .attr('disabled', false)
+                    .val(val);
+            }
+        });
+    },
+
+    showPreloader: function () {
+        this.el.find(".wrapperSignButtons button").hide();
+        this.el.find(".big-preloader").show();
+    },
+
+    hidePreloader: function () {
+        this.el.find(".wrapperSignButtons button").show();
+        this.el.find(".big-preloader").hide();
+    },
+
+    setFieldsData: function () {
+        const self = this;
+        if (this.data) {
+            this.el.find('input[name="type"]').attr('disabled', true);
+            this.el.find("input[name='helpId']").val(this.data.get("id"));
+            this.el.find("input[name='id']").val(this.data.get("id")).attr('disabled', true);
+            this.uploader.addParams({id: this.data.get("id")});
+            this.el.find("input.switchboxConfirm").attr('checked', this.data.get("siteDisplay") == 'Y');
+
+            this.el.find("input[name='desc1']").val(this.data.get("title"));
+            this.el.find("select[name='groups']").find(`option[value='${this.data.get('group')}']`).attr('selected', 'selected');
+            self.el.find("select[name='groups']").selectbox("detach").selectbox();
+
+            if (this.data.get('type') === SystemHelp.TYPE_FILE) {
+                self.el.find('div.file-upload').show();
+                self.el.find("input.text-link")
+                    .css('width', '350px')
+                    .attr('disabled', true)
+                    .val(self.data.get("link").split('/').reverse()[0]);
+            } else {
+                self.el.find('div.file-upload').hide();
+                self.el.find("input.text-link")
+                    .css('width', '83%')
+                    .attr('disabled', false)
+                    .val(self.data.get("link"));
+            }
+
+            this.el.find(`input[name='type'][value='${this.data.get('type')}']`).attr('checked', true);
+
+            const fileLinkText = self.data.get('type') === SystemHelp.TYPE_FILE ? tpl.linksAdminDialog.file : tpl.linksAdminDialog.link;
+            this.el.find('span.systemFileLink-dialog-label').text(fileLinkText);
+        } else {
+            this.el.find('input[name="type"]').attr('disabled', false);
+            this.getLastId(id => {
+                const nextId = +id + 1;
+                this.uploader.addParams({id: nextId});
+                this.el.find("input[name='id']").val(nextId);
+            });
+            this.el.find("select[name='groups'] option:nth-child(2)").attr("selected", "selected");
+            this.el.find("select[name='groups']").selectbox("detach").selectbox();
+            this.el.find('span.systemFileLink-dialog-label').text(tpl.linksAdminDialog.file);
+            this.el.find(`input[name='type'][value='file']`).attr('checked', true);
+            this.el.find('div.file-upload').show();
+            this.el.find("input.text-link")
+                .css('width', '350px')
+                .attr('disabled', true);
+        }
+    },
+
+    getLastId: function (callback = null) {
+        const systemHelp = new SystemHelp({getLastId: true, prdType: 'site_links'});
+        systemHelp.fetch({
+            success: function (res) {
+                const nextHelpId = +res.get('id') + 1;
+                if (_.isFunction(callback)) {
+                    callback(nextHelpId);
+                }
+            }
+        });
+    },
+
+    initialize: function () {
+        const self = this;
+        if (this.init) {
+            this.el.jqmShow();
+            return;
+        }
+
+        this.el.find('span.systemFileLink-dialog-siteDisplay').html(this.switch_tpl());
+
+        const options = self.types.map((b, c) => {
+            return `<option value="${b}" data-index="${c}">${b}</option>`;
+        });
+        self.el.find("select[name='groups']").append(options.join(''));
+        self.el.find("select[name='groups']").selectbox();
+
+        this.uploader = new qq.FileUploader({
+            dropText: tpl.dropImage,
+            inputText: tpl.inputImage,
+            element: self.el.find("div.file-upload").get(0),
+            action: 'uploads/upload.php',
+            params: {
+                "type": "prdPics"
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                self.currentUserImage = responseJSON.path;
+                self.el.find("input.text-link").val(responseJSON.path);
+            },
+            onSubmit: function () {
+                self.el.find("ul.qq-upload-list").empty();
+            },
+            maxConnections: 1
+        });
+
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs div.single-close-area a,a.welcome-button");
+        this.bindEvents();
+        this.init = true;
+    },
+
+    validateFields: function () {
+        let errorMessage = "";
+        let isValid = true;
+        const target = this.el.find("button.systemFileLink-btn-save");
+
+        if (this.el.find("input[name='id']").val() === "") {
+            isValid = false;
+            errorMessage = tpl.linksAdminDialog.errorMessage.id;
+        } else if (this.el.find("select[name='groups']").val() === "new" && this.el.find("input[name='newGroup']").val() === "") {
+            isValid = false;
+            errorMessage = tpl.linksAdminDialog.errorMessage.newGroup;
+        } else if (this.el.find("input[name='desc1']").val() === "") {
+            isValid = false;
+            errorMessage = tpl.linksAdminDialog.errorMessage.desc1;
+        } else if (this.el.find("input.text-link").val() === "") {
+            isValid = false;
+            if (this.el.find("input[name='type']:checked").val() === SystemHelp.TYPE_FILE) {
+                errorMessage = tpl.linksAdminDialog.errorMessage.file;
+            } else {
+                errorMessage = tpl.linksAdminDialog.errorMessage.link;
+            }
+        }
+
+        if (!isValid) {
+            ConfirmTooltip.show({
+                adj: target,
+                text: errorMessage,
+                image: tpl.iconTooltipNotify,
+                showConfirm: false,
+                showCancel: true,
+                manual: false
+            }, null);
+        }
+
+        return isValid;
+    },
+
+    getData: function () {
+        const id = this.el.find("input[name='id']").val();
+        const helpId = this.el.find("input[name='helpId']").val();
+        const siteDisplay = this.el.find("input.switchboxConfirm").is(":checked") ? 'Y' : 'N';
+        const title = this.el.find("input[name='desc1']").val();
+        const link = this.el.find("input.text-link").val();
+        const type = this.el.find("input[name='type']:checked").val();
+        const action = helpId !== "0" ? "update" : "create";
+        let group = this.el.find('select[name="groups"]').val();
+        if (group === 'new') {
+            group = this.el.find("input[name='newGroup']").val();
+        }
+        const prdType = SystemHelp.PRD_TYPE_SITE_LINKS;
+        const _data = {
+            id, type, prdType, action, title, group, link, siteDisplay
+        };
+
+        return _data;
+    },
+
+    save: function () {
+        const self = this;
+
+        if (!this.validateFields()) {
+            return;
+        }
+
+        self.showPreloader();
+
+        const data = this.getData();
+        const sufl = new SystemUpdateFileLinks();
+        sufl.save(data, {
+                success: function (res) {
+                    self.el.jqmHide();
+                    self.parent.loadData();
+                    self.hidePreloader();
+                },
+                error: function (code) {
+                    self.hidePreloader();
+                },
+            }
+        );
+    },
+
+    clearModalFields: function () {
+        this.el.find("input.text-link").val("");
+        this.el.find("input[name='id']").val("");
+        this.el.find("input[name='desc1']").val("");
+        this.el.find("input[name='desc3']").val("");
+        this.el.find("input[name='helpId']").val("0");
+        this.el.find("input[name='newGroup']").val("");
+        this.el.find("input.switchboxConfirm").prop("checked", true);
+    }
+}
+
+const deleteUserDialog = {
+    open: false,
+    init: false,
+    el: null,
+    callback: null,
+
+    show: function(user, callbacks) {
+        this.callbacks = callbacks;
+        this.user = user;
+        this.el = $("#delete-user-dialog");
+        if(!this.init){
+            this.initialize();
+            this.bindEvents();
+        }
+        if(!Application.resignationReasons){
+            this.loadData();
+        }else{
+            this.setupFields();
+            this.el.jqmShow();
+        }
+
+    },
+
+    loadData: function(){
+        const self = this;
+        Application.resignationReasons = new ResignationReasonCollection();
+        Application.resignationReasons.fetch({
+           success: function(){
+               self.setupFields();
+               self.el.jqmShow();
+           },
+            error: function(){
+
+            }
+        });
+    },
+
+    setupFields: function(){
+        const self = this;
+
+        self.el.find("select.delete-user-dialog-status").empty();
+        tpl.employeeTypes.forEach((type, i) => {
+            self.el.find("select.delete-user-dialog-status").append(new Option(type, i, false));
+        });
+        Application.resignationReasons.models.forEach( model => {
+            self.el.find("select.delete-user-dialog-status").append(new Option(model.get('description'), model.get('id'), false));
+        });
+
+        Utils.initMultiselect(this.el.find(".delete-user-dialog-status"), false, true, false, 0);
+
+        const fullName = `${self.user.get("firstName")} ${self.user.get("lastName")}`;
+        self.el.find(".employee-name").text(fullName);
+    },
+
+    initialize: function() {
+        const self = this;
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        this.el.find("div.close-area a").on('click', function(e) {
+            self.el.jqmHide();
+        });
+
+        Utils.initMultiselect(this.el.find(".delete-user-dialog-status"), false, true, false);
+
+        Application.getDatePicker(self.el.find(".delete-user-dialog-date"),true)
+            .on('apply.daterangepicker', (ev,picker)=>{ self.el.find(".delete-user-dialog-date").val(picker.startDate.format("DD/MM/YYYY")) });
+
+        this.el.find(".open-datepicker").click(function() {
+            $(this).parents("div:first").find("input").trigger("focus");
+        });
+
+        this.init = true;
+    },
+
+    bindEvents: function(){
+        const self = this;
+
+        this.el.find(".delete-user-dialog-confirm").click(function(){
+            if(_.isFunction(self.callbacks.onConfirm)){
+                const employeeType = self.el.find(".delete-user-dialog-status").val();
+                const changeDate = self.el.find(".delete-user-dialog-date").val();
+                const employedUntil_dt = Utils.convertDmyToCompanyFormat(changeDate, '/');
+                const employedUntil_ts = +moment(changeDate, "DD/MM/YYYY").format("X");
+                self.callbacks.onConfirm(+employeeType, employedUntil_ts, employedUntil_dt.replaceAll('-', '/'));
+            }
+            self.el.jqmHide();
+        });
+
+        this.el.find(".delete-user-dialog-decline").click(function(){
+            if(_.isFunction(self.callbacks.onCancel)){
+                self.callbacks.onCancel();
+            }
+            self.el.jqmHide();
+        });
+    }
+};
+
+const editEmployeeTypesDialog = {
+    open: false,
+    init: false,
+    el: null,
+    callback: null,
+    editId: null,
+
+    show: function(callback) {
+        this.callback = callback;
+        this.el = $("#edit-employee-types-dialog");
+
+        if(!this.init){
+            this.initialize();
+        }
+
+        if(!Application.resignationReasons){
+            this.loadData();
+        }else{
+            this.setupFields();
+            this.el.jqmShow();
+        }
+
+        this.bindEvents();
+    },
+
+    loadData: function(){
+        const self = this;
+        Application.resignationReasons = new ResignationReasonCollection();
+        Application.resignationReasons.fetch({
+            success: function(){
+                self.setupFields();
+                self.el.jqmShow();
+            },
+            error: function(){
+
+            }
+        });
+    },
+
+    setupFields: function(){
+        const self = this;
+        self.el.find("ul.edit-employee-types-options-wrapper").empty();
+        Application.resignationReasons.models.forEach( model => {
+            self.el.find(".edit-employee-types-options-wrapper").append(self.getTypeRowHtml(model.get('id'), model.get('description')));
+        });
+    },
+
+    getTypeRowHtml: function(id, description){
+        return `
+            <li data-id="${id}" class="employee-type-list">
+                <span>${description}</span>
+                <div class="ops" style="width:40px">
+                    <a class="employee-type-edit" data-id="${id}">
+                        <svg class="edit">
+                            <use xlink:href="#edit"></use>
+                        </svg>
+                    </a>
+                    <a class="employee-type-delete" data-id="${id}">
+                        <svg class="deleteIcon">
+                            <use xlink:href="#deleteIcon"></use>
+                        </svg>
+                    </a>
+                </div>
+            </li>
+        `;
+    },
+
+    initialize: function(parent) {
+        const self = this;
+        this.parent = parent;
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs div.close-area a");
+        this.el.find("div.close-area a").on('click', function(e) {
+            self.el.jqmHide();
+        });
+
+        this.el.find(".delete-user-dialog-status").selectbox();
+
+        Application.getDatePicker(self.el.find(".delete-user-dialog-date"),true)
+            .on('apply.daterangepicker', (ev,picker)=>{ self.el.find(".delete-user-dialog-date").val(picker.startDate.format("DD/MM/YYYY")) });
+
+        this.el.find(".open-datepicker").click(function() {
+            $(this).parents("div:first").find("input").trigger("focus");
+        });
+
+        this.init = true;
+    },
+
+    editMode: function(){
+        this.el.find('.btn-add').hide();
+        this.el.find('.btn-edit').show();
+        this.el.find('.edit-employee-types-add').hide();
+        this.el.find('.edit-employee-types-edit').show();
+    },
+
+    addMode: function(){
+        this.el.find('.btn-edit').hide();
+        this.el.find('.btn-add').show();
+        this.el.find('.edit-employee-types-edit').hide();
+        this.el.find('.edit-employee-types-add').show();
+    },
+
+    bindEvents: function(){
+        const self = this;
+        this.el.find(".employee-type-edit").unbind('click').click(function(e){
+            const id = $(this).attr("data-id");
+            self.editId = id;
+            let resignationReason = Application.resignationReasons.get({ id });
+            self.el.find('input.edit-employee-types-edit').val(resignationReason.get('description'));
+            self.editMode();
+        });
+
+        this.el.find(".btn-edit").unbind('click').click(function(e){
+            let resignationReason = Application.resignationReasons.get({ id: self.editId });
+            let description = self.el.find('input.edit-employee-types-edit').val().trim();
+            if(description.length < 3){
+                ConfirmTooltip.show({
+                    adj: $(this),
+                    text: tpl.errorDescription,
+                    image: tpl.iconTooltipNotify,
+                    showCancel: false,
+                    onConfirm: function(e, sender) {
+                        self.el.find("div.entry-preloader").hide();
+                        self.el.find("span.missing").show();
+                    }
+                }, null);
+
+                return false;
+            }
+            resignationReason.save({ description },{
+                success: function(res){
+                    self.setupFields();
+                    self.bindEvents();
+                    self.addMode();
+                    self.el.find('.edit-employee-types-edit').val('');
+                    if(_.isFunction(self.callback)){
+                        self.callback();
+                    }
+                },
+                error: function(){
+                    self.addMode();
+                }
+            });
+        });
+
+        this.el.find('.btn-add').unbind('click').click(function(e){
+            let description = self.el.find('input.edit-employee-types-add').val();
+            if(description.trim().length < 3){
+                ConfirmTooltip.show({
+                    adj: $(this),
+                    text: tpl.errorDescription,
+                    image: tpl.iconTooltipNotify,
+                    showCancel: false,
+                    onConfirm: function(e, sender) {
+                        self.el.find("div.entry-preloader").hide();
+                        self.el.find("span.missing").show();
+                    }
+                }, null);
+
+                return false;
+            }
+
+            const resignationReason = new ResignationReason();
+            resignationReason.save({ status: 1, description }, {
+                success: function(res){
+                    Application.resignationReasons.reset();
+
+                    Object.values(res.attributes).forEach(function(row){
+                        if(_.isObject(row)){
+                            Application.resignationReasons.add(row);
+                        }
+                    });
+
+                    self.setupFields();
+                    self.bindEvents();
+                    self.addMode();
+                    self.el.find('.edit-employee-types-add').val('');
+
+                    if(_.isFunction(self.callback)){
+                        self.callback();
+                    }
+                },
+                error: function(){
+                    self.addMode();
+                }
+            });
+        });
+
+        this.el.find(".employee-type-delete").unbind('click').click(function(e){
+            const id = $(this).attr("data-id");
+            let resignationReason = Application.resignationReasons.get({ id });
+
+            resignationReason.destroy({
+                success: function(res){
+                    self.setupFields();
+                    self.bindEvents();
+
+                    if(_.isFunction(self.callback)){
+                        self.callback();
+                    }
+                },
+                error: function(){}
+            });
+        });
+    }
+};
+
+var declinedBillingDialog = {
+    init: false,
+
+    show: function () {
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            $("#declinedBilling-dialog").jqmShow();
+            return;
+        }
+
+        $("#declinedBilling-dialog").jqm({modal: true});
+        $("#declinedBilling-dialog").jqmShow().jqmAddClose("div#dialogs div.single-close-area a,a.welcome-button");
+        this.init = true;
+    },
+}
+
+const employeeExpenses = {
+    init: false,
+    id: null,
+    title: null,
+
+    show: function (parent) {
+        this.parent = parent;
+        this.el = $("#employeeExpenses-dialog");
+        this.initialize();
+    },
+
+    initialize: function () {
+        this.resetValues()
+
+        if (this.init) {
+            this.el.jqmShow();
+            return;
+        }
+
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs div.single-close-area a,a.welcome-button");
+        this.bindEvents();
+        this.init = true;
+    },
+
+    bindEvents: function(){
+        const self = this;
+        this.el.find("div.employeeExpensesDialogItem").on('click', function(e){
+            self.id = $(this).attr('data-id');
+            self.title = $(this).attr('data-title');
+            self.parent.setCategory();
+            self.el.jqmHide();
+        });
+    },
+
+    getData: function(){
+        return {
+          id: parseInt(this.id),
+          title: this.title
+        };
+    },
+
+    resetValues: function(){
+        this.categoryId = null;
+        this.title = null;
+    }
+}
+
+const addPhoneDialog = {
+    init: false,
+    id: null,
+    isEdit: false,
+
+    show: function (parent, phoneNumber = null, phoneDescription = null) {
+        this.parent = parent;
+        this.el = $("#addPhone-dialog");
+        this.phoneNumber = phoneNumber;
+        this.phoneDescription = phoneDescription;
+        this.isEdit = !!this.phoneNumber;
+        this.initialize();
+    },
+
+    initialize: function () {
+        this.el.find("input.phonesEditorText").val(this.phoneNumber || "");
+        this.el.find("input.descEditorText").val(this.phoneDescription || "");
+        const titleText = this.isEdit ? tpl.editPhoneReportingNumber : tpl.addPhoneReportingNumber;
+        this.el.find(".dialog-content-container h4").html(titleText);
+
+        if (this.init) {
+            this.el.jqmShow();
+            return;
+        }
+
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs div.single-close-area button, button.close-popup");
+
+
+        this.bindEvents();
+        this.init = true;
+    },
+
+    bindEvents: function(){
+        const self = this;
+        this.el.find("button.add-number").unbind("click").click(function () {
+            const phone=self.el.find("input.phonesEditorText").val();
+            const desc=self.el.find("input.descEditorText").val();
+            let result = false;
+            if (self.isEdit) result = self.parent.editPhone(phone, desc, $(this));
+            else result = self.parent.addPhone(phone, desc, $(this));
+            if (result) {
+                self.el.find("input.phonesEditorText").val("");
+                self.el.find("input.descEditorText").val("");
+                self.el.jqmHide();
+            }
+        });
+
+        this.el.find("input.phonesEditorText").on("keypress keyup blur",function (event) {
+            //this.value = this.value.replace(/[^0-9\.]/g,'');
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        });
+    },
+}
+
+const changesSavedDialog = {
+    init: false,
+    id: null,
+    title: null,
+
+    show: function (parent) {
+        this.parent = parent;
+        this.el = $("#changesSaved-dialog");
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            this.el.jqmShow();
+            return;
+        }
+
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs div.single-close-area button, button.close-popup");
+    },
+}
+
+const removeItemDialog = {
+    init: false,
+    id: null,
+    onSaveCb: null,
+
+    show: function (parent, onSaveCb = null) {
+        this.parent = parent;
+        this.el = $("#removeItem-dialog");
+        this.onSaveCb = onSaveCb;
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            this.el.jqmShow();
+            return;
+        }
+
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs div.single-close-area button, button.close-popup");
+        $("button.confirm").unbind("click").click(() => {
+            if (this.onSaveCb) this.onSaveCb();
+            this.el.jqmHide();
+        });
+    },
+}
+
+
+
+
+const infoPopUpDialog = {
+    init: false,
+    show: function () {
+        this.el = $("#infoPopUp-dialog");
+        this.initialize();
+    },
+
+    initialize: function () {
+        if (this.init) {
+            this.el.jqmShow();
+            return;
+        }
+        this.el.jqm({modal: false});
+        this.el.jqmShow().jqmAddClose("div#dialogs .dialog-close svg");
+        this.bindEvents();
+        this.init = true;
+    },
+
+    bindEvents: function(){
+        const self = this;
+        $(document).off("keydown").on("keydown", function(event) {
+            if (event.key === "Escape" || event.keyCode === 27) {
+                self.el.jqmHide();
+            }
+        });
+    },
+}
+
+const addNewUserDialog = {
+    init: false,
+    show: function () {
+        this.el = $("#newAddUser-dialog");
+        this.initialize();
+    },
+    hide : function(){
+        this.el.jqmHide();  
+    },
+    initialize: function () {
+        if (this.init) {
+            this.el.jqmShow();
+            return;
+        }
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("div#dialogs .close-dialog");
+        this.init = true;
+    }
+}
+
+
+const addNewUserListDialog = {
+    init: false,
+    show: function () {
+        this.el = $("#newAddUserList-dialog");
+        this.initialize();
+    },
+    hide : function(){
+        this.el.jqmHide();
+    },
+    initialize: function () {
+        if (this.init) {
+            this.el.jqmShow();
+            return;
+        }
+        this.el.jqm({modal: true});
+        this.el.jqmShow().jqmAddClose("#newAddUserList-dialog .dialog-close , #newAddUserList-dialog .dialog-close-btn");
+        this.bindEvents();
+        this.init = true;
+    },
+
+    bindEvents: function(){
+        const self = this;
+        $(self.el).jqm({
+            onHide : function(hash){
+                // detect if its last step to refresh steps ...
+                if(self.el.find('.step-3-container').is(':visible')){
+                    $(self.el).find('.step-3-container .scrollable-div').html('');
+                    $(self.el).find('.step-3-container').hide();
+                    $(self.el).find('.step-1-container').show();
+
+                    $('#theBanner').attr("src","/images/step-1-banner.png");
+                    $(self.el).find('.progress-line').css("width","77px");
+                    $('.step.step-1').html('1');
+                    $('.step.step-2').html('2').removeClass('active');
+                    $('.step.step-3').removeClass('active');
+                    $(self.el).find('.view-wide').css("width","420px").css("min-height","420px");
+                }
+
+                // hide modal and if overlay, remove overlay.
+                hash.w.hide() && hash.o && hash.o.remove();
+                return true;
+            }
+        })
+    },
+}
+
+

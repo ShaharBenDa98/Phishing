@@ -1,0 +1,139 @@
+/* Default */
+.Button3Parts
+{
+	display: inline;
+	height: 24px;
+	line-height: 20px;
+	margin: 0px 0px 0px 8px;
+	/*vertical-align: middle;*/
+	cursor: pointer;
+	
+}
+.Button3Parts TR
+{
+	display: table;
+	_display: inherit;
+}
+.Grid .Button3Parts
+{
+	margin-top: 2px;
+	display: table;
+	cursor: pointer;
+	float:left;
+}
+.Button3Parts TD,
+.Grid .Button3Parts TD
+{
+	height: 24px;
+	line-height: 18px;
+	border: 0px;
+	padding: 0px;
+	cursor: pointer;
+}
+.Grid .Hover .Button3Parts *
+{
+	color: white;
+}
+.Button3Parts .ButtonLast,
+.Button3Parts .ButtonFirst
+{
+	width: 3px;
+	background-repeat: no-repeat;
+	display: block;
+}
+.Button3Parts .ButtonLast
+{
+	background-image: url(button3Parts/default/btn_idle_right.png);
+}
+.Button3Parts .ButtonFirst
+{
+	background-image: url(button3Parts/default/btn_idle_left.png);
+}
+.RTL
+.Button3Parts .ButtonLast
+{
+	background-image: url(button3Parts/default/btn_idle_left.png);
+}
+.RTL
+.Button3Parts .ButtonFirst
+{
+	background-image: url(button3Parts/default/btn_idle_right.png);
+}
+.Button3Parts .ButtonLabel,
+.Grid .Button3Parts .ButtonLabel
+{
+	background-image: url(button3Parts/default/btn_idle_center.png);
+	vertical-align: middle;
+	background-repeat: repeat-x;
+	padding: 0px 3px 3px 2px;
+	font-weight: bold;
+	text-align: center;
+	font-size: 12px;
+	color: White;
+	width: 44px;
+	/*min-width: 44px;*/
+	white-space: nowrap;
+}
+.Button3Parts .ButtonLabel SPAN,
+.Button3Parts .ButtonLabel LABEL,
+.Button3Parts .ButtonLabel DIV
+{
+	white-space: nowrap;
+	font-weight: bold;
+	font-size: 12px;
+	color: White;
+	width: 100%;	
+}
+/*  */
+.Button3Parts .Disabled,
+.Button3Parts .Disabled *
+{
+	cursor: default!important;
+}
+.Disabled .ButtonLabel,
+.Disabled .ButtonLabel *
+{
+	color: #D4D5D8!important;
+}
+/* Button Over */
+.Button3Parts .Over .ButtonLast
+{
+	
+}
+.Button3Parts .Over .ButtonFirst
+{
+	
+}
+.Button3Parts .Over .ButtonLabel
+{
+	
+}
+
+/* Button Down */
+.Button3Parts .Down .ButtonLast
+{
+	
+}
+.Button3Parts .Down .ButtonFirst
+{
+	
+}
+.Button3Parts .Down .ButtonLabel
+{
+	/*
+	padding: 0px 3px 2px 2px;*/
+	padding: 1px 2px 2px 3px;
+}
+/*
+<table class="Button3Parts">
+	<tbody class=" - theme - ">
+		<tr class=" - state - ">
+			<td class="ButtonFirst">&nbsp;</td>
+			<td class="ButtonLabel">
+				Cancel
+			</td>
+			<td class="ButtonLast">&nbsp;</td>
+		</tr>
+	</tbody>
+</table>
+*/

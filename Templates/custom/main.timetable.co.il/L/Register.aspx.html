@@ -1,0 +1,86 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>
+	TimeTable - רישום
+</title><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+
+    <script type="text/javascript">
+    function setEmailCode(code) {
+        document.getElementById("txtEmailCode").value = code;
+    }
+    function setPhoneCode(code) {
+        document.getElementById("txtPhoneCode").value = code;
+    }
+        function setNoEmailNoPhoneCode(code) {
+            document.getElementById("txtNoPhoneNoEmailCode").value = code;
+      }
+        
+</script>
+
+<body style="">
+    <form method="post" action="Register.aspx.html" id="form1">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="6c3/O5Ukg6/fEchkMBYDUakmPvJAJpEbh8k17Klz5mEuTk8wIpcTV9PtR6vxSPdkYI2CS9WTeigAtoZ4CIsEL9AKp8n6IavCZZt2sUBb8JNtflNR" />
+
+<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="DD0FCAEC" />
+<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="hLO/CYWGjQ23j65eFcBvf6WgM7syQ8PWHFcM+7T6Md600gTeknopKu5WrqL7l6lREYCv+Azp0YOfMEFaEdNXpFRPZVMVx8kVpviKv5QW7QkO78Hp8+S2MOncwKwlnbLCsR9fUqvuT4wBH/Dl1nVGxK2CvLtA4P5xWx2AUDMq+ukv4Kag" />
+        <div style="border: 1px solid #616d7e; direction: rtl; margin: 10% auto; text-align: right; display: block; width: 400px; box-shadow: 0px 0px 10px #616d7e; padding: 10px; font-family: arial, Helvetica, sans-serif; overflow: visible;">
+            <div style="text-align: center;">
+                <img src="../Graphics/images/logos/NewMitugLogo.png" style="width: 350px;" alt="Timetable logo" />
+            </div>
+
+            <div id="emailRegisterDiv" style="padding: 10px; font-size: 14.5pt;">
+                <div class="modalPopupHeader" style="padding-bottom:8px;font-size:24px;">
+                    <div id="BoxTitle" class="modalPopupHeaderTitle">
+                        רישום לאתר או לאירגון חדש
+                    </div>
+                </div>
+
+                <div style="margin: 5px 0px 0px 0px; color: #616d7e;">
+                    מה קוד הרישום/השיוך שקיבלת ?
+                </div>
+                <div style="border: 1px solid #C0C7CF; margin: 5px 0px 0px 0px;">
+                    <input name="txtEmailCode" type="password" id="txtEmailCode" style="border: none; font-size: 14pt; width: 100%; box-sizing: border-box; -moz-box-sizing: border-box;" />
+                </div>
+
+                <div style="margin: 5px 0px 0px 0px; color: #616d7e;">
+                    דואר אלקטרוני
+                </div>
+                <div style="border: 1px solid #C0C7CF; margin: 5px 0px 0px 0px;">
+                    <input name="txtMail" type="text" id="txtMail" style="border: none; font-size: 14pt; width: 100%; box-sizing: border-box; -moz-box-sizing: border-box;" />
+                </div>
+
+             
+
+                <div style="margin: 10px 0px 0px 0px; text-align: right; font-size: 12pt;">
+                    <input type="submit" name="btnLogin" value="המשך בתהליך הרישום>>" id="btnLogin" />
+                </div>
+                <div style="margin: 10px 0px 0px 0px; text-align: right; font-size: 12pt;">
+
+                    <a href="https://main.timetable.co.il/CreateEmail.aspx" style="color: Blue; font-size: 13px; margin: 3px; font-weight: bold; text-decoration: underline;">אין לך דואר אלקטרוני? לחץ כאן ליצירה</a>
+                    <div style="margin-top: 20px;">
+                        <a id="btnPhoneRegister" href="javascript:__doPostBack(&#39;btnPhoneRegister&#39;,&#39;&#39;)" style="color: Blue; font-size: 13px; margin: 3px; font-weight: bold; text-decoration: underline;">הרשם בעזרת נייד</a>
+                    </div>
+
+                    <div style="text-align:center;">
+               
+                      <a href="../DefaultLogin.aspx.html" style="display: inline-block; width: 190px; height: 30px; padding-top: 15px;" class="RegisterButton"> נרשמת כבר? יש לך סיסמה? לחץ כאן לכניסה למערכת</a>
+                        </div>
+                </div>
+            </div>
+
+            
+
+            
+
+             <span id="lblHelp" style="color: Red;"></span><br />
+
+            
+
+           
+
+        </div>
+    </form>
+</body>
+</html>

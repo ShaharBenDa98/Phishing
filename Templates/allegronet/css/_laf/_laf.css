@@ -1,0 +1,30 @@
+*
+{
+	scrollbar-arrow-color : #7A7B7F;
+	scrollbar-3dlight-color : #9A9DA1;
+	scrollbar-darkshadow-color : #7A7B7F;
+	scrollbar-face-color : #D8D8D8;
+	scrollbar-highlight-color : #FFFFFF;
+	scrollbar-shadow-color : #C3C3C3;
+	scrollbar-track-color : #ECECEC;
+
+}
+body
+{
+	
+	background-color: #F7F7F7;
+	border: 0px;
+	padding: 0px;
+	/**/
+	/*_background-image: url(Screen-Layout.gif);*/
+	_background-attachment: scroll;
+}
+BODY.RTL,
+.RTL
+{
+	direction: rtl;
+}
+#Table1 TD
+{
+	border: 1px solid black;
+}

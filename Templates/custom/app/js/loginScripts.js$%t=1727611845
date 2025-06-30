@@ -1,0 +1,520 @@
+
+var Login = Backbone.Model.extend({
+	defaults: {
+		email: null,
+		password: null,
+		cookie: false
+	},
+
+	url: function() {
+		return "login";
+	}
+});
+
+var LoginRouter = Backbone.Router.extend({
+	view: null,
+	routes: {
+		"" : "openLogin",
+		"login": "openLogin",
+		"forgotPassword": "openForgotPassword",
+		"passwordRecovery": "openForgotPassword"
+	},
+
+	openLogin: function() {
+		$("#ForgotPasswordView").hide();
+		$("#LoginFormView").find("input[type='text'],input[type='password']").val("");
+		$("#LoginFormView").show();
+		if (this.view && this.view.dispose) {
+			this.view.dispose();
+		}
+		this.view = new LoginView();
+		$("#login-menu a").removeClass("active");
+		$("#login-menu a#login-page").addClass("active");
+	},
+
+	openForgotPassword: function() {
+		$("#LoginFormView").hide();
+		$("#ForgotPasswordView").show();
+		$("#ForgotPasswordView").find("input[type='text'],input[type='password']").val("");
+		if (this.view && this.view.dispose) {
+			this.view.dispose();
+		}
+		this.view = new ForgotPasswordView();
+		$("#login-menu a").removeClass("active");
+		$("#login-menu a#forgot-password-page").addClass("active");
+	},
+
+	showPasswordRecovery:function(){
+		$(".xCE,.sl,.sl2,.rME,.forgotPass,.xCP, .login-sso-btns-wrapper").addClass("hidden");
+
+		if(sessionStorage.getItem("changePasswordProcedure")){
+            sessionStorage.removeItem("changePasswordProcedure");
+            $(".sl4").removeClass("hidden");
+		} else{
+            $(".sl3").removeClass("hidden");
+		}
+
+		$(".pwR").removeClass("hidden");
+		$("#password").removeAttr("required");
+		$("#email").removeAttr("required");
+		$(".fType").val('recovery');
+        $(".leftSide").addClass("hidden");
+        $(".newAccount").children().addClass("hidden");
+        $(".rightSide").attr("class", "col-lg-12 col-md-12 nopadding matchHeight rightSide");
+        $(".orWithGoogle, .googleSignUp, .microsoftSignUp, .login-sso-btns-divider").addClass("hidden");
+	}
+});
+
+var LoginManager = {
+	router: null,
+	init: function(passwordRecovery) {
+		$.ajaxSetup({cache: false});
+		this.router = new LoginRouter();
+
+		if(passwordRecovery){
+			this.router.showPasswordRecovery();
+		}
+
+		Backbone.history.start();
+	}
+}
+
+var LoginView = Backbone.View.extend({
+	loginAllowed: false,
+	isStrongPassword: false,
+	events: {
+		"focus input.email": "inputChanged",
+		"blur input.email": "inputChanged",
+		"focus input.password": "inputChanged",
+		"blur input.password": "inputChanged",
+		"change input.email": "inputChanged",
+		"change input.password": "inputChanged",
+		"keyup input.email": "inputChanged",
+		"keyup input.password": "inputChanged",
+		"mousedown button.showPassBtn": "showPassBtn",
+		"mouseup button.showPassBtn": "hidePassBtn",
+		"touchstart button.showPassBtn": "showPassBtn",
+		"touchend button.showPassBtn": "hidePassBtn",
+		"click a.forgotPass": "forgotPass",
+		"click a.backToLogin": "backToLogin",
+		"click input.rp": "rp",
+		"click input.pwR": "pwRecovery",
+		"keyup input.verificationCode": "enterToLogin",
+		"keyup input#email": "enterToLogin",
+		"keyup input#password": "enterToLogin",
+	},
+
+	initialize: function() {
+		this.el = $("#loginForm");
+		this.delegateEvents();
+		this.inputChanged();
+		this.matchH();
+		Application.initMeterStrengthPassword($("#loginForm"), this);
+	},
+
+	dispose: function() {
+		this.undelegateEvents();
+	},
+
+	inputChanged: function(ev) {
+		const el = $(ev?.currentTarget);
+		if (!el) return;
+
+		if (ev?.type !== "focusout" || el.val() && el.val().length ) {
+			el.addClass('focus');
+		} else {
+			el.removeClass('focus');
+		}
+	},
+
+	enterToLogin: function(e){
+		if (e.which == 13) {
+			this.el.find("input.login").click();
+		}
+	},
+
+	enterLogin: function(e) {
+		if (!this.loginAllowed) {
+			e.preventDefault();
+			this.login(e);
+		}
+		//let form submit itself
+	},
+
+	login: function(e) {
+		if (!FieldInformation.validate(this.el)) {
+			return;
+		}
+		var login = new Login(), self = this;
+		login.save({
+				email: this.el.find("input.email").val(),
+				password: this.el.find("input.password").val(),
+				cookie: this.el.find("input.remember-me").is(":checked")
+			},
+			{
+				success: function() {
+					self.loginAllowed = true;
+					self.el.find("form").submit();
+				},
+				error: function(code) {
+					var err = null, el = self.el.find("input.email");
+					switch (code) {
+						case 1:
+							err = el.metadata({type: "attr", name: "json"}).badLogin;
+							break;
+
+						case 2:
+							err = el.metadata({type: "attr", name: "json"}).accountLock;
+							break;
+
+						case 9:
+							err = inp.metadata({type: "attr", name: "json"}).accountBadIp;
+							break;
+					}
+					if (err) {
+						FieldInformation.customFieldError(el, err);
+					}
+				}
+			});
+	},
+
+	matchH:function(){
+		/**
+		 * jquery.matchHeight-min.js v0.5.2
+		 * http://brm.io/jquery-match-height/
+		 * License: MIT
+		 */
+		(function(c){var f=-1,g=-1,q=function(a){var b=null,d=[];c(a).each(function(){var a=c(this),l=a.offset().top-k(a.css("margin-top")),m=0<d.length?d[d.length-1]:null;null===m?d.push(a):1>=Math.floor(Math.abs(b-l))?d[d.length-1]=m.add(a):d.push(a);b=l});return d},k=function(a){return parseFloat(a)||0},n=function(a){var b={byRow:!0,remove:!1,property:"height"};"object"===typeof a&&(b=c.extend(b,a));"boolean"===typeof a&&(b.byRow=a);"remove"===a&&(b.remove=!0);return b},b=c.fn.matchHeight=function(a){a=
+			n(a);if(a.remove){var e=this;this.css(a.property,"");c.each(b._groups,function(a,b){b.elements=b.elements.not(e)});return this}if(1>=this.length)return this;b._groups.push({elements:this,options:a});b._apply(this,a);return this};b._groups=[];b._throttle=80;b._maintainScroll=!1;b._beforeUpdate=null;b._afterUpdate=null;b._apply=function(a,e){var d=n(e),h=c(a),l=[h],m=c(window).scrollTop(),g=c("html").outerHeight(!0),f=h.parents().filter(":hidden");f.css("display","block");d.byRow&&(h.each(function(){var a=
+			c(this),b="inline-block"===a.css("display")?"inline-block":"block";a.data("style-cache",a.attr("style"));a.css({display:b,"padding-top":"0","padding-bottom":"0","margin-top":"0","margin-bottom":"0","border-top-width":"0","border-bottom-width":"0",height:"100px"})}),l=q(h),h.each(function(){var a=c(this);a.attr("style",a.data("style-cache")||"").css("height","")}));c.each(l,function(a,b){var e=c(b),f=0;d.byRow&&1>=e.length||(e.each(function(){var a=c(this),b={display:"inline-block"===a.css("display")?
+			"inline-block":"block"};b[d.property]="";a.css(b);a.outerHeight(!1)>f&&(f=a.outerHeight(!1));a.css("display","")}),e.each(function(){var a=c(this),b=0;"border-box"!==a.css("box-sizing")&&(b+=k(a.css("border-top-width"))+k(a.css("border-bottom-width")),b+=k(a.css("padding-top"))+k(a.css("padding-bottom")));a.css(d.property,f-b)}))});f.css("display","");b._maintainScroll&&c(window).scrollTop(m/g*c("html").outerHeight(!0));return this};b._applyDataApi=function(){var a={};c("[data-match-height], [data-mh]").each(function(){var b=
+			c(this),d=b.attr("data-match-height")||b.attr("data-mh");a[d]=d in a?a[d].add(b):b});c.each(a,function(){this.matchHeight(!0)})};var p=function(a){b._beforeUpdate&&b._beforeUpdate(a,b._groups);c.each(b._groups,function(){b._apply(this.elements,this.options)});b._afterUpdate&&b._afterUpdate(a,b._groups)};b._update=function(a,e){if(e&&"resize"===e.type){var d=c(window).width();if(d===f)return;f=d}a?-1===g&&(g=setTimeout(function(){p(e);g=-1},b._throttle)):p(e)};c(b._applyDataApi);c(window).bind("load",
+			function(a){b._update(!1,a)});c(window).bind("resize orientationchange",function(a){b._update(!0,a)})})(jQuery);
+
+
+		$('.matchHeight').matchHeight();
+	},
+
+	showPassBtn:function(e){
+		$(e.currentTarget).parents('.inputWrap').find('input').attr('type','text');
+	},
+	hidePassBtn:function(e){
+		$(e.currentTarget).parents('.inputWrap').find('input').attr('type','password');
+	},
+	forgotPass:function(){
+		$(".pw").addClass("hidden");
+		$(".sl").addClass("hidden");
+		$(".sl2").removeClass("hidden");
+		$("#password").removeAttr("required");
+		$(".fType").val('recovery2');
+		$(".login-sso-btns-wrapper").hide();
+		$(".orWithGoogle").hide();
+	},
+	backToLogin:function(){
+		$(".pw").removeClass("hidden");
+		$(".sl").removeClass("hidden");
+		$(".sl2").addClass("hidden");
+		$("#password").attr("required",true);
+		$("#password2","#password3").removeAttr("required");
+		$(".fType").val('');
+		$(".login-sso-btns-wrapper").show();
+		$(".orWithGoogle").show();
+	},
+	rp:function(){
+    	const urlParams = window.location.search.substring(1);
+		const lang = (urlParams.indexOf("l=en") != -1) ? "en" : "he";
+
+		const el = $("#loginForm");
+		if ( !FieldInformation.validEmail(el.find("input.email").val()) ) return el.find("input.email").addClass('invalid');
+		const params = {
+			_method: "create",
+			data: JSON.stringify({
+				email: el.find("input.email").val(),
+				password: el.find("input.password").val(),
+				cookie: el.find("input.remember-me").is(":checked"),
+				forgotPassword: true,
+                language: lang
+			})
+		};
+		let returnCode = false;
+		$.ajax({
+			type: 'POST',
+			url: "api/login/",
+			data: params,
+			success: function(resp) {
+				const o = JSON.parse(resp);
+				let err = null, inp = el.find("input.email");
+				switch (o.code) {
+					default:
+						returnCode = true;
+						break;
+
+					case 1:
+						err = tpl.pw_login_errors.badLogin;
+						break;
+
+					/*case 2:
+						err = tpl.pw_login_errors.accountLock;
+						break;
+					case 9:
+						err = tpl.pw_login_errors.accountBadIp;
+						break;*/
+
+				}
+				if (err) {
+					alert(err);
+				}else{
+					$(".xC").addClass("hidden");
+					$(".pwSnt").removeClass("hidden");
+					$(".sl2").hide();
+					setTimeout(function(){
+						location.reload();
+					},6000);
+				}
+
+			},
+			async: false
+		});
+		return false;
+		//?? is it sync'd?
+		return returnCode;
+	},
+
+	pwRecovery:function(){
+		// No user object, therefore do not  Application.validPassword
+		// The validation happens on the server side
+		const elPassword = $('#password2');
+		const elConfirmPassword = $('#password3');
+
+		if(!this.isStrongPassword){
+			elPassword.addClass('invalid');
+			alert(tpl.errorPassword);
+			return;
+		}
+
+		//validate passwords
+		if(elPassword.val() != elConfirmPassword.val()){
+			elConfirmPassword.addClass('invalid');
+			alert(tpl.login_errors.passwordMisMatch)
+			return false;
+		}
+
+		//send to server
+
+		var params = {
+			_method: "create",
+			data: JSON.stringify({
+				passwordRecovery: true,
+				pw1:$("#password2").val(),
+				pw2:$("#password3").val(),
+			})
+		};
+
+		$.ajax({
+			type: 'POST',
+			url: "api/login/",
+			data: params,
+			success: function(resp) {
+				var o = JSON.parse(resp);
+
+				if(o.status ===0){
+					alert(tpl.login_errors.passwordChanged);
+				}else{
+					if(o.code == 11){
+                        $(".loginNotification").html(tpl.login_errors.samePassword).show();
+                        return false;
+					}
+					if(o.code == 17){
+						$(".loginNotification").html(tpl.errorPassword).show();
+						return false;
+					}
+					if(o.code == 112){
+						$(".loginNotification").html(tpl.login_errors.recentPassword).show();
+						return false;
+					}
+					alert(tpl.login_errors.fatal_error);
+				}
+
+				location.replace("/");
+
+			},
+			async: false
+		});
+
+		return false;
+	},
+
+});
+
+function _validateLogin(elEmail, elPassword) {
+	if (!elEmail || !elPassword) return false;
+	const email = elEmail.val();
+	const password = elPassword.val();
+	elEmail.removeClass('invalid');
+	elPassword.removeClass('invalid');
+	if (email && password) {
+		return true;
+	} else {
+		if (!email) elEmail.addClass('invalid');
+		if (!password) elPassword.addClass('invalid');
+		return false;
+	}
+}
+
+function _login(isResendVerificationCode = false, type, userDetails) {
+	const url = window.location.href;
+	const language = (url.search("l=en") > -1) ? "en" : "";
+	const el = $("#loginForm");
+	el.find("div.submitButtonsWrapper").hide();
+	el.find("div.big-preloader").show();
+	el.find("div.loginNotification").html("").hide();
+	let ssoLoginWith = false;
+	let email = el.find("input.email").val();
+	let image = false;
+	let idToken = false;
+
+	if(typeof type !== 'undefined' && typeof userDetails !== 'undefined') {
+		switch (type) {
+			case "google":
+				idToken = userDetails;
+				ssoLoginWith = "google";
+				email = "google";
+				break;
+			case "microsoft":
+				idToken = userDetails
+				ssoLoginWith = "microsoft";
+				email = "microsoft";
+				break;
+			default:
+				break;
+		}
+	} else if(type === undefined) {
+		if (!_validateLogin(el.find("input.email"), el.find("input.password"))) {
+			el.find("div.submitButtonsWrapper").show();
+			el.find("div.big-preloader").hide();
+			return false;
+		}
+	}
+
+	if($('.fType').val() == 'recovery'){
+		$('input.pwR').trigger('click');
+		return false;
+	}
+
+	if($('.fType').val() == 'recovery2'){
+		$('input.rp').trigger('click');
+		return false;
+	}
+
+	grecaptcha.ready(function() {
+		grecaptcha.execute('6Lfb53caAAAAAFPk-DdCDdPeC_Umv-xPAa9qOn7a', {action: 'login'}).then(function (token) {
+			const verificationCode = isResendVerificationCode ? "" : el.find("input.verificationCode").val();
+			const params = {
+				_method: "create",
+				data: JSON.stringify({
+					email: email,
+					password: el.find("input.password").val(),
+					cookie: el.find("input.remember-me").is(":checked"),
+					language: language,
+					verificationCode,
+					ssoLoginWith: ssoLoginWith,
+					image: image,
+					grecaptchaToken: token,
+					idToken
+				})
+			};
+
+			$.ajax({
+				type: 'POST',
+				url: "api/login/",
+				data: params,
+				success: function (resp) {
+					const o = JSON.parse(resp);
+					let err = null, inp = el.find("input.email");
+					let cleanErr = false;
+					switch (o.code) {
+						default:
+							const rememberMe = $("input#rememberMe").is(":checked") ? "on" : "";
+							$(location).attr("href", "r.php?rememberMe="+rememberMe);
+							break;
+						case 1:
+							err = tpl.login_errors.badLogin;
+							break;
+						case 2:
+							err = tpl.login_errors.accountLock;
+							break;
+						case 9:
+							err = tpl.login_errors.accountBadIp;
+							break;
+						case 10:
+							location.href = o.data.url;
+							sessionStorage.setItem("changePasswordProcedure", true);
+							break;
+						case 12:
+						case 18:
+							el.find("div.inputWrap").addClass("hidden");
+							el.find("div#verificationCode,div#submitButtons").removeClass("hidden");
+							el.find("div#verificationCode input#verificationCode").focus();
+							el.find("div.login-sso-btns-divider").addClass("hidden");
+							el.find("div.login-sso-btns-wrapper").addClass("hidden");
+							if(o.code == 12){
+								el.find("p.sl").addClass("hidden");
+								el.find("label.verificationCode").removeClass("hidden");
+								el.find("p.verificationCodeTxt").removeClass("hidden");
+							} else if(o.code == 18){
+								el.find("p.sl").addClass("hidden");
+								el.find("p.verificationCodeTxt").removeClass("hidden");
+								el.find("label.recaptchaCode").removeClass("hidden");
+							}
+							break;
+						case 13:
+							err = tpl.login_errors.verificationCode;
+							cleanErr = true;
+							break;
+						case 15:
+							err = tpl.login_errors.badSsoLoginWith;
+							break;
+						case 16:
+							var lang;
+							var urlParams = window.location.search.substring(1);
+							if (urlParams.indexOf("l=en") != -1) {
+								lang = "&l=en";
+							} else {
+								lang = "";
+							}
+							location.href = "companyInactive.php?company=" + o.data.companyInactiveCode + lang;
+							break;
+						case 19:
+							err = tpl.login_errors.enforceSso;
+							break;
+					}
+
+					$(".loginNotification").hide();
+					$(".loginNotificationGoogle").hide();
+					el.find("div.big-preloader").hide();
+					el.find("div.submitButtonsWrapper").show();
+
+					if (err && !cleanErr && !ssoLoginWith) {
+						if(err == tpl.login_errors.enforceSso){
+							$(".loginNotification").html(tpl.login_errors.enforceSso);
+						}else if (err != tpl.login_errors.accountLock) {
+							$(".loginNotification").html(tpl.login_errors.badLogin);
+						} else {
+							$(".loginNotification").html(tpl.login_errors.accountLock);
+						}
+						if ($(".loginNotification").is(":hidden")) {
+							$(".loginNotification").show();
+						}
+					} else if (err && cleanErr) {
+						$(".loginNotification").html(err);
+						if ($(".loginNotification").is(":hidden")) {
+							$(".loginNotification").show();
+						}
+					} else if (err && ssoLoginWith) {
+						$(".loginNotificationGoogle").html(err).show();
+					}
+				}
+			});
+		});
+	});
+}

@@ -1,0 +1,1477 @@
+/*
+* In case to avoid jquery validate bug must add name to any input in form
+* */
+$(function(){
+    /*Set Rules*/
+    const ruleSetDefualt = {
+            required: true,
+    };
+
+    const rulesTextDefault = {
+        minlength: 2
+    };
+
+    const rulesNumDefault = {
+        number: true
+    };
+
+    const rulePartnerRequired = {
+        required: '#married[value="1"]:checked'
+    };
+
+    const passportLength = 6; // just random number, don't judge me
+    jQuery.validator.addMethod("validIdNumber", function(value, element) {
+        var  idType = 1;
+        switch($(element).attr("id")){
+            case "idNumber":
+                idType = $("input[name='idBy']:checked").val()
+                break;
+            case "partnerIdNumber":
+                idType = $("input[name='partnerIdBy']:checked").val()
+        }
+
+        if(idType == 1 ){
+            return value.length == 9 && value == parseInt(value) && value > 0;
+        }else{
+            return value.length >= passportLength;
+        }
+    }, "");
+
+    $.extend(rulesTextDefault, ruleSetDefualt);
+    $.extend(rulesNumDefault, ruleSetDefualt);
+
+    /*Validate Form Object*/
+    $("form.tofes101-form").validate({
+        rules: {
+            firstName: rulesTextDefault,
+            lastName: rulesTextDefault,
+            idNumber: { validIdNumber: true },
+            birthday: rulesTextDefault,
+            city: ruleSetDefualt,
+            street: ruleSetDefualt,
+            houseNumber: rulesNumDefault,
+            phone: rulesNumDefault,
+            sex: ruleSetDefualt,
+            idBy: ruleSetDefualt,
+            maritalStatus: ruleSetDefualt,
+            memberKibbutzOrMoshav: ruleSetDefualt,
+            israeliResident: ruleSetDefualt,
+            salaryType: ruleSetDefualt,
+            partnerIncome: ruleSetDefualt,
+            HMOName:{
+                number: true,
+                required: {
+                    dependes: function(){
+                        return $("select#HMOName").find("input[name=HMOMember]:checked").val();
+                    },
+                },
+            },
+            otherIncomes: ruleSetDefualt,
+            otherIncomesSalaryType: {
+                required: function (){
+                    if($('#otherIncomesYes:checked')){
+                        return $(`input[name='otherIncomesSalaryType']:checked`).length == 0;
+                    }
+                }
+            },
+            'otherIncomesSalaryType[]': {
+                required: '#otherIncomesYes[value="1"]:checked',
+                minlength: 1
+            },
+            gettingCreditPoints:{
+                required: '#otherIncomesYes[value="1"]:checked',
+                minlength: 1
+            },
+            partnerFirstName: {
+                required: '#married[value="1"]:checked'
+            },
+            partnerLastName: rulePartnerRequired,
+            partnerIdBy: rulePartnerRequired,
+            partnerId: { validIdNumber: true },
+            partnerBirthday: rulePartnerRequired,
+            partnerIncome:rulePartnerRequired,
+            startWorkDate: rulesTextDefault,
+            localCityWithPointsCity:ruleSetDefualt,
+            localityWithPointsFromDate: ruleSetDefualt,
+            immigrantFromDate: rulesTextDefault,
+            childrenBornInTaxYear: rulesNumDefault,
+            'childrenAge1-2': rulesNumDefault,
+            'childrenAge3': rulesNumDefault,
+            'childrenAge4-5': rulesNumDefault,
+            'childrenAge6-17': rulesNumDefault,
+            childrenAge18: rulesNumDefault,
+            'toddlerChildrenAge1-2': rulesNumDefault,
+            'toddlerChildrenAge3': rulesNumDefault,
+            'toddlerChildrenAge4-5': rulesNumDefault,
+            'toddlerChildrenAge6-17': rulesNumDefault,
+            soldierOrServiceStart: rulesTextDefault,
+            soldierOrServiceEnd: rulesTextDefault,
+            taxCoordinationIncome: ruleSetDefualt,
+            declare: ruleSetDefualt,
+            disabledChildrenQuantity: rulesNumDefault,
+        },
+        errorPlacement: function(error, element) {
+            switch (element.attr('type')){
+                case 'radio':
+                case 'checkbox':
+                    switch(element.attr('name')){
+                        case 'otherIncomesSalaryType':
+                            error.appendTo($(element).parents('fieldset.optionalIncome'));
+                            break;
+                        case 'salaryType':
+                            error.appendTo($(element).parents('fieldset.incomeType'));
+                            break;
+                        case 'taxCoordinationIncome':
+                            error.appendTo($(element).parents('div.tax-cordination'));
+                            break;
+                        default:
+                            error.appendTo($(element).parents('div.form-row'));
+                            break;
+                    }
+                case 'text':
+                    $(element).addClass('error-border');
+                    break;
+
+                default:
+                    if($(element).hasClass('selectpickerInit'))
+                        $(element).next('button.dropdown-toggle').addClass('error-border');
+                    else
+                        $(element).addClass('error-border');
+                    break;
+            }
+        },
+        invalidHandler: function(form, validator) {
+            if (validator.numberOfInvalids()) {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $(validator.errorList[0].element).offset().top - 100
+                }, 0, function(){
+                    $(validator.errorList[0].element).focus();
+                });
+            }
+        },
+        success: function(label,element) {
+            switch ($(element).attr('type')){
+                case 'radio':
+                case 'checkbox':
+                    break;
+                case 'text':
+                    $(element).removeClass('error-border');
+                    break;
+                default:
+                    if($(element).hasClass('selectpickerInit'))
+                        $(element).next('button.dropdown-toggle').removeClass('error-border');
+                    $(element).removeClass('error-border');
+                    break;
+            }
+        },
+    });
+
+    $.validator.messages.required = 'חובה לסמן';
+
+    /* Functions */
+    function setRulesAndHighlightError(className){
+        $('input.'+className).each(function(index,element) {
+            $(element).rules('add', rulesTextDefault);
+            if($(element).val() == '')
+                $(element).addClass('error-border');
+        });
+    }
+
+    function removeRules(className){
+        $('input.'+className).each(function(index,element) {
+            $(element).rules('remove', 'required');
+            $(element).rules('remove', 'minlength');
+            $(element).removeClass('error-border');
+        });
+    }
+
+    function commitToRowChangeHandler(className, currentInput){
+        let filedsArray = [];
+        var child = $(currentInput).parents("div[class^='child-']");
+        child.find('input.'+className).each(function(index,input) {
+            if(input.value){
+                filedsArray.push(input.value);
+            }
+            $(this).validate();
+        });
+        if(filedsArray.length > 0){
+            setRulesAndHighlightError(className);
+        } else {
+            removeRules(className);
+        }
+        if(className == 'childs'){
+            childHoldingChange(filedsArray, child)
+        }
+    }
+
+    function childHoldingChange(filedsArray, child){
+        if(filedsArray.length == child.find('input.childs').length){
+            child.find('.childHolding').each(function(){
+                $(this).attr('disabled', false);
+            });
+        } else {
+            child.find('.childHolding').each(function(index,element){
+                $(element).prop('checked', false);
+                $(this).attr('disabled', true);
+                $(this).parents(".wrapperHoldingChild").find("input.gettingChildAllowance").parent().hide();
+            });
+        }
+    }
+
+    /* Event Listeners */
+    $('select.selectpickerInit').change(function(){
+        if($(this).val() != ''){
+            $(this).next('button.dropdown-toggle').hasClass('error-border') ? $(this).next('button.dropdown-toggle').removeClass('error-border') : '';
+            $(this).rules('remove', 'required');
+        }
+    });
+
+    $('div.datetimepicker').change(function(){
+        $(this).hasClass('error-border') ? $(this).removeClass('error-border') : '';
+    });
+
+    $('#israeliResidentYes').click(function(){
+        if($(this).is(':checked'))
+            $('#IIsraeliResident').prop('checked', true);
+    });
+
+    $('#ISingleParent').click(function(){
+        if($('#married').is(':checked') && !$('#childHolding-1').is(':checked')){
+            $(this).prop('checked' ,false);
+        } else if($(this).is(':checked')){
+            $('#childrenInMyPossession').parents('.form-row').next().show('slow');
+            $('#childrenInMyPossession').prop('checked', true);
+        }
+    });
+
+    $('#childrenInMyPossession').click(function(){
+        if($('#married').is(':checked')          &&
+            !$('#childHolding-1').is(':checked') &&
+            !$('input#female').is(':checked')    &&
+            !$('input#ISingleParentMyChildrenOwned').is(':checked') ||
+            $('#toddlerChildren').is(':checked')
+        ){
+            $(this).prop('checked' ,false);
+        }
+    });
+
+    $('#noIncomeForMySpouse').click(function(){
+        if(!$('#married').is(':checked')){
+            $(this).prop('checked', false);
+        }
+    });
+
+    $('#toddlerChildren').click(function(){
+        if(
+            (!$('#married').is(':checked') && $('input#childrenInMyPossession').is(':checked')) ||
+            ($('#married').is(':checked') && $('input#female').is(':checked') && $('#childHolding-1').is(':checked'))
+        ){
+            $(this).prop('checked', false)
+        }
+    });
+
+    $('#IParentDisabledChild').click(function(){
+        if($('#childIdNum-1').val() == '' || $('#childIdName-1').val() == '' || $('.childBirthday-1').val() == '')
+            $(this).prop('checked', false);
+
+    });
+
+    $('#alimonyToFormerSpouse').click(function(){
+        if(!$('#married').is(':checked') && !$('#divorcee').is(':checked') && !$('#separated').is(':checked'))
+            $(this).prop('checked', false)
+    });
+
+    $(`input[name='salaryType']`).each(function() {
+        $(this).change(function(){
+            switch($(this).val()){
+                case '2':
+                    $('#otherIncomesYes').attr("checked", true);
+                    $("div.wrapperIncomeDetails").show("slow");
+                    break;
+                default:
+                    $(`input[name='otherIncomes']`).each(function(index,element) {
+                        $(element).rules('add', ruleSetDefualt)
+                    })
+                    $('#otherIncomesYes').attr("checked", false);
+                    $("div.wrapperIncomeDetails").hide("slow");
+            }
+        })
+    });
+
+    $('#otherIncomesYes').change(function(){
+        if($(this).is(':checked') && $(this).val() === '1'){
+            $(`input[name='otherIncomesSalaryType']`).each(function(index, element){
+                $(element).rules('add', ruleSetDefualt)
+            })
+        }
+    });
+
+    $('.childs').keyup(function(){
+        if($(this).val() != '')
+            $(this).removeClass('error-border');
+    });
+
+    $('.childs').on('input propertychange',function(e){
+        commitToRowChangeHandler('childs', e.currentTarget);
+    });
+
+    $('.employer').on('input propertychange',function(e){
+        commitToRowChangeHandler('employer', e.currentTarget);
+    });
+
+    const $cityDfr = new jQuery.Deferred();
+    const $streetDfr = new jQuery.Deferred();
+    var company = null;
+    if(code){
+        $.ajax({
+            type: "POST",
+            url: '/api/101pdf/getData/',
+            data: {code: code},
+            success: function(data){
+                data = JSON.parse(data);
+                if(data.error === "time passed") window.location = `https://${location.host}/system_error/?tofes101=true`
+                if(data) {
+                    setData(data);
+                } else{
+                    window.location.href = "/tofes101";
+                }
+            },
+            error: function(){
+            }
+        });
+    } else{
+        var url = window.location.href;
+        var biocom = url.indexOf("biocom");
+        var merav = url.indexOf("merav");
+
+        if(biocom==-1 && merav==-1){
+            $("img.logo").show();
+        }
+        $("#save").addClass("withoutManager");
+    }
+
+    $('[data-toggle="popover"]').popover({
+        html:true,
+    });
+    $('[data-toggle="tooltip"]').tooltip();
+
+    $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
+        setTimeout(function(){ $(".tooltip").tooltip('hide')}, 3000);
+    });
+
+    $(document).on('mouseenter','.popoverByOver, .popover', function() {
+        $(this).popover('show');
+    });
+
+    $(document).on('mouseleave','.popoverByOver, .popover', function() {
+        $(this).popover('hide');
+    });
+
+    $(".selectpickerInit").selectpicker({
+        liveSearch: true,
+        title: "בחר מהרשימה",
+        dropdownAlignRight: true,
+        style: "form-control",
+        noneResultsText: "לא נמצאו תוצאות לערך {0}",
+    });
+
+    $(".selectpickerInit").on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+        $(this).parent().removeClass("invalid");
+        $(this).parent().parent().find("div.invalid-feedback").hide();
+    });
+
+    fillCity();
+
+    initDatepicker(".datepicker");
+
+    $(".taxYear").change(function () {
+        $(".taxYear").val($(this).val());
+    });
+
+    $("input[name=maritalStatus]").change(function () {
+        var val = parseInt($("input[name=maritalStatus]:checked").val());
+        switch (val){
+            case 1:
+                $("div.wrapperPartnerDetails").show("slow");
+                $("div.wrapperSeperatedFile").hide("slow");
+                break;
+            case 4:
+                $("div.wrapperSeperatedFile").show("slow");
+                $("div.wrapperPartnerDetails").hide("slow");
+                break;
+            default:
+                $("div.wrapperPartnerDetails").hide("slow");
+                $("div.wrapperSeperatedFile").hide("slow");
+                break;
+        }
+    });
+
+    $("input[name=israeliResident]").change(function () {
+        var val = parseInt($('input[name=israeliResident]:checked').val());
+        $("input#IIsraeliResident").prop("checked", val);
+    });
+
+    $("input#IIsraeliResident").change(function () {
+        var val = $(this).is(":checked") ? 1 : 0;
+        $("input[name=israeliResident][value=" + val + "]").prop("checked", true);
+    });
+
+    var pristineIdBy = true;
+    $("input[name=idBy]").change(function () {
+        var val = parseInt($('input[name=idBy]:checked').val());
+        var text, textLabelFile;
+        if(val == 2){
+            text = "מספר דרכון";
+            textLabelFile = "צילום דרכון";
+            $("#idNumber").removeClass("validateId");
+            $("input[name=israeliResident][value='0']").prop("checked", true);
+            $("input[name=israeliResident][value='1']").attr('disabled', true);
+            $("input#IIsraeliResident").prop("checked", false);
+            $("input#IIsraeliResident").attr('disabled', true);
+        }else{
+            text = "מספר זהות";
+            textLabelFile = "צילום תעודת זהות";
+            $("#idNumber").addClass("validateId");
+            $("input[name=israeliResident][value='1']").attr('disabled', false);
+            $("input#IIsraeliResident").attr('disabled', false);
+        };
+        $("span.idNumberText").text(text);
+        $("label.idNumberFile").text(textLabelFile);
+        if(!pristineIdBy){
+            $("#idNumber[data-validate=id]").trigger("focusout");
+        }
+        pristineIdBy = false;
+    });
+
+    $("input[name=partnerIdBy]").change(function () {
+        var val = parseInt($('input[name=partnerIdBy]:checked').val());
+        var text, textLabelFile;
+        if(val == 2){
+            text = "מספר דרכון";
+            textLabelFile = "צילום דרכון";
+            $("#partnerIdNumber").removeClass("validateId");
+        }else{
+            text = "מספר זהות";
+            textLabelFile = "צילום תעודת זהות";
+            $("#partnerIdNumber").addClass("validateId");
+        }
+        $("span.parentIdNumberText").text(text);
+        $("label.partnerIdPhoto").text(textLabelFile);
+        $("#partnerIdNumber[data-validate=id]").trigger("focusout");
+    });
+
+    $("input[name=otherIncomes]").change(function () {
+        var val = parseInt($('input[name=otherIncomes]:checked').val());
+        if(!val){
+            $("div.wrapperIncomeDetails").hide("slow");
+        }else{
+            $("div.wrapperIncomeDetails").show("slow");
+        }
+    });
+
+    $("input[name=HMOMember]").change(function () {
+        var val = parseInt($('input[name=HMOMember]:checked').val());
+        if(!val){
+            $(".wrapperHMOName, .HMONameText").hide();
+        }else{
+            $(".wrapperHMOName, .HMONameText").show();
+        }
+    });
+
+    $("input[name=otherIncomesSalaryType][value='7']").change(function () {
+        if($(this).is(":checked")){
+            $("#detailsAnotherSourceOfIncome").addClass("required");
+            $("div.wrapperAnotherSource").show('slow');
+        }else{
+            $("#detailsAnotherSourceOfIncome").removeClass("required");
+            $("div.wrapperAnotherSource").hide('slow');
+        }
+    });
+
+    $("input[name=taxCoordinationIncome]").change(function () {
+        var val = parseInt($('input[name=taxCoordinationIncome]:checked').val());
+        if(val == 1 || val == 3){
+            $("div.wrapperAddFile").show('slow');
+            $("div.wrapperEmployer").hide('slow');
+        }else{
+            $("div.wrapperAddFile").hide('slow');
+            $("div.wrapperEmployer").show('slow');
+        }
+    });
+
+    $("input[name=partnerIncome]").change(function () {
+        var val = parseInt($('input[name=partnerIncome]:checked').val());
+        if(val == 1){
+            $("div.wrapperPartnerIncomeType").show('slow');
+        }else{
+            $("div.wrapperPartnerIncomeType").hide('slow');
+        }
+    });
+
+    $("body").on("change", ".childHolding",function () {
+        if($(this).is(":checked")){
+            $(this).parents(".wrapperHoldingChild").find("input.gettingChildAllowance").parent().show();
+        }else{
+            $(this).parents(".wrapperHoldingChild").find("input.gettingChildAllowance").parent().hide();
+        }
+    });
+
+    $("#localityWithPoints, #immigrantChk, #soldierOrService, #taxCoordination").change(function () {
+        var container = $(this).parents("div.myContainer").find("div.wrapperDataToggleContent");
+        if($(this).is(":checked")){
+            container.find("span.requiredFields").show();
+            container.find("input:not([type=file]), div.wrapperLocalityWithPoints select").addClass("required");
+        }else{
+            container.find("span.requiredFields").hide();
+            container.find("input:not([type=file]), div.wrapperLocalityWithPoints select").removeClass("required");
+        }
+    });
+
+    $("input.toggleContent").change(function () {
+        var $dataContent = $(this).parents("div.myContainer").find("div.wrapperDataToggleContent");
+        if($(this).is(":checked")){
+            $dataContent.show('slow');
+        }else{
+            $dataContent.hide('slow');
+        }
+    });
+
+    $(document).on("keyup", ".deductionValidate",function () {
+        var $elm = $(this);
+        var val = $(this).val();
+        if(val.charAt(0) != 9){
+            $elm.parent().find("div.invalid-feedback").show();
+            $elm.addClass("invalid").focus(function () {
+                $elm.removeClass("invalid");
+                $elm.parent().find("div.invalid-feedback").hide();
+            });
+        }else {
+            $elm.removeClass("invalid");
+            $elm.parent().find("div.invalid-feedback").hide();
+        }
+        if(val.length > 9){
+            $elm.val(val.substring(0, 9));
+        }
+    });
+
+    $(document).on("blur", ".deductionValidate",function () {
+        var self = $(this);
+        var val = $(this).val();
+        if(!val.length){
+            return;
+        }
+        if(val.length != 9){
+            $(this).addClass("invalid");
+            $(this).parent().find("div.invalid-feedback").show();
+            $(this).focus(function () {
+                self.removeClass("invalid");
+                self.parent().find("div.invalid-feedback").hide();
+            });
+        }
+    });
+
+    $("body").on("focusout", "[data-validate=id]",function () {
+        var $elm = $(this);
+        if(!$elm.data("validateid")){
+            $elm.removeClass("invalid");
+            $elm.parent().find("div.invalid-feedback").hide();
+            return;
+        }
+
+        var  idType = 1;
+        switch($elm.attr("id")){
+            case "idNumber":
+                idType = $("input[name='idBy']:checked").val()
+                break;
+            case "partnerIdNumber":
+                idType = $("input[name='partnerIdBy']:checked").val()
+        }
+
+        // 1 - israel id, 2 - passport
+        if(idType == 1){
+            var isValid = validIdNumber($elm.val(), true);
+            if(!isValid){
+                $elm.addClass("invalid").keydown(function () {
+                    $elm.removeClass("invalid");
+                    $elm.parent().find("div.invalid-feedback").hide();
+                });
+                $elm.parent().find("div.invalid-feedback").show();
+                $elm.focus();
+            }
+
+            var isSameId = checkIsSameId($elm, true);
+            if(!isSameId){
+                $elm.addClass("invalid").keydown(function () {
+                    $elm.removeClass("invalid");
+                    $elm.parent().find("div.invalid-feedback-same-id").hide();
+                });
+                $elm.parent().find("div.invalid-feedback-same-id").show();
+                $elm.focus();
+            }
+        }else{
+            if($elm.val().length >= passportLength){
+                $elm.removeClass("invalid");
+                $elm.parent().find("div.invalid-feedback").hide();
+            }else{
+                $elm.addClass("invalid").keydown(function () {
+                    $elm.removeClass("invalid");
+                    $elm.parent().find("div.invalid-feedback").hide();
+                });
+                $elm.parent().find("div.invalid-feedback").show();
+                $elm.focus();
+            }
+        }
+    });
+
+    $("#addChild").click(function () {
+        var childrenCount = $("span.childCount").length;
+        childrenCount++;
+        if(childrenCount == 13){
+            $(this).prop('disabled', true);
+        }
+        if(childrenCount > 13){
+            return;
+        }
+        var childHtml = $("div.wrapperChildren div.child-1").html();
+        childHtml = $("<div class='child-" + childrenCount + " child-block'>" + childHtml + "</div>");
+        childHtml.find(".invalid").removeClass("invalid");
+        childHtml.find("input.childHolding").prop('disabled', true);
+        childHtml.find("div.invalid-feedback").hide();
+        childHtml.find("span.childCount").text(childrenCount);
+        childHtml.find("[id^=child][id$='-1']").each(function () {
+            replaceAttrOfElement(this,"id", childrenCount);
+        });
+        childHtml.find("[class^=child][class$='-1']").each(function () {
+            replaceAttrOfElement(this,"class", childrenCount);
+        });
+        childHtml.find("[for^=child][for$='-1']").each(function () {
+            replaceAttrOfElement(this,"for", childrenCount);
+        });
+        childHtml.find("[data-target^='#child'][data-target$='-1']").each(function () {
+            replaceAttrOfElement(this,"data-target", childrenCount);
+        });
+        childHtml.find("[name^=child][name$='-1']").each(function () {
+            replaceAttrOfElement(this,"name", childrenCount);
+        });
+        childHtml.find("input").val("");
+        childHtml.find("input.gettingChildAllowance").parent().hide();
+
+        initDatepicker(childHtml.find(".datepicker"));
+
+        childHtml.find('.childs').keyup(function(){
+            if($(this).val() != '')
+                $(this).removeClass('error-border');
+        });
+
+        childHtml.find('.childs').on('input propertychange',function(e){
+            commitToRowChangeHandler('childs', e.currentTarget);
+        });
+
+        childHtml.find('.employer').on('input propertychange',function(e){
+            commitToRowChangeHandler('employer', e.currentTarget);
+        });
+
+        $("body").on("change", ".childHolding",function () {
+            if($(this).is(":checked")){
+                $(this).parents(".wrapperHoldingChild").find("input.gettingChildAllowance").parent().show();
+            }else{
+                $(childHtml).parents(".wrapperHoldingChild").find("input.gettingChildAllowance").parent().hide();
+            }
+        });
+
+        childHtml.find(".form-row").not(".wrapperHoldingChild").append(`<button class="removeChild">&#x2715;</button>`);
+
+        childHtml.find('.removeChild').click(function() {
+            $(this).closest(".child-block").remove()
+        });
+
+        $("div.wrapperChildren").append(childHtml);
+    });
+
+    $("#addEmployer").click(function () {
+        var employerCount = $("span.employerCount").length;
+        employerCount++;
+        if(employerCount == 3){
+            $(this).prop('disabled', true);
+        }
+        if(employerCount > 3){
+            return;
+        }
+        var employerHtml = $("div.wrapperEmployer div.employer-1").html();
+        employerHtml = $(employerHtml);
+        employerHtml.find(".invalid").removeClass("invalid");
+        employerHtml.find("div.invalid-feedback").hide();
+        employerHtml.find("div.wrapperAddEmployer").remove();
+        employerHtml.find("span.employerCount").text(employerCount);
+        employerHtml.find("[id^=employer][id$='-1']").each(function () {
+            replaceAttrOfElement(this,"id", employerCount);
+        });
+        employerHtml.find("[class^=employer][class$='-1']").each(function () {
+            replaceAttrOfElement(this,"class", employerCount);
+        });
+        employerHtml.find("[name^=employer][name$='-1']").each(function () {
+            replaceAttrOfElement(this,"name", employerCount);
+        });
+        employerHtml.find("[for^=employer][for$='-1']").each(function () {
+            replaceAttrOfElement(this,"for", employerCount);
+        });
+        employerHtml.find("[data-target^='#employer'][data-target$='-1']").each(function () {
+            replaceAttrOfElement(this,"data-target", employerCount);
+        });
+        employerHtml.find("input:not(input[type=radio])").val("");
+        $("div.wrapperEmployer").append(employerHtml);
+    });
+
+    $('.checkSomeChildren input').on('input', function () {
+        const someChildren = $('.childHolding:checked').length;
+        const someChilrenInSection = countChilrenInSection($(this).closest('.checkSomeChildren').attr('id'));
+        if (someChilrenInSection > someChildren) {
+            $(this).val('');
+        }
+    });
+
+    function countChilrenInSection(sectionId) {
+        var sum = 0;
+        $('#' + sectionId).find('input').each(function() {
+            sum += parseInt($(this).val()) || 0;
+        });
+        return sum;
+    }
+
+    $("button.customButtonPlus").click(function () {
+        var input = $(this).parent().find("input");
+        var val = parseInt(input.val());
+        if(isNaN(val)){
+            val = 0;
+        }
+        if (!$(this).parents('.checkSomeChildren').length ||
+            countChilrenInSection($(this).closest('.checkSomeChildren').attr('id')) < $('.childHolding:checked').length)
+        {
+            val++;
+        }
+        input.val(val);
+    });
+
+    $("button.customButtonMinus").click(function () {
+        var input = $(this).parent().find("input");
+        var val = parseInt(input.val());
+        if(isNaN(val)){
+            val = 0;
+        }
+        val--;
+        if(val <= 0){
+            val = 0;
+        }
+        input.val(val);
+    });
+
+    $("#city").change(function () {
+        var cityChoose = parseInt($(this).val());
+        if(isNaN(cityChoose) || cityChoose <= 0){
+            return;
+        }
+        fillStreet(cityChoose);
+    });
+
+    $("input#getEmailWithCopy").change(function () {
+        if($(this).is(":checked")){
+            $("div.wrapperEmailCopyToSend").show();
+        }else{
+            $("div.wrapperEmailCopyToSend").hide();
+        }
+    });
+
+    $('#mailModal, #mailModalSendToManager').on('hidden.bs.modal', function (e) {
+        $("div.firstStep").show();
+        $("div.secondStep").hide();
+        $("div.wrapperLoader").hide();
+        $("#emailAddress").removeClass("require");
+    });
+
+    $("input[name=taxYear]").change(function () {
+        var val = $("input[name=taxYear]:checked").val();
+        $("input[name=taxYearBottom]").prop('checked', false);
+        $("input[name=taxYearBottom][value="+ val + "]").prop('checked', true);
+    });
+
+    $("input[name=taxYearBottom]").change(function () {
+        var val = $("input[name=taxYearBottom]:checked").val();
+        $("input[name=taxYear]").prop('checked', false);
+        $("input[name=taxYear][value="+ val + "]").prop('checked', true);
+    });
+
+    function setData(data){
+        if(typeof data.company != "undefined") {
+            company = data.company;
+            $("#companyName").val(data.company.name).prop('disabled', true);
+            $("#companyAddress").val(`${data.company.address || ""} ${data.company.city || ""}`.trim()).prop('disabled', true);
+            $("#companyPhone").val(clearStringOnlyNumbers(data.company.phone)).prop('disabled', true);
+            $("#deductions").val(data.company.deductions).prop('disabled', true);
+
+            if(!data.company.isSupplier){
+                $("img.logo").show();
+            }
+        }
+        if (data.user?.tofes101Data && Object.keys(data.user.tofes101Data)) {
+            setSaved101Data(data.user.tofes101Data);
+        } else if (typeof data.user != "undefined") {
+            $("#firstName").val(data.user.firstName);
+            $("#lastName").val(data.user.lastName);
+            $("#idNumber").val(data.user.idNum).trigger("focusout");
+            if(data.user.birthday > 0){
+                var date = new Date(data.user.birthday * 1000);
+                var texDate = ('0' + date.getDate()).slice(-2) + '/' + ('0' + (date.getMonth()+1)).slice(-2) + '/' + date.getFullYear();
+                $("#birthday input").val(texDate);
+            }
+            var phone = clearStringOnlyNumbers(data.user.phone);
+            if(phone.length == 9) {
+                $("#phone").val(data.user.phone);
+            }else if(phone.length == 10){
+                $("#mobilePhone").val(data.user.phone);
+            }
+            $("input#email").val(data.user.email);
+            $("input[name=sex][value=" + data.user.sex + "]").prop("checked", true);
+            $("input[name=maritalStatus][value=" + data.user.marital + "]").click();
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            $("#startWorkDate input").val(`01/01/${currentYear}`);
+        } else {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            $("#startWorkDate input").val(`01/01/${currentYear}`);
+        }
+    }
+
+    function setSaved101Data(data) {
+        const { accountDetails, children, employeeDetails, employerDetails, incomeFromOtherWork, incomeFromThisWork,
+            partnerDetails, points, tax} = data;
+        // employee details
+        $("#firstName").val(employeeDetails.firstName);
+        $("#lastName").val(employeeDetails.lastName);
+        if (employeeDetails.idBy == "2") {
+            $("input[name=idBy][value='1']").prop("checked", false);
+            $("input[name=idBy][value='2']").prop("checked", true);
+        }
+        $("#idNumber").val(employeeDetails.idNumber).trigger("focusout");
+        $("#birthday input").val(employeeDetails.birthday);
+        if (employeeDetails.immigrationDate) $("#immigrationDate input").val(employeeDetails.immigrationDate);
+        $("#houseNumber").val(employeeDetails.houseNumber);
+        $("#phone").val(employeeDetails.phone);
+        if (employeeDetails.mobilePhone) $("#mobilePhone").val(employeeDetails.mobilePhone);
+        if (employeeDetails.email) $("input#email").val(employeeDetails.email);
+        if (employeeDetails.postalCode) $("input#postalCode").val(employeeDetails.postalCode);
+        $("input[name=sex][value=" + employeeDetails.sex + "]").prop("checked", true);
+        $("input[name=maritalStatus][value=" + employeeDetails.maritalStatus + "]").prop("checked", true).trigger("change");
+        $("input[name=israeliResident][value=" + employeeDetails.israeliResident + "]").prop("checked", true);
+        $("input[name=memberKibbutzOrMoshav][value=" + employeeDetails.memberKibbutzOrMoshav + "]").prop("checked", true);
+        if (employeeDetails.HMOMember !== -1) {
+            $("input[name=HMOMember][value=" + employeeDetails.HMOMember + "]").prop("checked", true).trigger("change");
+            if (employeeDetails.HMOMember == 1) $("#HMOName").val(employeeDetails.HMOId);
+        }
+        $.when($cityDfr).done(()=> {
+            $("#city").val(employeeDetails.cityId).trigger("change");
+            $.when($streetDfr).done(()=> {
+                $("#street").val(employeeDetails.street).trigger("change");
+            });
+        });
+
+        //children details
+        children.forEach((child, i) => {
+            const childNum = i + 1;
+            $(`#childName-${childNum}`).val(child.name);
+            $(`#childIdNum-${childNum}`).val(child.id);
+            $(`#childBirthday-${childNum} input`).val(child.birthday);
+            if (child.childHolding) $(`input#childHolding-${childNum}`).prop("checked", true).trigger("change").prop("disabled", false);
+            if (child.childGettingAllowance) $(`input#childGettingAllowance-${childNum}`).prop("checked", true);
+            if (children.length !== childNum) $('#addChild').trigger("click");
+        });
+
+        //current work income
+        $(`#startWorkDate input`).val(incomeFromThisWork.startWorkDate);
+        $("input[name=salaryType][value=" + incomeFromThisWork.salaryType[0] + "]").prop("checked", true).trigger("change");
+        $("input[name=otherIncomes][value=" + incomeFromOtherWork.otherIncomes + "]").prop("checked", true).trigger("change");
+        if (incomeFromOtherWork.otherIncomes == "1") {
+            if (incomeFromOtherWork.childGettingAllowance) $(`input#childGettingAllowance-${childNum}`).prop("checked", true);
+            incomeFromOtherWork.otherIncomesSalaryType.forEach((salaryType, i) => {
+                $("input[name=otherIncomesSalaryType][value=" + salaryType + "]").prop("checked", true);
+            });
+            $("input[name=gettingCreditPoints][value=" + incomeFromOtherWork.gettingCreditPoints + "]").prop("checked", true);
+            if (incomeFromOtherWork.advancedStudyFund) $(`input#advancedStudyFund`).prop("checked", true);
+            if (incomeFromOtherWork.insurance) $(`input#insurance`).prop("checked", true);
+        }
+
+        //partner details
+        if (employeeDetails.maritalStatus == "1") {
+            $("#partnerFirstName").val(partnerDetails.partnerFirstName);
+            $("#partnerLastName").val(partnerDetails.partnerLastName);
+            $("#partnerIdNumber").val(partnerDetails.partnerIdNumber);
+            $(`input[name=partnerIdBy][value='${partnerDetails.partnerIdBy}']`).prop("checked", true);
+            $(`#partnerBirthday input`).val(partnerDetails.partnerBirthday);
+            if (partnerDetails.partnerImmigration) $(`#partnerImmigration input`).val(partnerDetails.partnerImmigration);
+            $(`input[name=partnerIncome][value='${partnerDetails.partnerIncome}']`).prop("checked", true).trigger("change");
+            if (partnerDetails.partnerIncome == "1") $(`input[name=partnerIncomeType][value='${partnerDetails.partnerIncomeType}']`).prop("checked", true).trigger("change");
+        }
+
+        // tax part
+        if (points.IIsraeliResident) $("#IIsraeliResident").prop("checked", true).trigger("change");
+        if (points.cripple) {
+            $("#cripple").prop("checked", true).trigger("change");
+            if (points.crippleStipend) $("#crippleStipend").prop("checked", true).trigger("change");
+        }
+        if (points.localityWithPoints) {
+            $("#localityWithPoints").prop("checked", true).trigger("change");
+            $(`#localityWithPointsFromDate input`).val(points.localityWithPointsFromDate);
+            $("#localCityWithPointsCity").val(points.localCityWithPointsCityId).trigger("change");
+        }
+        if (points.immigrantChk) {
+            $("#immigrantChk").prop("checked", true).trigger("change");
+            $(`#immigrantFromDate input`).val(points.immigrantFromDate);
+            $(`#IHadNoIncomeFromDate input`).val(points.IHadNoIncomeFromDate);
+        }
+        if (points.noIncomeForMySpouse) $("#noIncomeForMySpouse").prop("checked", true).trigger("change");
+        if (points.ISingleParent) $("#ISingleParent").prop("checked", true).trigger("change");
+        if (points.childrenInMyPossession) {
+            $("#childrenInMyPossession").prop("checked", true).trigger("change");
+            $("#childrenBornInTaxYear").val(points.childrenBornInTaxYear);
+            $("#childrenAge1-2").val(points["childrenAge1-2"] ?? 0);
+            $("#childrenAge3").val(points["childrenAge3"] ?? 0);
+            $("#childrenAge4-5").val(points["childrenAge4-5"] ?? 0);
+            $("#childrenAge6-17").val(points["childrenAge6-17"]);
+            $("#childrenAge18").val(points["childrenAge18"]);
+        }
+        if (points.toddlerChildren) {
+            $("#toddlerChildren").prop("checked", true).trigger("change");
+            $("#toddlerChildrenBornInTaxYear").val(points.toddlerChildrenBornInTaxYear);
+            $("#toddlerChildrenAge1-2").val(points["toddlerChildrenAge1-2"] ?? 0);
+            $("#toddlerChildrenAge3").val(points["toddlerChildrenAge3"] ?? 0);
+            $("#toddlerChildrenAge4-5").val(points["toddlerChildrenAge4-5"] ?? 0);
+            $("#toddlerChildrenAge6-17").val(points["toddlerChildrenAge6-17"]);
+        }
+        if (points.ISingleParentMyChildrenOwned) $("#ISingleParentMyChildrenOwned").prop("checked", true).trigger("change");
+        if (points.childrenNotWithMeAndIPayAlimony) $("#childrenNotWithMeAndIPayAlimony").prop("checked", true).trigger("change");
+        if (points.IParentDisabledChild) {
+            $("#IParentDisabledChild").prop("checked", true).trigger("change");
+            $("#disabledChildrenQuantity").val(points.disabledChildrenQuantity);
+        }
+        if (points.alimonyToFormerSpouse) $("#alimonyToFormerSpouse").prop("checked", true).trigger("change");
+        if (points.over16AndUnder18Years) $("#over16AndUnder18Years").prop("checked", true).trigger("change");
+        if (points.soldierOrService) {
+            $("#soldierOrService").prop("checked", true).trigger("change");
+            $(`#soldierOrServiceStart input`).val(points.soldierOrServiceStart);
+            $(`#soldierOrServiceEnd input`).val(points.soldierOrServiceEnd);
+        }
+        if (points.finishGraduation) $("#finishGraduation").prop("checked", true).trigger("change");
+
+        //tax coordination
+        if (tax.taxCoordination) {
+            $("#taxCoordination").prop("checked", true).trigger("change");
+            $(`input[name=taxCoordinationIncome][value='${tax.taxCoordinationIncome}']`).prop("checked", true).trigger("change");
+            if (tax.taxCoordinationIncome == "2") {
+                employerDetails.forEach(({address, deduction, monthlyIncome, name, taxDeducted, typeOfIncomeText, typeOfIncomeId}, i) => {
+                    const employerNum = i + 1;
+                    $(`#employerName-${employerNum}`).val(name);
+                    $(`#employerAddress-${employerNum}`).val(address);
+                    $(`#employerDeduction-${employerNum}`).val(deduction);
+                    $(`#employerMonthlyIncome-${employerNum}`).val(monthlyIncome);
+                    $(`#employerTaxDeducted-${employerNum}`).val(taxDeducted);
+                    $(`input[name=employerTypeOfIncome-${employerNum}][value='${typeOfIncomeId}']`).prop("checked", true).trigger("change");
+                    if (employerNum !== employerDetails.length) $("#addEmployer").trigger("click");
+                });
+            }
+        }
+
+        //bank account
+        if (accountDetails.isAccountDetails) {
+            $("#accountDetails").prop("checked", true).trigger("change");
+            $("#bankName").val(accountDetails.bankNumber).trigger("change");
+            $("#branchNumber").val(accountDetails.branchNumber);
+            $("#accountNumber").val(accountDetails.accountNumber);
+            $("#accountName").val(accountDetails.accountName);
+        }
+    }
+
+    function clearStringOnlyNumbers(string){
+        if(string){
+            return string.match(/\d/g)?.join("") || "";
+        }
+
+        return "";
+    }
+
+    function fillCity(){
+        $.ajax({
+            type: "GET",
+            url: '/api/getCityOrStreets/cities/',
+
+            success: function(data){
+                data = JSON.parse(data);
+                var $select = $("#city");
+                var $select2 = $("#localCityWithPointsCity");
+                $select.selectpicker('refresh');
+                $select2.selectpicker('refresh');
+                $select.find("option").remove();
+                $select2.find("option").remove();
+                for(var i in data){
+                    var option = "<option value='" + data[i].cityId + "'> " + data[i].cityName + " </option>";
+                    $select.append(option);
+                    $select2.append(option);
+                }
+                $select.selectpicker('refresh');
+                $select2.selectpicker('refresh');
+                $cityDfr.resolve();
+            },
+            error: function(){
+            }
+        });
+    }
+
+    function fillStreet(cityChoose = "") {
+        $.ajax({
+            type: "POST",
+            url: '/api/getCityOrStreets/streets/',
+            data: {cityChoose: cityChoose},
+
+            success: function(data){
+                data = JSON.parse(data);
+                var $select = $("#street");
+                $select.selectpicker('refresh');
+                $select.find("option").remove();
+                for(var i in data){
+                    var option = "<option value='" + data[i].streetId + "'> " + data[i].name + " </option>";
+                    $select.append(option);
+                }
+                $select.selectpicker('refresh');
+                $streetDfr.resolve();
+            },
+            error: function(){
+            }
+        });
+    }
+
+    function initDatepicker(selector){
+        $(selector).datetimepicker({
+            format: 'L',
+            debug: false,
+            icons: {
+                time: 'icofont-clock-time',
+                date: 'icofont-calendar',
+                up: 'icofont-arrow-up',
+                down: 'icofont-arrow-down',
+                previous: 'icofont-caret-right',
+                next: 'icofont-caret-left',
+                today: 'far fa-calendar-check-o',
+                clear: 'icofont-trash',
+                close: 'icofont-close'
+            }
+        });
+    }
+
+    function collectData(e){
+        var $modal = $(e.target).parents("div.modal");
+        var email = $modal.find(".emailAddress").val();
+        var isForManager = $modal.find(".emailAddress.required").length ? 0 : 1;
+        if (!email && !isForManager) {
+            $modal.find(".emailAddress").addClass("invalid");
+            $modal.find(".emailAddress").parent().find("div.invalid-feedback").show('slow');
+            $modal.find(".emailAddress").focus(function () {
+                $modal.find(".emailAddress").removeClass("invalid");
+                $modal.find(".emailAddress").parent().find("div.invalid-feedback").hide('slow');
+            });
+            return null;
+        }
+        const isMarried = $("input[name=maritalStatus]:checked").val() == "1";
+        var o = {
+            taxYear : $("input[name=taxYear]:checked").val(),
+            companyDetails: {
+                companyName : $("input#companyName").val(),
+                companyAddress : $("input#companyAddress").val(),
+                companyPhone : $("input#companyPhone").val(),
+                deductions : $("input#deductions").val(),
+            },
+            employeeDetails: {
+                firstName : $("input#firstName").val(),
+                lastName : $("input#lastName").val(),
+                idBy: $("input[name=idBy]:checked").val() === undefined ? -1 : $("input[name=idBy]:checked").val(),
+                idNumber : $("input#idNumber").val(),
+                birthday : $("div#birthday input").val(),
+                immigrationDate : $("div#immigrationDate input").val(),
+                cityId : $("select#city").val(),
+                cityName : $("select#city option:selected").html(),
+                street : $("select#street").val(),
+                streetName : $("select#street option:selected").html(),
+                houseNumber : $("input#houseNumber").val(),
+                postalCode : $("input#postalCode").val(),
+                phone : $("input#phone").val(),
+                mobilePhone : $("input#mobilePhone").val(),
+                email : $("input#email").val(),
+                maritalStatus: $("input[name=maritalStatus]:checked").val() === undefined ? -1 : $("input[name=maritalStatus]:checked").val(),
+                sex: $("input[name=sex]:checked").val() === undefined ? -1 : $("input[name=sex]:checked").val(),
+                israeliResident: $("input[name=israeliResident]:checked").val() === undefined ? -1 : $("input[name=israeliResident]:checked").val(),
+                memberKibbutzOrMoshav: $("input[name=memberKibbutzOrMoshav]:checked").val() === undefined ? -1 : $("input[name=memberKibbutzOrMoshav]:checked").val(),
+                HMOMember: $("input[name=HMOMember]:checked").val() === undefined ? -1 : $("input[name=HMOMember]:checked").val(),
+                HMOId : $("select#HMOName").val(),
+            },
+            incomeFromThisWork: {
+                salaryType: [$("input[name=salaryType]:checked").val() === undefined ? -1 : $("input[name=salaryType]:checked").val()],
+                startWorkDate : $("div#startWorkDate input").val(),
+            },
+            incomeFromOtherWork: {
+                otherIncomes: $("input[name=otherIncomes]:checked").val() === undefined ? -1 : $("input[name=otherIncomes]:checked").val(),
+                detailsAnotherSourceOfIncome: $("#detailsAnotherSourceOfIncome").val(),
+                gettingCreditPoints: $("input[name=gettingCreditPoints]:checked").val() === undefined ? -1 : $("input[name=gettingCreditPoints]:checked").val(),
+                advancedStudyFund: $("#advancedStudyFund").is(":checked") ? 1 : 0,
+                insurance: $("#insurance").is(":checked") ? 1 : 0,
+            },
+            partnerDetails: {
+                partnerFirstName : isMarried ? $("input#partnerFirstName").val() : "",
+                partnerLastName : isMarried ? $("input#partnerLastName").val() : "",
+                partnerIdBy: $("input[name=partnerIdBy]:checked").val() === undefined || !isMarried ? -1 : $("input[name=partnerIdBy]:checked").val(),
+                partnerIdNumber : isMarried ? $("input#partnerIdNumber").val() : "",
+                partnerBirthday : isMarried ? $("div#partnerBirthday input").val() : "",
+                partnerImmigration : isMarried ? $("div#partnerImmigration input").val() : "",
+                partnerIncome: $("input[name=partnerIncome]:checked").val() === undefined || !isMarried ? -1 : $("input[name=partnerIncome]:checked").val(),
+                partnerIncomeType: $("input[name=partnerIncomeType]:checked").val() === undefined || !isMarried ? -1 : $("input[name=partnerIncomeType]:checked").val(),
+            },
+            points: {
+                IIsraeliResident: $("#IIsraeliResident").is(":checked") ? 1 : 0,
+                cripple: $("#cripple").is(":checked") ? 1 : 0,
+                crippleStipend: $("#crippleStipend").is(":checked") ? 1 : 0,
+                localityWithPoints: $("#localityWithPoints").is(":checked") ? 1 : 0,
+                localityWithPointsFromDate : $("div#localityWithPointsFromDate input").val(),
+                localCityWithPointsCityId : $("select#localCityWithPointsCity").val(),
+                localCityWithPointsCityName : $("select#localCityWithPointsCity option:selected").html(),
+                immigrantChk: $("#immigrantChk").is(":checked") ? 1 : 0,
+                immigrantFromDate : $("div#immigrantFromDate input").val(),
+                IHadNoIncomeFromDate : $("div#IHadNoIncomeFromDate input").val(),
+                noIncomeForMySpouse: $("#noIncomeForMySpouse").is(":checked") ? 1 : 0,
+                ISingleParent: $("#ISingleParent").is(":checked") ? 1 : 0,
+                childrenInMyPossession: $("#childrenInMyPossession").is(":checked") ? 1 : 0,
+                childrenBornInTaxYear : $("input#childrenBornInTaxYear").val(),
+                "childrenAge1-2" : $("input#childrenAge1-2").val(),
+                "childrenAge3" : $("input#childrenAge3").val(),
+                "childrenAge4-5" : $("input#childrenAge4-5").val(),
+                "childrenAge6-17" : $("input#childrenAge6-17").val(),
+                "childrenAge18" : $("input#childrenAge18").val(),
+                toddlerChildren: $("#toddlerChildren").is(":checked") ? 1 : 0,
+                toddlerChildrenBornInTaxYear : $("input#toddlerChildrenBornInTaxYear").val(),
+                "toddlerChildrenAge1-2" : $("input#toddlerChildrenAge1-2").val(),
+                "toddlerChildrenAge3" : $("input#toddlerChildrenAge3").val(),
+                "toddlerChildrenAge4-5" : $("input#toddlerChildrenAge4-5").val(),
+                "toddlerChildrenAge6-17" : $("input#toddlerChildrenAge6-17").val(),
+                ISingleParentMyChildrenOwned: $("#ISingleParentMyChildrenOwned").is(":checked") ? 1 : 0,
+                childrenNotWithMeAndIPayAlimony: $("#childrenNotWithMeAndIPayAlimony").is(":checked") ? 1 : 0,
+                IParentDisabledChild: $("#IParentDisabledChild").is(":checked") ? 1 : 0,
+                alimonyToFormerSpouse: $("#alimonyToFormerSpouse").is(":checked") ? 1 : 0,
+                over16AndUnder18Years: $("#over16AndUnder18Years").is(":checked") ? 1 : 0,
+                soldierOrService: $("#soldierOrService").is(":checked") ? 1 : 0,
+                soldierOrServiceStart : $("div#soldierOrServiceStart input").val(),
+                soldierOrServiceEnd : $("div#soldierOrServiceEnd input").val(),
+                finishGraduation: $("#finishGraduation").is(":checked") ? 1 : 0,
+                disabledChildrenQuantity : $("input#disabledChildrenQuantity").val(),
+            },
+            tax:{
+                taxCoordination: $("#taxCoordination").is(":checked") ? 1 : 0,
+                taxCoordinationIncome: $("input[name=taxCoordinationIncome]:checked").val() === undefined ? -1 : $("input[name=taxCoordinationIncome]:checked").val(),
+            },
+            accountDetails: {
+                bankName: $("select#bankName option:selected").text(),
+                bankNumber: $("select#bankName").val(),
+                branchNumber: $("input#branchNumber").val(),
+                accountNumber: $("input#accountNumber").val(),
+                accountName: $("input#accountName").val(),
+                isAccountDetails: $("input#accountDetails").is(":checked") ? 1 : 0
+            },
+            v2Token: $("#captcha").data().token
+        };
+
+        var scholarship = $("input[id=scholarship]:checked").val() === undefined ? -1 : $("input[id=scholarship]:checked").val();
+        var allowance = $("input[id=allowance]:checked").val() === undefined ? -1 : $("input[id=allowance]:checked").val();
+        if(allowance != -1){
+            o.incomeFromThisWork.salaryType.push(allowance);
+        }
+        if(scholarship != -1){
+            o.incomeFromThisWork.salaryType.push(scholarship);
+        }
+
+        if(o.employeeDetails.HMOId > 0){
+            o.employeeDetails.HMOName = $("select#HMOName option:selected").html();
+        }
+        var arr = [];
+        var childrenAmount = $("span.childCount").length;
+        for(var i = 1; i <= childrenAmount; i++){
+            var temp = {};
+            temp.name = $("input#childName-" + i).val();
+            temp.id = $("input#childIdNum-" + i).val();
+            temp.birthday = $("div#childBirthday-" + i + " input").val();
+            temp.childHolding = $("input#childHolding-" + i).is(":checked") ? 1 : 0;
+            temp.childGettingAllowance = $("input#childGettingAllowance-" + i).is(":checked") ? 1 : 0;
+            arr.push(temp);
+        }
+        o.children = arr;
+
+        arr = [];
+        $("input:checkbox[name=otherIncomesSalaryType]:checked").each(function(){
+            arr.push($(this).val());
+        });
+        o.incomeFromOtherWork.otherIncomesSalaryType = arr;
+
+        arr = [];
+        var employerAmount = $("span.employerCount").length;
+        for(var i = 1; i <= employerAmount; i++){
+            var temp = {};
+            temp.name = $("input#employerName-" + i).val();
+            temp.address = $("input#employerAddress-" + i).val();
+            temp.deduction = $("input#employerDeduction-" + i).val();
+            temp.monthlyIncome = $("input#employerMonthlyIncome-" + i).val();
+            temp.taxDeducted = $("input#employerTaxDeducted-" + i).val();
+            var typeOfIncomeText = $("input[name='employerTypeOfIncome-"+ i +"']:checked").parent().find("label.custom-control-label").html();
+            temp.typeOfIncomeId = $("input[name='employerTypeOfIncome-"+ i +"']:checked").val();
+            temp.typeOfIncomeText = typeOfIncomeText === undefined ? "" : typeOfIncomeText;
+            arr.push(temp);
+        }
+        o.employerDetails = arr;
+
+        if($.fn.signaturePad.isDrawingExist) {
+            var canvas = document.getElementById('signaturePad');
+            var dataURL = canvas.toDataURL();
+            o.sign = dataURL;
+        }
+        o.emailToSend = email;
+        o.isForManager = isForManager;
+        o.company = company;
+        o.code = code || null;
+
+        return o;
+    }
+
+    $('#signaturePad').on("mouseup touchend", function(){
+        $('div.wrapperSign label.error').hide();
+    });
+
+    $('.withoutManager, #save').click(function(e) {
+        e.preventDefault();
+
+        if($('form.tofes101-form').valid() && $.fn.signaturePad.isDrawingExist) {
+            $('#signature-error').hide();
+            if(e.currentTarget.classList.contains("withoutManager")){
+                $('#mailModal').modal('show');
+            } else{
+                $('#mailModalSendToManager').modal('show');
+            }
+        } else {
+            if(!$.fn.signaturePad.isDrawingExist){
+                signatureNotValidated();
+            }
+        }
+    });
+
+    $(".sendEmail").click(function (e) {
+        $("div.wrapperLoader").show();
+        if($('form.tofes101-form').valid() && $.fn.signaturePad.isDrawingExist) {
+            $('#signature-error').hide();
+            sendData(e,false);
+        } else {
+            if(!$.fn.signaturePad.isDrawingExist){
+                signatureNotValidated();
+            }
+        }
+    });
+
+    $(".onlyCreateFile").click(function (e) {
+        if($('form.tofes101-form').valid() && $.fn.signaturePad.isDrawingExist) {
+            $('#signature-error').hide();
+            sendData(e,true);
+        } else {
+            if(!$.fn.signaturePad.isDrawingExist){
+                signatureNotValidated();
+            }
+        }
+    });
+
+    $(document).on("change", "input[type=file]", function(){
+        var alowedExts = ["png", "gif", "jpg", "jpeg", "pdf"];
+        var fileName = $(this).val();
+        fileName = fileName.substring(fileName.lastIndexOf("\\") + 1, fileName.length);
+        $(this).next('.custom-file-label').html(fileName);
+        var fileExt = fileName.split(".").reverse()[0].toLowerCase();
+
+        if(alowedExts.indexOf(fileExt) === -1){
+            $(this).parent().find("div.invalid-feedback").show();
+            $(this).next('.custom-file-label').html("צירוף קבצים");
+            $(this).val("");
+        }else{
+            $(this).parent().find("div.invalid-feedback").hide();
+            $(this).next('.custom-file-label').html(fileName);
+        }
+    });
+
+    $(".closeAndExit").click(function(){
+        window.location.href = "https://" + location.hostname;
+    });
+
+    function signatureNotValidated(){
+        if($('form.tofes101-form').valid() && !($("input").is(":focus"))){
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $("#signaturePad").offset().top
+            }, 0).stop() ;
+        }
+        $('#signature-error').html("חובה לחתום");
+        $('#signature-error').show();
+        $("div.wrapperLoader").hide();
+    }
+
+    function sendData(e, isCreateFileOnly){
+        e.preventDefault();
+        var data = collectData(e);
+        if (data == null) {
+            return null;
+        }
+
+        $("div.firstStep").hide();
+
+        let grecaptchaToken = null;
+        grecaptcha.ready(function() {
+            grecaptcha.execute('6Lfb53caAAAAAFPk-DdCDdPeC_Umv-xPAa9qOn7a', {action: 'submit_101'}).then(function(token) {
+                grecaptchaToken = token;
+                data.grecaptchaToken = grecaptchaToken;
+                data.isCreateFileOnly = isCreateFileOnly ? 1 : 0;
+                data = JSON.stringify(data);
+                var formData = new FormData();
+                formData.append('data', data);
+
+                // Attach file
+                $("input[type=file]").each(function () {
+                    formData.append($(this).attr("id"), $(this)[0].files[0]);
+                });
+
+                const params = {
+                    type: "POST",
+                    url: '/api/101pdf/',
+                    data: formData,
+                    cache: false,
+                    contentType: false, //this is required
+                    processData: false, //this is required
+
+                    success: function(data){
+                        $("div.firstStep div.error").hide();
+
+                        data = JSON.parse(data);
+                        if(data){
+                            if(isCreateFileOnly){
+                                $("div.firstStep").show();
+                                $("div.wrapperLoader").hide();
+                                location.href = "/e.php?fid=" + data.fileId + "&withoutUser=1";
+                            } else if (data.code) {
+                                $("div.firstStep").show();
+                                $("div.wrapperLoader").hide();
+                                switch (data.code) {
+                                    case 500:
+                                        grecaptcha.render("captcha", {
+                                            sitekey: "6LeMS5AlAAAAAAyREiaY4_0Bw_TR4Nsr0nlWi_4T",
+                                            callback: (captchaToken)=>{
+                                                $("#captcha").data("token", captchaToken);
+                                            },
+                                            action: "submit_101",
+                                        });
+                                        break;
+                                    case 600:
+                                        $("div.firstStep div.error").show();
+                                        break;
+                                }
+                            } else {
+                                $("div.wrapperLoader").hide();
+                                $("div.secondStep").show();
+                                $(".emailAddress").val("");
+                                $("#mailModal button.close, #mailModalSendToManager button.close").remove();
+                            }
+                        }else{
+                            $("div.firstStep").show();
+                            $("div.firstStep div.error").show();
+                            $("div.wrapperLoader").hide();
+                        }
+                    },
+                    error: function(){
+                        $("div.firstStep").show();
+                        $("div.firstStep div.error").show();
+                        $("div.wrapperLoader").hide();
+                    }
+                }
+                $.ajax(params);
+            });
+        });
+    }
+
+    function validIdNumber(idNumber, isAllowEmpty){
+        idNumber = idNumber.toString().trim();
+        if(idNumber == ""){
+            return isAllowEmpty;
+        }
+        if(idNumber.length > 9){
+            return false;
+        }
+        var checkDigit = parseInt(idNumber.slice(-1));
+        var numbersWithoutCheckDigit = idNumber.substring(0, idNumber.length - 1);
+        var countToPadding = 8 - numbersWithoutCheckDigit.length;
+        var padding = "0".repeat(countToPadding);
+        numbersWithoutCheckDigit = padding + numbersWithoutCheckDigit;
+        var numArr = numbersWithoutCheckDigit.split("");
+        var arrAlgorithm = [1, 2, 1, 2, 1, 2, 1, 2];
+        var sum = 0;
+        for(var i = 0; i < numArr.length; i++){
+            var temp = numArr[i] * arrAlgorithm[i];
+            if(temp > 9){
+                temp = temp.toString().split("").reduce(function(total, num){
+                    return parseInt(total) + parseInt(num);
+                });
+            }
+            sum += temp;
+        }
+
+        if(((sum + checkDigit) % 10) == 0){
+            return true;
+        }
+        return false;
+    }
+
+    function checkIsSameId(el, isAllowEmpty){
+        idNumber = $(el).val().toString().trim();
+        if(idNumber == ""){
+            return isAllowEmpty;
+        }
+
+        var isValid = true;
+        $("input[data-validate='id']").not(el).each(function(i, el){
+            var val = ($(el).val()).toString().trim();
+            if(val != "" && idNumber == val){
+                isValid = false
+            }
+        });
+        return isValid;
+    }
+
+    function validDate(val) {
+        if (!val || !val.length) {
+            return false;
+        }
+        var res = val.split("/");
+        for (var i=0; i<res.length; i++) {
+            res[i] = parseInt(res[i], 10);
+        }
+        if (res.length != 3 || !res[0] || !res[1] || !res[2]) {
+            return false;
+        }
+
+        //make sure it's an actual date
+        var dt = new Date(res[2], res[1]-1, res[0]);
+        return (dt.getDate() != res[0] || dt.getMonth() != res[1]-1 || dt.getFullYear() != res[2]) ? false : true;
+    }
+
+    function replaceAttrOfElement(element, attrName, newIndex) {
+        element = $(element);
+        var oldNameAttr = element.attr(attrName);
+        var newName = oldNameAttr.replace("-1", "-"+newIndex);
+        element.attr(attrName, newName);
+    }
+
+    $('.wrapperSign').signaturePad({drawOnly:true, lineColour: "#DDDDDD", lineTop: 149, penColour: "#0000ff", penWidth: 3, clear: "#clear"});
+});

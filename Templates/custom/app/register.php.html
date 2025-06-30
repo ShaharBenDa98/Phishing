@@ -1,0 +1,288 @@
+<div id="tooltip-confirm">
+    <div class="bg">
+        <div class="icon">
+            <svg class="highPriority icon">
+                <use xlink:href="#highPriority"></use>
+            </svg>
+        </div>
+        <div class="text"></div>
+        <div class="popup-footer">
+
+            <a class="tooltip-button tooltip-confirm simple-btn">
+                <span class="btnConfirmText"></span>
+            </a>
+
+            <a class="tooltip-button tooltip-confirm-2 simple-btn">
+                <span class="btnConfirmText2"></span>
+            </a>
+
+            <a class="tooltip-button tooltip-cancel simple-btn">
+                <span class="btnCancelText"></span>
+            </a>
+
+        </div>
+    </div>
+</div>
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<title>יצירת חשבון חדש</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" >
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+		<link href="css/bootstrap.css%3Ft=1641811893.css" rel="stylesheet">
+		<link href="css/bootstrap-rtl.css%3Ft=1544955874.css" rel="stylesheet">		<link href="css/fonts/line-awesome/css/line-awesome.min.css%3Ft=1543174917.css" rel="stylesheet">
+		<link href="css/login.css.php%3Ft=1747994350&amp;l=he.css" rel="stylesheet">
+		<link href="css/responsive.css%3Ft=1707130289.css" rel="stylesheet">
+		<script type="text/javascript" src="js/jquery-3.6.0.min.js%3Ft=1614766748"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js%3Ft=1641811893"></script>
+		<script type="text/javascript" src="js/json2.js%3Ft=1543174917"></script>
+		<script type="text/javascript" src="js/underscore-min.js%3Ft=1543174917"></script>
+		<script type="text/javascript" src="js/backbone.js%3Ft=1682603930"></script>
+		<script type="text/javascript" src="js/meckano.sync.js%3Ft=1698847394"></script>
+		<script type="text/javascript" src="js/jquery.metadata.js%3Ft=1543174917"></script>
+		<script type="text/javascript" src="js/Application.js%3Ft=1742290882"></script>
+		<script type="text/javascript" src="js/Dialogs.js%3Ft=1742127375"></script>
+		<script type="text/javascript" src="js/RegisterScripts.js%3Ft=1708512315"></script>
+        <script type="text/javascript" src="js/zxcvbn.js%3Ft=1735638479"></script>
+        <script type="text/javascript" src="js/loadSvgIcons.js%3Ft=174107117992322&amp;mainSvgTs=1741244869922834"></script>
+
+                    <script type="text/javascript" src="tpl/tpl.js%3Ft=1741515304"></script>
+        
+					<script type="text/javascript">
+				const _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-30966104-1']);
+				_gaq.push(['_trackPageview']);
+
+				(function() {
+					const ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					const s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			</script>
+			
+        <link rel="shortcut icon" sizes="32x32" href="images/favicon/android-chrome-32X32.png" />
+        <link rel="icon" sizes="57x57" href="images/favicon/android-chrome-57X57.png" />
+        <link rel="icon" sizes="72x72" href="images/favicon/android-chrome-72X72.png" />
+        <link rel="icon" sizes="114x114" href="images/favicon/android-chrome-114X114.png" />
+        <link rel="icon" sizes="120x120" href="images/favicon/android-chrome-120X120.png" />
+        <link rel="icon" sizes="128x128" href="images/favicon/android-chrome-128X128.png" />
+        <link rel="icon" sizes="144x144" href="images/favicon/android-chrome-144X144.png" />
+        <link rel="icon" sizes="152x152" href="images/favicon/android-chrome-152X152.png" />
+        <link rel="icon" sizes="167x167" href="images/favicon/android-chrome---167X167.png" />
+        <link rel="icon" sizes="180x180" href="images/favicon/android-chrome-180X180.png" />
+        <link rel="icon" sizes="192x192" href="images/favicon/android-chrome-192x192.png" />
+
+        <script src="https://apis.google.com/js/platform.js?onload=init&ts=1747994350" async defer></script>
+        <script src="https://www.google.com/recaptcha/enterprise.js?render=6Ld9x48lAAAAADB8NDj2CmlVBTfd9MIZflJFZ02_"></script>
+    </head>
+	<body>
+
+	<section class="wrapper">
+		<div class="container-fluid">
+			<div class="row register">
+				<div class="col-lg-7 col-md-6 nopadding matchHeight rightSide">
+                    <div class="newAccount redirect-to-login">
+                        <span>לקוחות קיימים?</span>
+                        <a href="login.php.html" >לחצו כאן להתחבר</a>
+                    </div>
+					<form id="registerForm" method="post" autocomplete="off">
+						<a href="https://www.meckano.co.il" class="logoWrap" target="_blank">
+                            <div class="meckano-logo-container">
+                                <div class="meckano-logo-inner-container">
+                                    <svg class="meckanoLogo">
+                                        <use xlink:href="#meckanoLogo"></use>
+                                    </svg>
+                                </div>
+                            </div>
+						</a>
+                        <div class="register-step-one ">
+                            <h2 class="head-title">
+                                נסו אותנו ל-15 יום, זה בחינם                            </h2>
+                            <p class="head-sentence">
+                                הרשמה קלה ומהירה ללא צורך באמצעי תשלום                            </p>
+                            <div class="inputWrap floatingLabel">
+                                <input type="text" id="companyName" class="companyName" json='{"required":true,"type":1,"error":"\u05e0\u05d0 \u05dc\u05d4\u05d6\u05d9\u05df \u05e9\u05dd \u05dc\u05d7\u05d1\u05e8\u05d4","tooltip":0}'>
+                                <label for="companyName">שם העסק / חברה</label>
+                            </div>
+
+                            <div class="name-wrapper">
+                                <div class="inputWrap floatingLabel">
+                                    <input type="text" id="firstname" class="firstname" json='{"required":true,"type":1,"error":"\u05e0\u05d0 \u05dc\u05d4\u05db\u05e0\u05d9\u05e1 \u05e9\u05dd \u05e4\u05e8\u05d8\u05d9 \u05dc\u05e2\u05d5\u05d1\u05d3","tooltip":0}'>
+                                    <label for="firstname">שם פרטי</label>
+                                </div>
+
+                                <div class="inputWrap lastname-wrap floatingLabel">
+                                    <input type="text" id="lastname" autocomplete="off" class="lastname" json='{"required":true,"type":1,"error":"\u05e0\u05d0 \u05dc\u05d4\u05db\u05e0\u05d9\u05e1 \u05e9\u05dd \u05de\u05e9\u05e4\u05d7\u05d4 \u05e9\u05dc \u05d4\u05e2\u05d5\u05d1\u05d3","tooltip":0}'>
+                                    <label for="lastname">שם משפחה</label>
+                                </div>
+
+                            </div>
+
+                            <div class="inputWrap floatingLabel">
+                                <input type="text" id="phone" autocomplete="off" class="phone" json='{"required":true,"type":6,"error":"\u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df \u05dc\u05d0 \u05ea\u05e7\u05d9\u05df","tooltip":0}'>
+                                <label for="phone">
+                                    <span>טלפון נייד </span>
+                                    <span class="phone-plus">(קוד אימות יישלח למספר)</span>
+                                </label>
+                            </div>
+
+                            <div class="inputWrap floatingLabel">
+                                <input type="email" id="email-input" name="email" autocomplete="off" class="email" json='{"required":true,"type":5,"error":"\u05e0\u05d0 \u05dc\u05d4\u05db\u05e0\u05d9\u05e1 \u05db\u05ea\u05d5\u05d1\u05ea \u05d3\u05d5\u05d0\u05e8 \u05d0\u05dc\u05e7\u05d8\u05e8\u05d5\u05e0\u05d9 \u05d7\u05d5\u05e7\u05d9\u05ea","tooltip":0,"emailExists":"\u05d4\u05d9\u05d9, \u05d2\u05dd \u05d6\u05d4 \u05e7\u05d5\u05e8\u05d4. \u05e0\u05e8\u05d0\u05d4 \u05e9\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05e0\u05d5 \u05dc\u05e4\u05ea\u05d5\u05d7 \u05dc\u05da \u05de\u05e0\u05d5\u05d9, \u05d0\u05d1\u05dc \u05d0\u05dc \u05d3\u05d0\u05d2\u05d4 \u05e6\u05d5\u05d5\u05ea \u05d4\u05e9\u05d9\u05e8\u05d5\u05ea \u05e9\u05dc\u05e0\u05d5 \u05db\u05d0\u05df \u05dc\u05e2\u05d6\u05d5\u05e8 \u05dc\u05da. \u05e4\u05e0\u05d5 \u05d0\u05dc\u05d9\u05e0\u05d5 \u05d1\u05d8\u05d5\u05e4\u05e1 \u05d9\u05e6\u05d9\u05e8\u05ea \u05e7\u05e9\u05e8 \u05d5\u05e0\u05d3\u05d0\u05d2 \u05dc\u05d7\u05d6\u05d5\u05e8 \u05d1\u05d4\u05e7\u05d3\u05dd."}'>
+                                <label for="email-input" class="email">
+                                    <span>מייל</span>
+                                    <span class="mail-plus">(ישמש גם כשם המשתמש שלך)</span>
+                                </label>
+                            </div>
+
+                            <div class="password-wrapper">
+                                <div class="inputWrap floatingLabel">
+                                    <button class="showPassBtn" type="button" tabindex="-1">
+                                        <svg class="showPass"><use xlink:href="#showPass"></use></svg>
+                                    </button>
+                                    <input type="password" id="password" name="password" autocomplete="off" class="password meterPassword" json='{"required":true,"type":1,"error":"\u05e9\u05d3\u05d4 \u05d7\u05d5\u05d1\u05d4. \u05e9\u05d9\u05dc\u05d5\u05d1 \u05e9\u05dc \u05d0\u05d5\u05ea\u05d9\u05d5\u05ea \u05d5\u05de\u05e1\u05e4\u05e8\u05d9\u05dd. (\u05de\u05d9\u05e0\u05d9\u05de\u05d5\u05dd 8 \u05ea\u05d5\u05d5\u05d9\u05dd)","tooltip":0}'>
+                                    <meter min="0" max="4" id="password-strength-meter" required></meter>
+                                    <label for="password">בחירת סיסמה</label>
+                                </div>
+
+                                <div class="inputWrap repeatPassword-wrap floatingLabel">
+                                    <input type="password" id="repeatPassword" name="repeatPassword" autocomplete="off" class="password" json='{"required":true,"type":1,"error":"\u05e1\u05d9\u05e1\u05de\u05d4 \u05d0\u05d5 \u05d0\u05d9\u05de\u05d5\u05ea \u05e1\u05d9\u05e1\u05de\u05d4 \u05dc\u05d0 \u05ea\u05d5\u05d0\u05de\u05d9\u05dd.","tooltip":0}'>
+                                    <label for="repeatPassword">אימות סיסמה</label>
+                                </div>
+                            </div>
+
+                            <div class="xC registerNotification" style="display: none"></div>
+
+                            <div class="privacy-newsletter-wrapper">
+                                <div class="privacyWrap">
+                                    <div class="checkboxWrap">
+                                        <input type="checkbox" id="privacy" name="privacy" class="privacy" json='{"required":true,"type":1,"error":"\u05e1\u05d9\u05e1\u05de\u05d4 \u05d0\u05d5 \u05d0\u05d9\u05de\u05d5\u05ea \u05e1\u05d9\u05e1\u05de\u05d4 \u05dc\u05d0 \u05ea\u05d5\u05d0\u05de\u05d9\u05dd.","tooltip":0}'>
+                                        <label for="privacy" class="privacy">קראתי ואישרתי את                                            <a href="https://www.meckano.co.il/%D7%AA%D7%A7%D7%A0%D7%95%D7%9F-%D7%94%D7%90%D7%AA%D7%A8" target="_blank">תנאי השימוש</a>
+                                            ואת                                            <a href="https://www.meckano.co.il/%D7%94%D7%A6%D7%94%D7%A8%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA" target="_blank">מדיניות הפרטיות</a>
+                                        </label>
+                                    </div>
+                                    <p class="privacyError">חובה לסמן שקראת את תנאי השימוש ומדיניות הפרטיות </p>
+                                </div>
+                                <div class="newsletterWrap">
+                                    <div class="checkboxWrap">
+                                        <input type="checkbox" id="newsletter" name="newsletter" class="newsletter" json='{"required":true,"type":1,"error":"\u05e1\u05d9\u05e1\u05de\u05d4 \u05d0\u05d5 \u05d0\u05d9\u05de\u05d5\u05ea \u05e1\u05d9\u05e1\u05de\u05d4 \u05dc\u05d0 \u05ea\u05d5\u05d0\u05de\u05d9\u05dd.","tooltip":0}'>
+                                        <label for="newsletter">שלחו גם אליי עדכוני מערכת וטיפים לעבודה נכונה</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="captcha-container inputWrap">
+                                <div id="captcha"></div>
+                                <p class="captchaError"></p>
+                            </div>
+                            <div class="submitButtonsWrapper">
+                                <div class="inputWrap" id="submitButtons">
+                                    <input class="send sl registration" type="button" name="submit" value="קדימה, מתחילים כאן">
+                                </div>
+                            </div>
+                            <div class="big-preloader"></div>
+                        </div>
+                        <div class="register-step-two hidden">
+                            <div class="verificationCodeTxt sl">
+                                <div>שלחנו לך קוד אימות,<br> יש להזין אותו למטה על מנת להמשיך.</div>
+                                <div class="verificationCodeTxt time-code">הקוד תקף ל-5 דקות</div>
+                            </div>
+                            <div class="xC inputWrap" id="verificationCodeSMS">
+                                <label for="verificationCodeSMS" class="verificationCodeSMS"> הזינו את קוד האימות</label>
+                                <input type="text" id="verificationCodeSMS" name="verificationCodeSMS" autocomplete="off" class="verificationCodeSMS">
+                                <div class="xC registerNotification" style="display: none"></div>
+                                <a href="register.php.html#" class="send sl resend" tabindex="-1">שלח קוד אימות מחדש</a>
+                            </div>
+
+
+                            <div class="submitButtonsWrapper">
+                                <div class="xC inputWrap" id="submitButtons">
+                                    <input class="send sl submit-verification-sms" type="button" name="submit" value="המשך">
+                                </div>
+                            </div>
+
+                            <div class="show-change-phone">
+                                <div class="xC inputWrap" id="show-change-phone">
+                                    <input class="send sl show-change-phone-button" type="button" value="שינוי מספר טלפון">
+                                </div>
+                            </div>
+
+                            <div class="update-phone-popup hidden">
+                                <div class="fade-bg"></div>
+                                <div class="change-phone-wrapper">
+                                    <h3>שינוי מספר טלפון</h3>
+                                    <div class="xC inputWrap" id="update-phone">
+                                        <input type="text" id="update-phone" name="update-phone" autocomplete="off" class="update-phone">
+                                        <p class="updatePhoneError"></p>
+                                    </div>
+
+
+                                    <div class="submit-update-phone-wrapper">
+                                        <div class="xC inputWrap" id="submit-update-phone">
+                                            <input class="send sl submit-update-phone" type="button" name="submit" value="עדכן">
+                                        </div>
+                                        <div class="xC inputWrap" id="cancel-update-phone">
+                                            <input class="send sl cancel-update-phone" type="button" name="submit" value="ביטול">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="big-preloader"></div>
+                        </div>
+                        <div class="register-step-three hidden">
+                            <div class="register-success-text">
+                                <h2>היי, תודה שהצטרפת!</h2>
+                                <p>ממש עכשיו שלחנו לך מייל עם קישור להפעלת המערכת</p>
+                                <p>אם לא קיבלת מאיתנו מייל, ניתן לפנות                                                                            <a target="_blank" href="https://www.meckano.co.il/%D7%91%D7%95%D7%90%D7%95-%D7%A0%D7%93%D7%91%D7%A8">אלינו כאן</a>
+                                                                        ונשמח לעזור.                                </p>
+                            </div>
+                            <div class="inputWrap">
+                                <input class="register-success-button sl" type="button" value="כניסה למערכת">
+                            </div>
+                        </div>
+
+                    </form>
+
+					<div class="loginFooter">
+						<p>© 2025 כל הזכויות שמורות - Meckano </p>
+						<a target="_blank" href="https://www.meckano.co.il/%D7%AA%D7%A7%D7%A0%D7%95%D7%9F-%D7%94%D7%90%D7%AA%D7%A8">תנאי שימוש</a>
+						<a target="_blank" href="https://www.meckano.co.il/%D7%94%D7%A6%D7%94%D7%A8%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA">הצהרת פרטיות</a>
+                                                    <a target="_blank" href="tofes101.html">טופס 101</a>
+                        						<a href="https://app.meckano.co.il/register.php?l=en">
+							<span>En</span>
+							<svg class="language"><use xlink:href="#language"></use></svg>
+						</a>
+					</div>
+				</div>
+				<div class="col-lg-5 col-md-6 nopadding matchHeight leftSide">
+					<div class="bgWrap register">
+						<div class="centerdTxt">
+							<h1>דיווח וניהול שעות עבודה <br><span>במערכת נוכחות מנצחת</span></h1>
+							<h2>נהלו את המשאב האנושי בארגון <br> עם מגוון פתרונות ייחודיים בכל זמן ומכל מקום</h2>
+							<a target="_blank" href="https://www.meckano.co.il/%D7%90%D7%99%D7%9A-%D7%96%D7%94-%D7%A2%D7%95%D7%91%D7%93">רוצה לדעת יותר?</a>
+						</div>
+						<div class="appLinks">
+							<a target="_blank" href="https://itunes.apple.com/il/app/meckano/id572248235?mt=8" target="_blank">
+								<svg class="appstore"><use xlink:href="#appstore"></use></svg>
+								<span class="sr-only">app store</span>
+							</a>
+							<a target="_blank" href="https://play.google.com/store/apps/details?id=com.kfir.Meckano" target="_blank">
+								<svg class="googlePlay"><use xlink:href="#googlePlay"></use></svg>
+								<span class="sr-only">google play</span>
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+    <footer>
+        <script type="text/javascript">
+            window.addEventListener("load", () => {
+                Application.api = '/api/';
+                RegisterManager.init();
+            });
+        </script>
+    </footer>
+  </body>
+</html>
+

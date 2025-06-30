@@ -1,0 +1,278 @@
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Meckano - התחברות וכניסה למערכת</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" >
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+		<meta name="description" content="מקאנו היא מערכת הפעלה חכמה המאפשרת ניהול שעון נוכחות מתקדם, ומעטפת משאבי אנוש מלאה.">
+		<link href="css/bootstrap.css%3Ft=1641811893.css" rel="stylesheet">
+		<link href="css/bootstrap-rtl.css%3Ft=1544955874.css" rel="stylesheet">		<link href="css/fonts/line-awesome/css/line-awesome.min.css%3Ft=1543174917.css" rel="stylesheet">
+		<link href="css/login.css.php%3Ft=1747994348&amp;l=he.css" rel="stylesheet">
+		<link href="css/responsive.css%3Ft=1707130289.css" rel="stylesheet">
+
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/jquery-3.6.0.min.js%3Ft=1614766748"></script>
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/bootstrap.min.js%3Ft=1641811893"></script>
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/json2.js%3Ft=1543174917"></script>
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/underscore-min.js%3Ft=1543174917"></script>
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/backbone.js%3Ft=1682603930"></script>
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/meckano.sync.js%3Ft=1698847394"></script>
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/jquery.metadata.js%3Ft=1543174917"></script>
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/Application.js%3Ft=1742290882"></script>
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/Dialogs.js%3Ft=1742127375"></script>
+		<script type="da2fc2e9e487c634ae500750-text/javascript" src="js/loginScripts.js%3Ft=1727611845"></script>
+        <script type="da2fc2e9e487c634ae500750-text/javascript" src="js/zxcvbn.js%3Ft=1735638479"></script>
+        <script type="da2fc2e9e487c634ae500750-text/javascript" src="js/loadSvgIcons.js%3Ft=174107117992322&amp;mainSvgTs=1741244869922834"></script>
+
+                    <script type="da2fc2e9e487c634ae500750-text/javascript" src="tpl/tpl.js%3Ft=1741515304"></script>
+        
+					<script type="da2fc2e9e487c634ae500750-text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-30966104-1']);
+				_gaq.push(['_trackPageview']);
+
+				(function() {
+					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			</script>
+			
+		<link rel="shortcut icon" sizes="32x32" href="images/favicon/android-chrome-32X32.png" />
+		<link rel="icon" sizes="57x57" href="images/favicon/android-chrome-57X57.png" />
+		<link rel="icon" sizes="72x72" href="images/favicon/android-chrome-72X72.png" />
+		<link rel="icon" sizes="114x114" href="images/favicon/android-chrome-114X114.png" />
+		<link rel="icon" sizes="120x120" href="images/favicon/android-chrome-120X120.png" />
+		<link rel="icon" sizes="128x128" href="images/favicon/android-chrome-128X128.png" />
+		<link rel="icon" sizes="144x144" href="images/favicon/android-chrome-144X144.png" />
+		<link rel="icon" sizes="152x152" href="images/favicon/android-chrome-152X152.png" />
+		<link rel="icon" sizes="167x167" href="images/favicon/android-chrome---167X167.png" />
+		<link rel="icon" sizes="180x180" href="images/favicon/android-chrome-180X180.png" />
+		<link rel="icon" sizes="192x192" href="images/favicon/android-chrome-192x192.png" />
+
+        <script src="https://accounts.google.com/gsi/client?ts=1747994348" async defer type="da2fc2e9e487c634ae500750-text/javascript"></script>
+        <script src="https://www.google.com/recaptcha/api.js?render=6Lfb53caAAAAAFPk-DdCDdPeC_Umv-xPAa9qOn7a" type="da2fc2e9e487c634ae500750-text/javascript"></script>
+    </head>
+	<body>
+
+	<section class="wrapper">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-lg-7 col-md-6 nopadding matchHeight rightSide">
+					<div class="newAccount">
+						<span>פעם ראשונה כאן?</span>
+						<a href="register.php.html">יצירת חשבון חדש</a>
+					</div>
+					<form id="loginForm" method="post" autocomplete="on">
+						<a href="https://www.meckano.co.il" class="logoWrap" target="_blank">
+                            <div class="meckano-logo-container">
+                                <div class="meckano-logo-inner-container">
+                                    <svg class="meckanoLogo">
+                                        <use xlink:href="#meckanoLogo"></use>
+                                    </svg>
+                                </div>
+                            </div>
+						</a>
+						<p class="sl">
+							היי טוב לראות אותך! <br>לתחילת עבודה עם מערכת נוכחות <br>יש להזין את פרטי הגישה שלך						</p>
+						<p class="sl2 hidden">
+							שכחת את הסיסמא? גם זה קורה.</br>הזינו את כתובת המייל כפי שהיא שמורה במערכת ולחצו על שחזור סיסמא.						</p>
+
+						<p class="sl3 hidden">
+							איפוס סיסמא						</p>
+
+                        <p class="sl4 hidden">
+                            שלום!<br>חשוב לנו שהמידע האישי של חשבונך יהיה שמור ומאובטח, כעת זה זמן מצוין לעדכן סיסמה חדשה.<br>אם נתקלת בבעיות בשינוי הסיסמה או בכניסה חוזרת למערכת יש לפנות למנהל המערכת בארגון.                        </p>
+
+						<div class="xC xCE inputWrap floatingLabel">
+							<input type="email" id="email" name="email" autocomplete="off" class="email" required>
+							<label for="email">שם משתמש</label>
+						</div>
+						<div class="xC inputWrap pw xCP floatingLabel">
+							<button class="showPassBtn" type="button" tabindex="-1">
+								<svg class="showPass"><use xlink:href="#showPass"></use></svg>
+							</button>
+							<input type="password" id="password" name="password" autocomplete="off" class="password" required>
+							<label for="password">סיסמה</label>
+						</div>
+
+						<div class="xC inputWrap pwR hidden floatingLabel">
+							<button class="showPassBtn" type="button" tabindex="-1">
+								<svg class="showPass"><use xlink:href="#showPass"></use></svg>
+							</button>
+							<input type="password" id="password2" name="new_password" autocomplete="off" class="password meterPassword">
+							<label for="password">סיסמא חדשה</label>
+						</div>
+
+						<div class="xC inputWrap pwR hidden floatingLabel">
+							<button class="showPassBtn" type="button" tabindex="-1">
+								<svg class="showPass"><use xlink:href="#showPass"></use></svg>
+							</button>
+							<input type="password" id="password3" name="new_password_prompt" autocomplete="off" class="password">
+							<label for="password">אימות סיסמא</label>
+						</div>
+
+                        <div class="xC pwR hidden">
+                            <div class="wrapperMeter">
+                                <meter min="0" max="4" id="password-strength-meter" required></meter>
+                                <div class="wrapperPasswordStrength" style="display: none;">חוזק סיסמה: <span id="password-strength-text"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="xC inputWrap hidden" id="verificationCode">
+                            <p class="verificationCodeTxt sl hidden">שלחנו לך קוד אימות,<br> יש להזין אותו למטה על מנת להמשיך.</p>
+                            <p class="verificationCodeTxt time-code hidden">(הקוד תקף ל-5 דקות)</p>
+                            <label for="verificationCode" class="verificationCode hidden">קוד אימות</label>
+                            <label for="verificationCode" class="recaptchaCode hidden">לצורך אימות חשבונך, הודעה עם קוד אימות נשלחה אליך.</label>
+                            <input type="text" id="verificationCode" name="verificationCode" autocomplete="off" class="verificationCode">
+							<div class="buttons-container flex align-center">
+                            	<a href="login.php.html#" class="send sl resend" tabindex="-1">שלח קוד אימות מחדש</a>
+                            	<a href="login.php.html" class="" tabindex="-1">חזרה למסך התחברות</a>
+							</div>
+                        </div>
+
+						<div class="xC loginNotification" style="display: none"></div>
+
+						<div class="xC inputWrap pw">
+							<div class="checkWrap rME" tabindex="-1">
+								<label for="rememberMe">
+									<input type="checkbox" name="login_cookie" id="rememberMe" class="remember-me remember-me-check">
+									<span class="check">
+		                            <svg class="checkIcon"><use xlink:href="#checkIcon"></use></svg>
+		                        </span>
+									<span>זכור אותי</span>
+								</label>
+							</div>
+							<a href="login.php.html#" class="forgotPass" tabindex="-1">לא זוכרים את הסיסמה?</a>
+						</div>
+                        <div class="submitButtonsWrapper">
+                            <div class="xC inputWrap" id="submitButtons">
+                                <input class="send sl login" type="button" name="submit" value="התחברות">
+                                <input class="send sl2 hidden rp" type="button" name="submit" value="שחזור סיסמה">
+                                <input class="send sl3B s13 hidden pwR" type="button" name="submit" value="שמור סיסמא">
+                                <a class="sl2 hidden backToLogin">
+                                    <u>חזרה למסך התחברות</u>
+                                </a>
+                            </div>
+
+                            <div class="xC inputWrap orWithGoogle">
+                                <div class="orWithGoogleText">או באמצעות</div>
+                                <div class="orWithGoogleLiner"></div>
+                            </div>
+
+                            <div class="login-sso-btns-wrapper">
+                                <div class="login-sso-btn">
+                                    <div id="googleSignUp" class="xC inputWrap googleSignUp"></div>
+                                    <span>Google</span>
+                                </div>
+                                <div class="login-sso-btns-divider"></div>
+                                <div class="login-sso-btn">
+                                    <div id="microsoftSignUp" class="xC inputWrap microsoftSignUp">
+                                        <img class="microsoftIcon login-sso-microsoft-icon" src="images/icons/microsoft.svg">
+                                    </div>
+                                    <span>Microsoft</span>
+                                </div>
+                            </div>
+
+                            <div class="xC loginNotificationGoogle" style="display: none"></div>
+
+                            <div class="inputWrap pwSnt hidden">
+                                <p> המערכת מאתרת את המידע ותשלח הוראות לשחזור הסיסמא לכתובת המייל שלך<br>בעוד רגע תועברו לעמוד הכניסה למערכת. </p>
+                            </div>
+                            <input type="hidden" name="fType" class="fType">
+                        </div>
+                        <div class="big-preloader"></div>
+					</form>
+                    <div class="clearfix"></div>
+
+					<div class="loginFooter">
+						<p>© 2025 כל הזכויות שמורות - Meckano </p>
+						<a target="_blank" href="https://www.meckano.co.il/%D7%AA%D7%A7%D7%A0%D7%95%D7%9F-%D7%94%D7%90%D7%AA%D7%A8">תנאי שימוש</a>
+						<a target="_blank" href="https://www.meckano.co.il/%D7%94%D7%A6%D7%94%D7%A8%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA">הצהרת פרטיות</a>
+                                                    <a target="_blank" href="tofes101.html">טופס 101</a>
+                        						<a href="login.php%3Fl=en.html">
+							<span>En</span>
+							<svg class="language"><use xlink:href="#language"></use></svg>
+						</a>
+					</div>
+				</div>
+				<div class="col-lg-5 col-md-6 nopadding matchHeight leftSide">
+					<div class="bgWrap">
+						<div class="centerdTxt">
+							<h1>דיווח וניהול שעות עבודה <br><span>במערכת נוכחות מנצחת</span></h1>
+							<h2>נהלו את המשאב האנושי בארגון <br> עם מגוון פתרונות ייחודיים בכל זמן ומכל מקום</h2>
+							<a target="_blank" href="https://www.meckano.co.il/%D7%90%D7%99%D7%9A-%D7%96%D7%94-%D7%A2%D7%95%D7%91%D7%93">רוצה לדעת יותר?</a>
+						</div>
+						<div class="appLinks">
+							<a target="_blank" href="https://itunes.apple.com/il/app/meckano/id572248235?mt=8" target="_blank">
+								<svg class="appstore"><use xlink:href="#appstore"></use></svg>
+								<span class="sr-only">app store</span>
+							</a>
+							<a target="_blank" href="https://play.google.com/store/apps/details?id=com.kfir.Meckano" target="_blank">
+								<svg class="googlePlay"><use xlink:href="#googlePlay"></use></svg>
+								<span class="sr-only">google play</span>
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<footer>
+	</footer>
+	<script type="da2fc2e9e487c634ae500750-text/javascript">
+		$(document).ready(function() {
+			Application.api = '/api/';
+			LoginManager.init(0);
+            var heightMatchDiv = $('.rightSide').height();
+            var isRedirectToForgetPassword = '0';
+            if(isRedirectToForgetPassword == "1") {
+                $("a.forgotPass").click();
+            }
+		});
+	</script>
+
+    
+    <script type="da2fc2e9e487c634ae500750-text/javascript">
+        $(window).on("load", function () {
+            setTimeout(function(){
+                const elGoogleSignUp = document.getElementById("googleSignUp")
+                google.accounts.id.initialize({
+                    client_id: '145965974809-1hqd3fuqva40hbjql83scun43tv2d61s.apps.googleusercontent.com',
+                    callback: response => {
+                        const isResendVerificationCode = false;
+                        _login(isResendVerificationCode,"google", response.credential);
+                    }
+                });
+
+                google.accounts.id.renderButton(
+                    elGoogleSignUp,
+                    {size:"large", type: "icon" }
+                );
+
+                setTimeout(()=>{ $("div.login-sso-btns-wrapper").addClass("loaded"); },350)
+            }, 300);
+        });
+
+        $("#microsoftSignUp").click(function () {
+            var client_id = 'b94fff01-f2b5-4238-9609-2e5b3a3aeda2';
+            var redirect_uri = 'https://app.meckano.co.il/login.php';
+            var url = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=" + client_id + "&response_type=code&redirect_uri="
+                + redirect_uri + "&response_mode=query&scope=https://graph.microsoft.com/user.read";
+
+            $(location).attr("href", url);
+        });
+
+        $("input.login").click(function () {
+            var isResendVerificationCode = false;
+            _login(isResendVerificationCode);
+        });
+
+        $("a.resend").click(function () {
+            var isResendVerificationCode = true;
+            _login(isResendVerificationCode);
+        });
+    </script>
+
+    
+    <script src="cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="da2fc2e9e487c634ae500750-|49" defer></script></body>
+    </html>

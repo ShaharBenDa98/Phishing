@@ -1,0 +1,1683 @@
+const tpl = {
+    allWorkers:"All employees",
+    no:"None",
+    questionsReportLocation:"Choose location",
+    userQ:"Employee",
+    departmentQ:"Company",
+    departmentQS:"Department(s)",
+    workerQS:"Employee(s)",
+    reactivate:"Activate",
+    inputNumbers:"Enter employee numbers",
+    address: "Address",
+    comment: 'Comments',
+    noComment: 'No comments',
+    description: "Description",
+    rootDepartment: "Primary",
+    MultipleChoice: "Multiple choice",
+    numDepartments: "Departments",
+    rootTask: 'Primary',
+    parentQuestion: 'None',
+    noTasksDefined: "No tasks defined",
+    noTasksFound: "No tasks found",
+    notAssociated: "Not associated",
+    noFiltering: "Unfiltered",
+    noDepartmentFiltering: "Unfiltered",
+    nonAssociatedEmployees: "General‏",
+    inactiveEmployees: "Inactive employees",
+    allDepartments: "All departments",
+    naAssocUser: "User not found",
+    nsAssocDepartment: "Department not found",
+    validEmailTextErr:"Enter a valid email",
+    validDepartment : "Please choose a department",
+    validWorkerTag : "Invalid employee tag",
+    validDirectManager : "Please choose direct manager",
+    validContractId : "Please choose contract",
+    validRole : "Please choose or enter position",
+    validUserCalender : "Please choose a holiday calender",
+    validAbsencePolicy : "Please choose a absence policy",
+    validStatus : "Please choose employee type",
+    validUserTimezone : "Please choose timezone",
+    validstdtMonthTextErr:"Enter the standard monthly hours",
+    validTH_valueErr:"Enter hour limit",
+    validTH_tableErr:"Complete all fields in the table",
+    multDaySpan_valueErr:"Enter rest time between shifts",
+    weekly_rest_time_valueErr:"Enter weekly rest time",
+    overtime_pay_valueErr:"Must enter a value",
+    holiday_pay_valueErr:"Must enter a value",
+    close: "Close",
+    open: "Open",
+    edit: "Edit",
+    save: "Save",
+    update: "Update",
+    confirmLocked: "Confirm",
+    cencleLocked: "Cancel",
+    arrowRight: "Back",
+    arrowLeft: "Next",
+    arrowUp: "Previous employee",
+    arrowDown: "Next employee",
+    iconTooltipNotify: "/images/icon-notify-white.png",
+    iconTooltipHours: "/images/report-tooltip-overtime.png",
+    iconTooltipComment: "/images/report-tooltip-comment.png",
+    iconTooltipLocations: "/images/report-tooltip-locations.png",
+    holidayWeekend:"Weekend",
+    holidayWeekendJewishMessage:"Israeli holidays and Shabat start and end times:",
+    holidayWeekendMessage:"Holidays - start and end times:",
+    noticeDeactivateEmployee: "Deactivate employee?",
+    confirmToDeleteLocation: "Do you want to delete this location?",
+    noticeDeleteEmployee: "Deleting the user permanently will remove all his details and data collected for him including reports and documents. It will not be possible to restore or undo this operation after it has been performed.</br>To confirm the action, type 'DELETE' in the text box and click confirm:",
+    textToConfirmDeleteUser: "DELETE",
+    noticeOnlyManagerCanDeleteEmployee: "Only an admin can permanently delete an employee",
+    noPermissionWatchEmployeesDetails: "Unauthorized to view employee details",
+    noticeDepartmentDelete: "Delete department? Deleting a department will make its employees unaffiliated with a department",
+    copyOf: "Copy of",
+    associateAll: "Associate to all",
+    missingsNone: "No event",
+    missingsAdd: "+",
+    checkinAndCheckoutReportFailed: "Clock-in and clock-out reporting failed due to overlapping hours",
+    checkinReportFailed: "Clock-in reporting failed due to overlapping hours",
+    checkoutReportFailed: "Clock-out reporting failed due to overlapping hours",
+    absenceReportFailed: "Absence report failed",
+    closeWinIn: "You are being forwarded to the timesheet report in about",
+    seconds: "Seconds",
+    userContractTitle:"Defined employment contract",
+    contractNum:"Contract number: ",
+    contractName:"Contract name: ",
+    userContractNotExist:"No employment contract defined",
+    checkinAt: "Clock-in at",
+    checkin: "Clock-in",
+    checkout: "Clock-out",
+    hour: "Time",
+    mustInputLocationFromMapAndSetRadius: "Must add location using the selection box and enter a radius",
+    phoneAlreadyExist: "You can't add duplicate phone numbers",
+    locationAlreadyExist: "You can't add duplicate locations",
+    moreThan1SamePhone: "The contact table includes two or more identical numbers",
+    dropImage: "Drag image here",
+    inputImage: "Upload image",
+    dropDocument: "Drag document here",
+    inputDocument: "Upload file",
+    inputList: "Upload file or drop here",
+    departmentOrEmployee: "Department / employee",
+    regularTimeWithOverTime: "Overtime cannot be marked when time is calculated normally",
+    OverTimeSmallerThanRecognizeTime:"Value cannot be lower than the time recorded for the employee",
+    seperator: ">",
+    exportReport: "Export",
+    exportFile: "Export file",
+    goodMorning: "Good Morning",
+    goodEvening: "Good Evening",
+    goodAfternoon: "Good Afternoon",
+    goodNight: "Good Night",
+    userLocked: "Account locked. Click to unlock",
+    workerTag: "Employee tag",
+    emptyPassword: "Please choose password",
+    badEmail: "Invalid email",
+    missingFields: "Please complete all fields",
+    userEmailExists: "A user with this email address already exists",
+    allCompany: "For the entire company",
+    captchaLock: "Form locked: drag the tab to send",
+    captchaUnlock: "The form can be sent",
+    generateReport: "Generate",
+    addOverrideShift: "Add to contract",
+    erevHag:"Holiday Eve",
+    hag:"Holiday",
+    holHamoed:"Intermediate days",
+    shabat:"Sat",
+    everyone:"Everyone",
+    allEmployees : "All Employees" ,
+    timeIn:"Clock-in at",
+    timeOut:"Clock-out at",
+    yoursHoursForThisDay:"Your attendance for this day",
+    noReport:"No report",
+    employeeTimeDetails:"Employee time",
+    departmentTimeDetails:"Department time",
+    totalTasks:'Total tasks',
+    totalHours:'Total hours',
+    updateOverrideShift: "Update contract",
+    commentMessageForLockedReport:"Lock the report to disable editing and changes for the current month",
+    commentMessageForOpenReport:"Unlock report to enable editing and changes for the current month.",
+    commentMessageForConfirmReport:"Confirm report viewing.",
+    commentMessageForNoConfirmReport:"Cancel confirmation for report viewing.",
+    reportLocked:"Cannot unlock the report without supervisor approval.",
+    reportUnlocked:"Are you sure you wish to unlock the report?",
+    toConfirmAndSubmitReport:"To confirm and send the attendance report",
+    beforeReportLockedCompleteMissingReporting:"Can't lock report because of missing reports",
+    beforeReportLockedWorning:"Before you confirm!</br>Your report will be sent to your supervisor and locked to disable changes",
+    overTimeErr:"TTotal time of task reporting is larger than the attendance reporting time",
+    cantAddRow:"Can't enter new task because the task reporting time is larger or equal to the attendance reporting time",
+    bedTimeErr:"Must enter valid time",
+    cantDeleteOneTask:"Unable to remove a single task",
+    composerDetailsInfoTitle:"Report completion help",
+    composerDetailsInfoBody:"Enter the details… Text text text",
+    composerHeaderInfoTitle:"Header creation help",
+    composerHeaderInfoBody:"Drag the fields you want to display from the right into the left table",
+    composerBodyInfoTitle:"Body creation help",
+    composerBodyInfoBody:"Drag the fields you want to display from the right into the left table",
+    composerFooterInfoTitle:"Footer creation help",
+    composerFooterInfoBody:"Drag the fields you want to display from the right into the left table",
+    endDateSmallerThanStartDat:"End time is smaller than start time",
+    endDateCanNotBeEmpty:"Must enter end time",
+    startDateCanNotBeEmpty:"Must enter start time",
+    dateInRange:"Invalid date. Date is smaller than or equal to previous date",
+    locatedHere:"Located here",
+    allowedOnlyFromSearchPanel:"Location can only be entered from the search box above the map when you verify that the address is correct and the location you received on the map matches the search",
+    editRatesCalculationForDate:"Calculate hours for date",
+    tooltips: {
+        employeeDeactivate: "Deactivate",
+        employeeReactivate:"Activate",
+        employeeReport: "Employee monthly timesheet",
+        employeeProjectReport: "Employee project update",
+        employeeEdit: "Employee card",
+        employeeDelete: "Delete employee",
+        departmentInfo: "Edit department",
+        departmentDelete: "Delete department",
+        departmentReport: "Department report",
+        confirmation:"Confirm",
+        cancelEdit: "Cancel edit",
+        cancel: "Cancel",
+        contractDetails: "Employment contract attached to employee",
+        duplicateDay: "Duplicate current day",
+        lockIconTooltipForLock:"Lock the report",
+        lockIconTooltipForOpen:"Unlock report",
+        commentIconReportTooltip:"View employee comments",
+        employeelockIconToolTipForLocked:"Confirm and lock the report",
+        employeeCommentLockedReportTooltipNoComment:"Add comment",
+        updateComment:"Update note",
+        calculateHours:"Calculate hours",
+        holidayTimesIn:"Shabbat/holiday start times",
+        locationSign:"Signing locations",
+        updateBonus:"Bonus",
+        presenceHoursForThisDay:"Attendance hours for this day",
+        confirmLockedReport:"This report is confirmed by a superviser",
+        unconfirmLockedReport:"To confirm this report by a supervisor",
+        employeeCommentLockedReportTooltipComment:"Comments",
+        employeeDoc:"Document",
+        save:"Save",
+        confirmAllDescription : "Confirm all reports",
+        exportXLS : "Excel",
+        exportPDF : "PDF",
+        freeReporting : "Fast edit",
+        activeEmployees: "Active employees",
+        moveToCheckin: "Transfer clock-in",
+        moveToCheckout: "Transfer clock-out",
+        blockLocation: "Block or enable location for reports",
+        modify: "Edit",
+        remove: "Delete",
+        duplicate: "Duplicate",
+    },
+    errors: {
+        firstName: "Please enter your first name",
+        lastName: "Please enter your last name",
+        reportBadDates: "Invalid dates selected. Please try again",
+        reportBadDatesRange: "The date range you selected is incorrect, Please select a range smaller than a year and try again",
+        reportBadEntry: "Possible values for this record range from: ",
+        reportBadTime: "Invalid time values selected",
+        reportBadBaseTime: "Invlaud date selected",
+        taskEntryCollides: "Selected reporting times conflict with existing reports",
+        taskEntrySave: "Error saving data",
+        updateTasksFailed:"Update failed: part of your request failed, tasks may already exist or incorrect task assignment. please go to your task report and update the hours manually.",
+        taskEntryLargerThan: "Clock-in time is larger than clock-out time",
+        lockHoursBadHours: "Please enter the number of hours",
+        checkInOrOutIsMandatory:"It is mandatory to enter a clock-in or clock-out report before presenting the questionnaire",
+        checkinNullForThisQuestion:"This question is defined for clock-in reporting; enter a clock-in report first",
+        checkoutNullForThisQuestion:"This question is defined for clock-out reporting; enter a clock-out report first",
+        answerContainsOnlyNumbers:"Answer must contain numbers only",
+        answerContainsOnlyChars:"Answer must contain text only",
+        contractNotExist:"Must configure an employment contract for the employee to edit the contract",
+        changePasswordDays: "Please enter the number of days",
+        answerIsMandatory: "Mandatory question, cannot be skipped",
+        numbersOnly: "Please enter numbers only",
+        textOnly: "Please enter text only",
+        eventsCalendarTypes: "Must choose events",
+        eventsCalendarName: "Must enter event name",
+        salarySystemTagContainsNumbers:"Tag in payroll must contain numbers",
+        contractPercent: "Please enter a number between 1 to 100",
+    },
+    confirm: {
+        autoCheckin: "This clock-in was automatically completed according to the contract definitions, please confirm.",
+        autoCheckout: "This clock-out was automatically completed according to the contract definitions, please confirm.",
+        fillCheckinFirst: "Please complete the clock-in field before the clock-out field."
+    },
+    mb: {
+        undo: "Cancel",
+        error: "An error has occurred",
+        departmentSaved: "Department saved",
+        questionSaved:"Question saved",
+        saving: "Saving data",
+        employeeSaved: "Employee details saved 🎉",
+        infoSaved: "Details saved",
+        contractSaved: "Contract data saved",
+        taskSaved: "Task saved",
+        companySaved: "Company details saved",
+        companySettingsSaved: "Company settings saved",
+        alertsSettingsSaved: "Alerts configuration saved",
+        locationSaved: "Location saved",
+        locationRemoved: "Location removed",
+        companyPhonesSettingsSaved: "Telephony settings saved",
+        employeeAdded: "Employee added",
+        departmentAdded: "Department added",
+        emailReportAdded: "Report saved",
+        supportTicketSaved: "Support ticket sent",
+        dataImportProgress: "Importing data",
+        dataImportError: "Import error",
+        dataImportSuccess: "Data import completed successfully",
+        updateCredentialsSaved: "Credentials updated",
+        deleting: "deleting data",
+        deletedData: "deleted data",
+        operationPerformedSuccessfully: "Operation performed successfully",
+    },
+
+    //dataExportComposer///
+    dataExportListSubTitle:"Manage record structure",
+    newDataExportSubtitle:"Create new payroll export system",
+    editDataExportSubtitle:"Update payroll export system",
+    componentsForFileName : {
+        companyId:["Company ID",0], //must to start with value 0 in the array
+        companyName:["Company name",0],
+        companyNum:["Company no.",1],
+        eventNum:["Event no.",1]
+    },
+    datesForFileName: [
+        "ddmmyyyy",
+        "yymmdd",
+        "mmddyy",
+        "mm",
+        "yy",
+        "yyyy",
+        "mmyyyy",
+        "yymm",
+    ],
+    typesForFileName:{
+        constant:"Constant",
+        date:"Date",
+        component:"Component",
+    },
+    constantsForLine:{
+        //[key,desc,value]
+        0:["0","0"],
+        1:["1","1"],
+        2:["2","2"],
+        3:["3","3"],
+        4:["4","4"],
+        5:["5","5"],
+        6:["6","6"],
+        7:["7","7"],
+        8:["8","8"],
+        9:["9","9"],
+        space:["Profit","&nbsp;"],
+        dot:["Dot","."],
+        plus:["Plus","+"],
+        minus:["Minus","-"],
+    },
+    componentsForLine : {
+        //0 - can be freq value
+        // - 1 - need input value, can't be freq value (except specialHours )
+        // - 2 do not need to input value but could not be feq value
+        // - 3 need input value and can be freq value
+        employeeWorkerTag:["Employee tag",2],//must start with value 0 in the array
+        idNum:["ID",2],
+        employeeSalarySystemTag:["Employee tag in payroll",2],//must start with value 0 in the array
+        employeeId:["Employee ID",2],
+        companyId:["Company ID",2],
+        travelExpensesMonthly:["Monthly travel reimbursement",0],
+        travelExpensesDaily:["Daily travel reimbursement",0],
+        componentNum:["Component no.",1],
+        companyNum:["Company no.",1],
+        eventNum:["Event no.",1],
+        factory:["Factory no.",1],
+        standardNumDays:["Standard days",0],
+        presenceNumDays:["Attendance days",0],
+        paidNumDays:["Paid days",0],
+        effectiveTotalHours:["Total hours to calculate",0],
+        presenceTotalHours:["Total work hours",0],
+        standardTotalHours:["Total standard hours",0],
+        underTimeTotalHours:["Absence hours",0],
+        breakTotalHours:["Break",0],
+        odefTimeTotalHours:["Hours deviating from standard",0],
+        odefTime100TotalHours:["100% excess time",0],
+        hours100:["100%",0],
+        hours125:["125%",0],
+        hours150:["150%",0],
+        hours175:["175%",0],
+        hours200:["200%",0],
+        specialHours:["Special hours",3],
+        hoursPaid:["Paid hours",0],
+        hoursDailyAverage:["Daily hour average",0],
+        departmentNumber:["Department number",2],
+        holidayHours:["Holiday hours",0],
+        billableHolidaysHours:["Holiday hours calculation",0],
+        holidayDays:["Holiday days",0],
+        travelExpenses:["Travel expenses",0],
+        daysLack:["Missing days", 0],
+        lineNumber:["Serial number", 2],
+        startDate:["Start date ddmmyyyy", 2],
+        endDate:["End date ddmmyyyy", 2],
+        monthStartDate:["Start month date ddmmyyyy", 2],
+        monthendDate:["End month date ddmmyyyy", 2],
+        standardLessHrs100:["Standard hours less 100% hours",0],
+        hrs100LessBreak:["100% hours less break hours",0],
+        effectiveHoursLessBreak:["Hours to calculate less break hours",0],
+        bonus:["Bonus",0],
+        parentingHours:["Parenting hours", 0],
+        shiftName:["Shift name",3],
+    },
+    datesForLine: [
+        "ddmm",
+        "mmyy",
+        "yymm",
+        "ddmmyy",
+        "yymmdd",
+        "mmddyy",
+        "ddmmyyyy",
+        "mm",
+        "yy",
+        "mmyyyy",
+    ],
+    namedHoursForLine: "Hours with name",
+
+    showAbsenceAs : {
+        0: "Default",
+        1: "Hours",
+        2: "Units",
+        3: "Days",
+        4: "Only 100% Hours",
+        100: "Start Date",
+        101: "End Date",
+    },
+
+    absenceCalculationTable : {
+        0: "Column  1",
+        1: "Column  2",
+        2: "Column  3",
+        3: "Column  4",
+        4: "rest of the days",
+        5: "Event total pay",
+        6: "Column  1 (units)",
+    },
+
+    typesForLine:{
+        constant:"Constant",
+        date:"Date",
+        component:"Component",
+        absence:"Absence"
+    },
+    dataExportComposerErrors:{
+        payrollWizardNameRequired: "Must enter the payroll wizard name",
+        fileNameRequired: "Must enter the file name",
+        rowsFormatSettingsRequired: "Must enter the row format settings",
+    },
+
+    emailWrong:"Invalid Email",
+    phoneWrong:"Invalid Phone",
+    phoneAlertMissing: "Attention! No mobile phone number entered. Clicking save will activate the alert and the SMS will be sent to each employee in separate.",
+
+    alertsTypes: {
+        //email alert 0-99
+        0: "Manual update by employee",
+        1: "Deviation from daily standard",
+        2: "Deviation from monthly standard",
+        3: "Overtime start",
+        4: "Work over 12 hours",
+        5: "Less than 8 hours gap between the first and second shift",
+        6: "Add new employee",
+        7: "Add new document",
+        8: "Send absences report to employee",
+        9: "Send reminder to lock monthly report",
+        10: "Missing attendance reporting exceeding 5 days",
+        11: "Overtime exceeding the 16-hour weekly quota",
+        12: "Event and absence approval status",
+        13: "Event updated by employee",
+        14: "Send monthly report to employees",
+        15: "Monthly lock report status",
+        16: "Change employee status",
+        17: "Send birthday mail",
+        18: "Working day smaller then",
+        19: "7 consecutive working days without a day off",
+        20: "Employee birthday reminder",
+        21: "Reminder about employee seniority",
+        22: "Update a specific event by an employee",
+        23: "Exceed weekly hours",
+        24: "Exceed 100% weekly hours",
+        99: "Free text",
+
+        //sms alert 100+
+        100: "Work over time hours",
+        101: "Clock-in not reported until",
+        102: "Clock-out not reported until",
+        103: "Manual update by employee",
+        104: "Event updated by employee",
+        105: "Overtime exceeding weekly quota",
+        106: "Send birthday message",
+        107: "Send reminder to lock monthly report" ,
+        199: "Free text",
+    },
+
+
+    sendAlertFreq : ["Daily","Weekly","Monthly"],
+    sendAlertSendType : ["Email","SMS"],
+    sendAlertSendFor : ["All","Deparment","Employee"],
+    sendAlertSendForDefault: "Select employees" ,
+    enterMichpalCode: "Please enter the company's Michpal number",
+    enterOketchCode: "Please enter the company's Oketz number",
+    _listShow: "Display list &rsaquo;",
+    _listHide: "Hide list &rsaquo;",
+    _downLink: "Download",
+    _linkUrl: "Link",
+    _reportBonusEdit: "To enter data, click edit",
+    _reportBonusNoData: "No data entered",
+    composerHeaderColumns: {
+        employeeName:"Employee name",
+        employeeFirstName:"First name",
+        employeeLastName:"Last name",
+        employeeWorkerTag:"Employee tag in the attendance system",
+        employeeSalaryId:"Employee tag in the payroll system",
+        employeeDepartment:"Show departments",
+        department:"Department name",
+        employeeCompany:"Company name",
+        employeeContractName:"Employment agreement",
+        employeeContractId:"Employment agreement number",
+        employeeInitWorkDay:"Employee creation date",
+        employeeStartWorkDay:"Employee start date",
+        employeeEndWorkDay:"Employee end date",
+        employeeEmail:"Email",
+        employeeId:"ID",
+        employeeBirthDay:"Date of birth",
+        employeeFamilyStatus:"Marital status",
+        employeeAddress:"Street",
+        employeeCity:"City",
+        employeePhone:"Phone",
+        employeeWorkStatus:"Employee status",
+        employeeRole:"Position",
+        salary:"Salary",
+        employeeSex:"Gender",
+        statusDescription: "Employee type",
+        employeeCalendar: "Holiday calendar",
+        employeeBankName: "Bank name",
+        employeeBankId: "Bank number",
+        employeeBranchId: "Branch number",
+        employeeAccountNum: "Account number",
+        eventPolicyName: "Policy Name",
+        employeeSeniorityWorks: "Seniority",
+        employeeDirectManager: "Direct Manager",
+        employeeResignationReason: "Leave reason",
+    },
+    composerBodyColumns: {
+        day:"Day",
+        date:"Date",
+        dayType:"Day type",
+        timeIn:"Clock-in time",
+        timeOut:"Clock-out time",
+        totalWorkHours:"Total work hours",
+        totalWorkHoursBruto:"Gross hours",
+        effectiveHours:"Hours to calculate",
+        standartHours:"Standard hours",
+        underTimeHours:"Undertime",
+        extraHours:"Extra hours",
+        extraHours100:"Extra hours at 100%",
+        event:"Event",
+        hours100:"100%",
+        hours125:"125%",
+        hours150:"150%",
+        hours175:"175%",
+        hours200:"200%",
+        allOverTime:"Overtime",
+        allOverTimeSeparation:"Overtime separation",
+        totalHoursIncludeAbsences:"Total hours including absences",
+        lateToShift:"Late to shift",
+        comment:"Comments",
+        bonus:"Addition",
+        salary:"Wage",
+        locationIn:"Clock-in location",
+        locationOut:"Clock-out location",
+        phoneCheckIn:"Clock-in phone",
+        phoneCheckOut:"Clock-out phone",
+        addressCheckIn:"Clock-in address",
+        addressCheckOut:"Clock-out address",
+        descriptionCheckIn:"Clock-in description",
+        descriptionCheckOut:"Clock-out description",
+        employeeName:"Employee name",
+        employeeId:"ID",
+        employeeTag:"Employee code",
+        employeeDepartment:"Department name",
+        employeeDepartmentNumber:"Department number",
+        employeeRole:"Position",
+        statusDescription:"Employee type",
+        calc:"Cost",
+        employeeBirthDay:"Date of birth",
+        breakTotal:"Break",
+        checkInPhoneDescription:"Clock-in phone description",
+        checkOutPhoneDescription:"Clock-out phone description",
+        hours100_calc:"Extra Hours at 100%", //only for company 464 lam research
+        salarySystemTag: 'Employee Salary Tag',
+        directManager: 'Direct Manager',
+        parentingHours: 'Parenting hours'
+    },
+    composerFooterColumns: {
+        totalWorkDaysNum:"Total attendance days",
+        standartDaysNum:"Total standard days",
+        totalWorkHours:"Total attendance hours",
+        totalWorkHoursBruto:"Total gross hours",
+        standartHours:"Total standard hours",
+        effectiveHours:"Total hours to calculate",
+        totalLateToShiftDaysNum:"Number of shifts started late",
+        extraHours:"Total hours deviating from standard",
+        extraHours100:"Total hours deviating from standard at 100%",
+        underTimeHours:"Total undertime",
+        underTimeHours_m:"Total monthly undertime",
+        breakTotal:"Total break hours",
+        employeeBirthDay:"Date of birth",
+        hours100:"Total hours 100%",
+        hours125:"Total hours 125%",
+        hours150:"Total hours 150%",
+        hours175:"Total hours 175%",
+        hours200:"Total hours 200%",
+        allOverTime:"Overtime",
+        allOverTimeSeparation:"Overtime separation",
+        holidayHours:"Holiday hours",
+        totalHoursIncludeAbsences:"Total hours including absences",
+        bonus:"Addition",
+        salary:"Wage",
+        events:"Display events",
+        employeeSign:"Employee signature",
+        moderateSign:"Supervisor signature",
+        managerSign:"Head manager signature",
+        underTimeHours_wo_extra:"Undertime minus overtime",
+        travelExpenses:"Travel",
+        questions:"Report forms",
+        hours100_calc_wo_182:"Overtime offset 182", //only for company 464 lam research
+        hours100_calc_wo_standard:"Overtime offset standard", //only for company 464 lam research
+        infoEmployeeCard:"Employee card comments",
+        daysLack:"Missing days",
+        hoursDailyAverage:"Average daily hours",
+        attendanceDaysAccordingStandardDays: "Total attendance days according to standard",
+        eventsBalances: "Event balances",
+        extraHours:"Extra hours",
+        paidDaysNum:"Paid days",
+        signingSources: "Signing sources",
+        standardLessHrs100: "Standard hours less 100% hours",
+        hrs100LessBreak: "100% hours less break hours",
+        parentingHours: 'Parenting hours',
+        reportSign: 'Signing an attendance report'
+    },
+    composerTaskBodyColumns: {
+        day:"Day",
+        date:"Date",
+        timeIn:"Clock-in time",
+        timeOut:"Clock-out time",
+        totalTasksHours:"Total hours",
+        comment:"Comments",
+        locationIn:"Clock-in location",
+        locationOut:"Clock-out location",
+        addressCheckIn:"Clock-in address",
+        addressCheckOut:"Clock-out address",
+        descriptionCheckIn:"Clock-in description",
+        descriptionCheckOut:"Clock-out description",
+        employeeName:"Employee name",
+        employeeTag:"Employee code",
+        employeeDepalortment:"Department name",
+        employeeRole:"Position",
+        statusDescription:"Employee type",
+        employeeBirthDay:"Date of birth",
+        salary:"Salary",
+        taskName:"Task name",
+        taskNamePath:"Task path",
+        taskNumber:"Task number",
+        taskCost:"Task cost",
+        event:"Event",
+    },
+    composerTaskFooterColumns: {
+        taskPresenceNumDays:"Total days",
+        totalTasksHours:"Total hours",
+        employeeBirthDay:"Date of birth",
+        employeeSign:"Employee signature",
+        moderateSign:"Supervisor signature",
+        managerSign:"Head manager signature",
+        infoEmployeeCard:"Employee card comments",
+        tasksDuration:"Tasks duration",
+        taskCost:"Total cost",
+        events:"Display events",
+    },
+
+    composerFooterColumnsForConcentratedReport: {
+        totalWorkDaysNum:"Total attendance days",
+        standartDaysNum:"Total standard days",
+        totalWorkHours:"Total attendance hours",
+        totalWorkHoursBruto:"Total gross hours",
+        standartHours:"Total standard hours",
+        effectiveHours:"Total hours to calculate",
+        totalLateToShiftDaysNum:"Number of shifts started late",
+        extraHours:"Total hours deviating from standard",
+        extraHours100:"Total hours deviating from standard at 100%",
+        underTimeHours:"Total undertime",
+        underTimeHours_m:"Total monthly undertime",
+        hours100:"Total hours 100%",
+        hours125:"Total hours 125%",
+        hours150:"Total hours 150%",
+        hours175:"Total hours 175%",
+        hours200:"Total hours 200%",
+        employeeBirthDay:"Date of birth",
+        allOverTime:"Overtime",
+        allOverTimeSeparation:"Overtime separation",
+        holidayHours:"Holiday hours",
+        totalHoursIncludeAbsences:"Total hours including absences",
+        bonus:"Addition",
+        salary:"Wage",
+        events:"Display events",
+        employeeName:"Employee name",
+        employeeFirstName:"First name",
+        employeeLastName:"Last name",
+        employeeSalaryId:"Number at payroll",
+        employeeDepartment:"Department name",
+        employeeDepartmentNumber:"Department number",
+        employeeId:"ID",
+        employeePhone:"Mobile Phone",
+        employeeAddress:"Address",
+        employeeCity:"City",
+        employeeRole:"Position",
+        employeeEmail:"Email",
+        employeeWorkerTag:"Employee tag",
+        travelExpenses:"Travel",
+        employeePosition:"Current status",
+        employeeStartWorkDay:"Work start date",
+        employeeEndWorkDay:"Work end date",
+        calc:"Cost",
+        totalOdefHours:"Total overtime",
+        infoEmployeeCard:"Employee card comments",
+        daysLack:"Absence days",
+        hoursDailyAverage:"Average daily hours",
+        dateCreated:"Employee creation date",
+        month:"Month",
+        year:"Year",
+        taskNumber:"Project number",
+        taskName:"Project name",
+        totalHoursPerTask:"Task total hours",
+        percentTaskFromTotalHours:"Task % of monthly attendance",
+        employeeContractName:"Employment agreement",
+        employeeContractId:"Employment agreement number",
+        statusDescription: "Employee type",
+        breakTotal:"Break",
+        attendanceDaysAccordingStandardDays: "Total attendance days according to standard",
+        employeeCalendar: "Holiday calendar",
+        hours100_calc_wo_182:"Overtime offset 182", //only for company 464 lam research
+        hours100_calc_wo_standard:"Overtime offset standard", //only for company 464 lam research
+        employeeBankName: "Bank name",
+        employeeBankId: "Bank number",
+        employeeBranchId: "Branch number",
+        employeeAccountNum: "Account number",
+        eventsBalances: "Current Balance",
+        eventPolicyName: "Policy Name",
+        employeeSeniorityWorks: "Seniority",
+        reportLockStatus:"Report lock status",
+        employeeDirectManager: "Direct Manager",
+        employeeWorkStatus:"Employee status",
+        employeeSex:"Gender",
+        paidDaysNum:"Paid days",
+        signingSources: "Register attendance sources",
+        employeeResignationReason: "Leave reason",
+        standardLessHrs100: "Standard hours less 100% hours",
+        hrs100LessBreak: "100% hours less break hours",
+        contractPercent: "Contract percent",
+        parentingHours: "Parenting hours"
+    },
+
+    composerTypes: {
+        0: "Detailed",
+        1: "Summary",
+        2: "",
+        3: "",
+        4: "Transverse",
+        5: "Tasks",
+    },
+
+    tamal5Components:{
+        tamal_presenceDaysNum:"Attendance days",
+        tamal_presenceDaysNum_1:"Attendance days",
+        tamal_presenceDaysNum_2:"Attendance days",
+        tamal_presenceHours:"Total hours",
+        tamal_presenceHours_1:"Total hours",
+        tamal_presenceHours_2:"Total hours",
+        tamal_hours100Num:"100%",
+        tamal_hours100Num_1:"100%",
+        tamal_hours100Num_2:"100%",
+        tamal_hours125Num:"125%",
+        tamal_hours150Num:" 150%",
+        tamal_hours175Num:" 175%",
+        tamal_hours200Num:"200%",
+        tamal_vecationDaysNum:"Paid leave",
+        tamal_sickDaysNum:"Sick leave",
+        tamal_breakDaysNum:"Break",
+        tamal_travelExpenses_montly:"Monthly travel reimbursement",
+        tamal_travelExpenses_daily:"Daily travel reimbursement"
+    },
+
+    MichpalComponents:{
+        michpal_presenceDaysNum:"Attendance days",
+        michpal_presenceDaysNum_1:"Attendance days",
+        michpal_presenceDaysNum_2:"Attendance days",
+        michpal_presenceDaysNum2:"Actual number of work days",
+        michpal_totalHours:"Total work hours",
+        michpal_totalHours_1:"Total work hours",
+        michpal_totalHours_2:"Total work hours",
+        michpal_arrivments:"Travel",
+        michpal_hours100Num:"100%",
+        michpal_hours100Num_1:"100%",
+        michpal_hours100Num_2:"100%",
+        michpal_hours125Num:"125%",
+        michpal_hours150Num:"150%",
+        michpal_hours175Num:"175%",
+        michpal_hours200Num:"200%",
+        michpal_sickDaysNum:"Sick leave",
+        michpal_vecationDaysNum:"Paid leave",
+        michpal_reserveDaysNum:"Reserve duty",
+        michpal_holidayDaysNum:"Holiday",
+        michpal_travelExpenses_montly:"Monthly travel reimbursement",
+        michpal_travelExpenses_daily:"Daily travel reimbursement",
+        michpal_standardNumDays:"Standard days",
+        michpal_standardHours:"Standard hours",
+        michpal_standardMonthlyHours: "Monthly fixed standard hours",
+    },
+    HargalComponents:{
+        presenceDaysNum_1:"Work days",
+        arrivments:"Work days ((travel))",
+        totalHours:"Total attendance hours",
+        totalLackHours:"Missing hours",
+        totalStandardHours:"Standard hours",
+        totalOdefHours:"Overtime",
+        hours100Num_1:"Regular hours at 100%",
+        hours100Num_2:"Regular hours at 100%",
+        hours125Num:"Overtime at 125%",
+        hours150Num:"Overtime at 150%",
+        hours175Num:"Overtime at 175%",
+        hours200Num:"Overtime at 200%",
+        sickDaysNum:"Sick leave",
+        vecationDaysNum:"Paid leave",
+        reserveDaysNum:"Reserve duty",
+        holidayDaysNum:"Holiday"
+    },
+    hilanComponents: {
+        event:"Event number",
+        factory:"Factory number",
+        standardDays:"Standard days",
+        presenceDaysNum:"Attendance days",
+        presenceDaysNum_1:"Attendance days",
+        presenceDaysNum_2:"Attendance days",
+        effectiveHours:"Total hours to calculate",
+        totalHours:"Total work hours", /* presence */
+        underTimeHours:"Missing hours",
+        breakHours:"Break",
+        odefTime:"Hours deviating from standard",
+        odefTime100:"Overtime at 100%",
+        hours100Num:"100%",
+        hours100Num_1:"100%",
+        hours100Num_2:"100%",
+        hours125Num:"125%",
+        hours150Num:" 150%",
+        hours175Num:" 175%",
+        hours200Num:"200%",
+        vacationDaysNum:"Paid leave",
+        sickDaysNum:"Sick leave",
+        holidayDaysNum:"Holiday",
+        reserveDaysNum:"Reserve duty",
+        holidayByManagerNum:'Vacation paid by employer',
+        absenceByManagerNum:'Absence paid by employer'
+    },
+
+    confirmSendPassword: "Sent new access details to this user?",
+    statusNameEmpty: "Please enter employee type description",
+    roleNameEmpty: "Please enter position description",
+    fieldTypeEmpty: "Please enter field type",
+    fieldNameEmpty: "Please enter field description",
+    fieldOptionsEmpty: "Please enter options to select",
+    confirmDelete: "Delete?",
+
+    questionTypes: {
+        yesno: "Yes/No",
+        freetext: "Free text",
+        textonly: "Text only",
+        number: "Number only",
+        selection: "Select",
+        selectionLocation: "Select location",
+    },
+
+    login_errors:{
+        badLogin:"Incorrect user name or passowrd.",
+        accountLock:"Access to your account is suspended for 15 minutes due to several failed login attempts.",
+        accountBadIp:"You are not authorized to log-in from this ip address.",
+        passwordMisMatch:"Passwords do not match.",
+        passwordChanged:"Password changed successfully",
+        fatal_error:"An error has occurred. Please try again",
+        badPW:"Invalid username/email or password.<br/> There are X remaining attempts until the account is blocked.",
+        badPWLAST:"Invalid username/email or password.<br/> You have one last attempt left before the account is blocked for 15 minutes.",
+        samePassword:"The new password cannot be the same as the current password. Please choose a different password.",
+        recentPassword: "The new password cannot be the same as one of the recently used passwords. Please choose a different password.",
+        verificationCode:"Invalid verification code",
+        badSsoLoginWith: "Could not find an account associated to this email address ",
+        enforceSso: "Please use SSO to continue logging in",
+        badCaptcha: "Required field",
+        emailExists: "oops, we encountered an error while loading creating this account, please contact support team for assistance.",
+        currentPasswordEmpty: "Please enter your current password to change your password.",
+        currentPasswordIncorrect: "The current password entered is incorrect."
+    },
+    pw_login_errors:{
+        badLogin:"We couldn't find that email address.",
+    },
+    operation_failed:"Action failed",
+    mustDoc:"Must upload confirmation file for this event type",
+
+    companyDetails:{
+        "totalBilling":"<b>Total for billing</b>",
+        "monthly":"Monthly",
+        "oneTime":"Onetime",
+        "confirmCloseService": "Do you want to close the service?",
+        "successCloseService": "Service closed successfully",
+        "errorFields": "Please enter valid values",
+        "successAddService": "Service added successfully",
+        "successEditContact": "Details saved successfully",
+        "successRemoveContact": "Contact deleted successfully",
+        "confirmRemoveContact": "Do you want to delete this contact?",
+        "successAddContact": "Contact added successfully",
+        "successUpdateCompany": "Company details updated successfully",
+        "successUpdateCreditCard": "Credit card updated successfully",
+        "areYouSureCloseCompany" : "Are you sure you want to close the company? Closing the company will deactivate all employees",
+        "canNotCloseCompanyBecauseRentClock" : "Can't close client. Client has a leased clock, clock must be collected before closing the account. Thank you",
+        "mustBankDetails" : "Must enter full details of standing order",
+        "mustCreditCardDetails" : "Must enter credit card details",
+        "companiesNotClosure": "This is a special company, it can't be closed",
+        "markServicePaid": "Mark service paid?",
+        "successMarkServicePaid": "Service was marked as paid",
+        "mustChoosePaymentMethod" : "Must choose payment method",
+    },
+
+    companyDetailsErrors: {
+        "name" : "Must enter company name",
+        "phone" : "Must enter phone number",
+        "email" : "Must enter email",
+        "address" : "Must enter address",
+        "country" : "Must enter country name",
+        "city" : "Must enter city name",
+        "companyNumber" : "Must enter PLC/LD",
+        "companyNumberIsrael" : "Maximum allowed 9 numbers",
+        "numInCrm" : "Must enter CRM number",
+        "supplier" : "Must enter supplier name",
+        "invoicecompanyName" : "Must enter invoice name",
+        "packageBasicOption" : "Must choose a payment method"
+    },
+
+    companyIdentify: "Company ID",
+    reportList: "Report list",
+    createNewReport: "Create new report",
+
+    buttons:{
+        saveChanges: "Save changes",
+        saveAndClose: "Save and close",
+        update: "Update",
+        save: "Save",
+        continue: "Continue",
+        success: "&#10003;",
+        error: "&#x2716;",
+        supportSend: "Send form",
+        clickToAdd:"Click to add",
+    },
+
+    powerUpsButtons:{
+        purchase: "Add",
+        remove: "Remove",
+        include: "Include",
+    },
+
+    powerUpsAction:{
+        purchaseWithMonthFree: "Upgrade your system with the extension for 30 days free of charge as from today.<br>After the trial period, the extension cost is: ",
+        purchaseUtilizingMonthFree: "Upgrade your system with the extension.<br>The extension cost is: ",
+        purchaseIls: " ILS.<br>",
+        purchaseIlsPerUser: " ILS per user.<br>",
+        purchaseMonthlyRecurring: "Payment is monthly recurring. Service can be stopped at any time)",
+        remove: "Are you sure you want to remove the service?",
+        purchaseScouter: "<br><br>synchronize yours employees and open the access to the shift management. After the page is refreshed, it will be possible to access to Scouter directly from the button next to the employee list.",
+    },
+
+    powerUpsTitles:{
+        api: "API",
+        dataExportComposer: "Salary Wizard",
+        scientistReport: "Innovation Authority",
+        questions: "Report forms",
+        tasks: "Manage tasks",
+        reportsComposer: "Report Wizard",
+        modificationReport: "Changes report",
+        specialReport: "Special reports",
+        alerts: "Alerts",
+        filesLinks: "Form Templates",
+        departments: "Manage departments",
+        locationsMap: "Manage locations",
+        phoneReporting: "Telephone clock-in",
+        contracts: "Employment contracts",
+    },
+
+    areYouSureRemoveEventsCalendar: "Do you want to delete this events calendar?",
+    areYouSureRemoveLine: "Do you want to delete this line?",
+    areYouSureRestoreLine: "Would you like to restore this event?",
+    areYouSureRemoveReport: "Do you want to delete this report?",
+    areYouSureRemoveShift: "Do you want to delete this shift?",
+    areYouSureRequestMakeBilling: "Are you sure you want to send a billing request to clients? (Please check the month and year!!!)",
+    areYouSureRequestMasavBilling: 'Are you sure you want to bill via bank clearing? (Please check the month and year!!!)',
+    areYouSureRemoveComment: "Do you want to delete this comment?",
+    areYouSureRemoveBonus: "Do you want to delete bonus?",
+    areYouSureRemoveBreak: "Do you want to delete break?",
+
+    needSelectRowOfCredential: "Select credentials line",
+    needSelectRowOfCredential2 : "You must select who the permission will apply to before proceeding." ,
+
+    averageDailyHoursToEmployeeChart: "Daily average for employee",
+    totalWorkHoursChart: "Total daily hours",
+    regularHoursVsOvertimeChart: "Hour breakdown of the past week",
+    employeesByDepartment: "Employees by department",
+
+    areYouSureRemoveDevice: "Remove device?",
+
+    startDateOrEndDateMissing: "Not selected start / end date",
+    startCheckinOrCheckoutMissing: "Not selected enter / exit day",
+    missingUpdateFor: "Not selected for who update the absence",
+    missingUpdateForEmployees: "Select employees",
+    missingUpdateForDepartments: "Select Departments",
+    startDateGreaterThanOrEqualEndDate: "Start date must be greater than / equal to end date",
+    confirmSweepingUpdateMissings: "The event will be insert in time-sheet for all employees that selected.",
+    confirmSweepingUpdateMissingsEmployee: "The event will be updated according to the selected dates.",
+    missingEventType: "Not selected event type",
+    confirmQuickUpdateEmployee: "Note! continue will overwrite the existing reports, do you wish to continue ?",
+    confirmQuickUpdateMonthRange: "Insert comment that will appear next to the report in the time-sheet.",
+    missingLinkedToHoursBank: "Linked to the Bank's hours",
+
+    multyselect : {
+        clickToSelect : "Click to select",
+        selected : "# Selected",
+        checkAll : "",
+        uncheckAll : "",
+        filter : "",
+        search : "Search...",
+        selectTask : "What are we working on today?"
+    },
+
+    dataSecurity : {
+        warningAlertText : "When 2-step verification is enabled, you will be required to enter a verification code that will be sent to the mobile number listed in your account",
+    },
+
+    companyPaymentMethod : {
+        edit : "Edit",
+        save : "Save"
+    },
+
+    reportsComposer:{
+        displayLine: "Displayed in line",
+        displayFormat: "Displayed in format",
+        totalHours: "Total hours",
+        effectiveHours:"Hours to calculate",
+        percentages:"In percentages",
+        default:"Default",
+        hours:"Hours",
+        decimal:"Decimal",
+        days: "Days",
+        hoursAndDays: "Hours And Days",
+        units: "Units",
+        firstLLastName:"First + last",
+        lastFirstName:"Last + first",
+        listReportsIsEmpty:"The list of reports is empty, can't create file",
+        reportNameRequired: "Must enter the report name",
+        mustEnterNumber: "Must enter a number",
+        successfullyDeleted: "Deleted successfully",
+        updateReport: "Update report",
+        mustChooseFields: "Must choose fields to display",
+        department: "Department",
+        departmentPath: "Show departments",
+    },
+
+    manageTasks: {
+        departments: "Departments",
+        employees: "Employees",
+        and: "and"
+    },
+
+    selected: "Selected",
+    selectedAllDepartments : "All departments" ,
+    selectedAllTasks : "All tasks" ,
+    selectedTasks : "tasks" ,
+    popupPresence: {
+        yourAttendanceForDay: "Your attendance hours for this day",
+        noReport: "No Report",
+        timeIn:"Clock-in",
+        timeOut:"Clock-out",
+    },
+
+    doYouWantUpdateTasks: "Do you want to update the tasks?",
+
+    mustInputPhoneAndDescription: "Must enter a phone number and short description",
+
+    missingMustDoc : {
+        updateMissing : "Update event ",
+        mustDoc : "Must add document"
+    },
+
+    addressNotFound: "Address not found",
+
+    noResults: "No results found",
+
+    messageBeforeCreateSubManager: "You are about to add a new manager account with complete system management permissions. Permissions to view edit and update your account. This user will not be able to access company details and payment methods.",
+    messageBeforeDeleteUserAccount: "Delete user?",
+    messageBeforeSendAccessDetails: "Clicking on approval will send a new password to the email address updated in the system",
+
+    next: "Next",
+
+    smsPackages: {
+        "messageBeforeAddSMSPackage": "Click on confirm to add the SMS package you've selected to your service. It will be added to your existing SMS balance.",
+        "messages": "SMS messages",
+        "shekel": 'ILS',
+    },
+
+    preventHoursErrorMessage: {
+        daysPreventError: "Must select days",
+        endHourError: "End time must be larger than start time",
+        deleteWarning: "Are you sure?",
+    },
+
+    taskReportBlockByPreventHour: "You can report task at defined times. Your entry was blocked for reporting by your system admin.",
+    reportBlockByPreventHour: "You can report timesheet at defined times. Your entry was blocked for reporting by your system admin.",
+    reportBlockByPreventHourForManager: "Please note that you are updating hours at times that do not conform to the employee contract",
+    taskStopAlreadyExist: {
+        beforeTaskName: "The task",
+        afterTaskName: "already has a future completion reported,",
+        afterTaskTime: "Therefore it's not possible to report a second completion time.",
+    },
+
+
+    shortAllDaysType: {
+        0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat", 7: "Holiday Eve", 8: "Holiday", 9: "Intermediate"
+    },
+
+    fieldsToAddEmployee: {
+        0: {className: "workerTag", text: "Employee tag"},
+        1: {className: "email", text: 'Email'},
+        2: {className: "phone", text: "Phone"},
+        3: {className: "userLanguage", text: "Language"},
+        4: {className: "departmentId", text: "Department"},
+        5: {className: "directManager", text: "Direct Manager"},
+        6: {className: "idNum", text: "ID"},
+        7: {className: "birthday", text: "Date of birth"},
+        8: {className: "sex", text: "Gender"},
+        9: {className: "marital", text: "Marital Status"},
+        10: {className: "status", text: "Employee Type"},
+        11: {className: "role", text: "Position"},
+        12: {className: "employedFrom_ts", text: "Work start"},
+        13: {className: "salarySystemTag", text: "Employee tag in payroll"},
+        14: {className: "userTimezone", text: "Timezone"},
+        15: {className: "userCalendar", text: "Holiday calendar"},
+        16: {className: "contractId", text: "Employment contract"},
+        17: {className: "address", text: "Address"},
+        18: {className: "city", text: "City"},
+        19: {className: "salary", text: "Salary"},
+        20: {className: "travelExpenses", text: "Travel"},
+        21: {className: "absencePolicy", text: "Absence policy"},
+    },
+
+    settingsCreateAndManageEmployee: {
+        0: {className: "enableCheckingIDNumber", text: "Allow duplicate employee numbers in the payroll system"},
+        1: {className: "allowSameSalaryTag", text: "Activate mechanism for validating IDs"},
+    },
+
+    permissionsToAddEmployees: {
+        0: {className: "useEntry", text: "Clock-in online"},
+        1: {className: "useEntryInApp", text: "Clock-in via app"},
+        2: {className: "userCanWatchUserCard", text: "View employee card"},
+        3: {className: "useEntryInAppMustGPS", text: "Attendance reporting requires activating location services"},
+        4: {className: "useTasks", text: "Report tasks and projects"},
+        5: {className: "watchSelfReport", text: "View timesheets"},
+        6: {className: "modifySelfReport", text: "Edit timesheets"},
+        7: {className: "modifyEventsAndAbsences", text: "Update event and absence"},
+        8: {className: "watchSelfTaskReport", text: "View task reports"},
+        9: {className: "modifySelfTaskReport", text: "Edit task reports"},
+        10: {className: "reportingByPhone", text: "Clock-in via phone"},
+        11: {className: "phoneWithProjectCode", text: "Report tasks and projects via phone"},
+        12: {className: "manualBreak", text: "Show break button"},
+        13: {className: "innovationAuthority", text: "Scientist worker"},
+        14: {className: "expenseReimbursement", text: "Expense report"},
+    },
+
+    subscriberRegistration:{
+        continue: "Next",
+        back: "Previous",
+        finish: "Close",
+        save: "Save",
+        yourPackageChoose: "Select a subscription for your business",
+        untilNumEmployees: "up to %NUM_EMPLOYEES_CHOOSE% employees",
+        shekel: 'ILS',
+        errorCreateToken: "Incorrect credit data",
+        errorAccountDetails: "The details you entered are incorrect",
+        errorGeneral: "There was an error saving, please contact support",
+    },
+
+    legendForStep: {
+        0: "Ready To Go",
+        1: "Pick A Plan",
+        2: "Update details",
+        3: "Process completed",
+    },
+
+    legendForCloseCompany: {
+        0: "Cancel subscription",
+        1: "Confirm",
+        2: "Approve",
+    },
+
+    mustToApprovalOfPolicies: "Please check",
+
+    needAvoidedFromRetroactiveReporting: "Avoid retroactive reporting in the future",
+
+    notApprovedIp: "Please note that your IP address is not recognized by the app, <br>reporting these hours will be considered retroactive. <br>To set an IP address, please contact your manager.",
+
+    kioskDescriptionExist: "The description exist for another device",
+
+    manualReportingOnlyRetroactive: "Cannot report in the future",
+
+    lockMonthReportAllDepartment: "Lock report for the entire department?",
+    unlockMonthReportAllDepartment: "Unlock reports to edit?",
+    managerViewReportAllDepartment: "Approve report for the entire department?",
+
+    methodCalculateDaysSuccession: {
+        departments: "Departments: ",
+        contracts: "Employment contracts: ",
+        statuses: "Employee types: ",
+        infoText: `The first row in the table represents the days, the row below represents the relative percentage. 
+        For example: if we enter 1 on the first day and below we fill in 0.25, the event on the first day will be calculated by 25%. 
+        If we enter in the next column 3 and below 0.5 then starting from the second day and for 3 more days it will be calculated according to 50% and so on.`
+    },
+
+    areYouSure: "Are you sure?",
+
+    payable: "Payable",
+
+    errorExtraRatesToShifts: {
+        startEndEqual: "Clock-in and clock-out match",
+        overlappingHours: "Hour overlap",
+        rate: "Complete the missing fields",
+    },
+
+    years: "Years",
+
+    months: "Month",
+
+    invalidDateText: "Cannot enter date in the future",
+    invalidDateFormat: "Invalid date format",
+    invalidDate: "Choose valid date",
+
+    errorPassword: "Incorrect password. Password must be at least eight characters long and composed of digits and letters, and must not include the employee's email.",
+    badPasswordConfirm: "Password and verification do not match.",
+
+    strengthPasswordDescription: {
+        0: "",
+        1: "Weak",
+        2: "Good",
+        3: "Very good",
+        4: "Strong",
+    },
+
+    emailReportTypes: {
+        1: "Daily",
+        2: "Summarized monthly",
+        3: "Employee monthly",
+        4: "Overall company",
+        5: "Lack",
+        7: "Events",
+        8: "Data log",
+        9: "Summarized monthly - department",
+        10: "Pending to Confirm",
+        11: "Task report",
+    },
+
+    doYouWantMoveToArchive: "Move to archive?",
+    doYouWantPermanentlyDelete: "Do you want to permanently delete?",
+
+    email: "Email",
+    mobile: "Mobile",
+
+    confirmToDeleteAnswers: "Deleting a data also removes all information it contains. this can't be undone. Is that what you want to do?</br>Type 'DELETE' to confirm:",
+    textToConfirmDeleteAnswers: "DELETE",
+
+    noFileUpload: "Please choose file",
+    doYouWantUploadUsers: "Are you sure you want to upload the table?",
+
+    usersAdditionalFieldsTypes: {
+        1: "Free text",
+        2: "Number only",
+        3: "Text only",
+        4: "Select",
+        5: "Date",
+    },
+
+    mandatoryField: "Required Field",
+    invalidPassport : "Invalid ID number." ,
+    employeeEmailExists : "Email already exists in the system."  ,
+    employeeIdNumExists  : "ID number already exists in the employee record." ,
+    employeeTagExists :   "Employee tag already exists in the system, please choose a different tag." ,
+    salaryTagExists :   "Employee tag already exists in the salary system, please choose a different tag." ,
+
+    yesNoOptions: {
+        none: "",
+        Yes: "Yes",
+        No: "No",
+    },
+
+    datesFormat: {
+        "DDMMYYYY": "25.08.1999",
+        "MMDDYYYY": "08.25.1999",
+    },
+
+    scientistReportErrorPdfDownload: "Some employee reports include a large number of tasks and cannot be created in PDF format. To re-download, select the XLS file type and download again.",
+
+    changesTakeActionAfterReloading: "Changes will take action after reloading the page",
+
+    unCalculatedHours:{
+        "errorOverDiffHours":"! It's not possible to add more hours than time diff",
+        "updateSuccess":"Update successfully",
+        "confirmAddBalance": "Add Overtime",
+    },
+
+    scheduleReport:{
+        hour: "Hour",
+        hoursExceeding: "Hours exceeding",
+    },
+
+    signature: {
+        toSignReport: "Sign your report",
+        signedReport: "Signed Report",
+        lockTitle: "Lock reports from changes",
+    },
+
+    holidayHours: "Holiday hours",
+
+    noticeSendAccessDetails: "Sending access details to all employees will cause the login passwords to change.</br>To confirm the action, type 'SEND' in the text box and click confirm:",
+    textToConfirmSendAccessDetails: "SEND",
+
+    absencePolicy:{
+        policyType:{
+            select: {
+                placeholder: "Type",
+                0: "Accrual",
+                1: "Bank hours",
+                2: "Parenting hours"
+            }
+        },
+        errors:{
+            PolicyNameEmpty:"Must enter name",
+            AbsenceAlreadyExist:"Policy with this event already exist",
+            AbsenceNameEmpty:"Must choose events",
+            updateEventByPolicy: "Unable to complete request based on current balance",
+            sweepingUpdateEventBYPolicy: "Unable to complete request for some of the employees according to their current balance",
+            daysCountEmpty: "Enter days amount",
+            dateOrCountEmpty: "Enter date or/and number of months",
+            dayAndMonth: "Enter day and month",
+            parentingMinutesEmpty: "Must enter minutes",
+            parentingMaxMinutesEmpty: 'Please enter a numeric value to define the condition for completing parenting hours. This condition determines when "parenting hours" will be applied relative to the employee\'s daily standard. The recommended value is "60" minutes, as per the parenting hour definition. If completion is required in all cases, you can enter a higher value in minutes. For example, for a 9-hour shift, enter "540" minutes.',
+            parentingHoursEmpty: "A numeric value must be entered for the salary transfer condition. The default is 174 hours, in accordance with legal regulations. Entering \"0\" will ensure parental hours are always transferred to the salary.",
+            errorBalance: "Please note: This type of policy requires a number greater than 0 to be entered."
+        }
+    },
+
+    areYouSureCancelRequestEvent: "Cancel and remove request from report?",
+
+    errorBulkUpdateContractsDates: "Unable to complete process for some of the employees cause of their current contract dates. To complete the request, change the contract at employee card.",
+    reportIsLocked: "Report locked for changes, Can't report on the current date.",
+
+    totalMonthlyChart: "Total monthly hours",
+
+    monthList: [
+        "",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ],
+    dateRanges: {
+        today:"Today",
+        yesterday:"Yesterday",
+        currentWeek:"Current Week",
+        lastWeek:"Last Week",
+        currentMonth:"Current Month",
+        lastMonth:"Last Month"
+    },
+
+    reportSent: "Report Sent",
+    sendReportTooltip: "Send Report",
+
+    exportReportCompressed: "Export",
+
+    isScietistClient: "Note! Chief Scientist Client",
+    refreshReport: "Refresh",
+    watchReport: "View",
+    eventNotAbleToEnterHours: "Can't update event and hours together",
+    errorEventNotAbleToEnterHours: "Can't update event and hours together",
+    errorEventNotAbleToEnterHoursSweeping: "Pay attention,<br>" +
+        "There is an error with your request.<br>" +
+        "Can't update event and hours at the same date for some employees.",
+    errorUpdatedForContract: "This event cannot be updated to the employee",
+
+
+    moveToContractTooltipMessage: "Hey! all employee associate with this contract will transfer to the new contract. Are you sure?",
+
+    reportLockedByManager: "The report is closed for changes, to edit the report please contact your admin.",
+
+    systemUpdateNotificationDialog: {
+        userTypeMissing: "נא לסמן למי להציג",
+        textMissing: "נא להזין הודעה"
+    },
+
+    systemAlertAdminDialog: {
+        applicationHe: "<p><strong>לקוחות יקרים,</strong></p>" +
+            "<p>כרגע קיים קושי בהתחברות עם האפליקציה.</p>" +
+            "<p>אנו מתנצלים על אי הנעימות ופועלים במהירות לתיקון התקלה.</p>" +
+            "<p>תודה, מקאנו.</p>",
+        reportsHe: "<p><strong>לקוחות יקרים,</strong></p>" +
+            "<p>כרגע קיים קושי בהוצאה והורדה של דוחות מהמערכת.</p>" +
+            "<p>אנו מתנצלים על אי הנעימות ופועלים במהירות לתיקון התקלה.</p>" +
+            "<p>תודה, מקאנו.</p>",
+        applicationEn: "<p><strong>Dear customers,</strong></p>" +
+            "<p>There is currently a difficulty connecting with the mobile application.</p>" +
+            "<p>We apologize for the inconvenience and are working quickly to correct the problem.</p>" +
+            "<p>Thank you, Meckano.</p>",
+        reportsEn: "<p><strong>Dear customers,</strong></p>" +
+            "<p>Currently there is a difficulty in issuing and downloading reports from the system</p>" +
+            "<p>We apologize for the inconvenience and are working quickly to correct the problem.</p>" +
+            "<p>Thank you, Meckano.</p>",
+        telephonyEn: "<p><strong>Hello</strong></p>" +
+            "<p>We have been encountered malfunctions with our telephone lines.</p>" +
+            "<p>As a result, calls are being dropped or not connecting at all.</p>" +
+            "<p>Support and service are available to you at</p>" +
+            "<p>Support mail: <a href='mailto:support@meckano.co.il'>support@meckano.co.il</a></p>" +
+            "<p>Live chat in the system (icon that appears at the bottom of the screen)</p>" +
+            "<p>Opening support ticket in the <a href='https://app.meckano.co.il/#newSupportTicket'>Support tab</a></p>" +
+            "<p>And send us quick messages on WhatsApp - <a href='https://api.whatsapp.com/send?phone=972542304207&text=%D7%A9%D7%9C%D7%95%D7%9D+%D7%9E%D7%A7%D7%90%D7%A0%D7%95'>to start a conversation click here</a></p>" +
+            "<p>Thank you for your understanding.</p>",
+        telephonyHe: "<p><strong>שלום,</strong></p>" +
+            "<p>בעקבות תקלה במערכת הטלפונייה, אנו נתקלים בקשיים בקבלה והוצאת שיחות שירות.</p>" +
+            "<p>אנו פועלים מול ספק המרכזייה על מנת לטפל בזה בהקדם.</p>" +
+            "<p>צוות התמיכה זמין עבורך במגוון ערוצים אחרים:</p>" +
+            "<p>במייל <a href='mailto:support@meckano.co.il'>support@meckano.co.il</a></p>" +
+            "<p>בצ׳אט לייב במערכת(אייקון המופיע בתחתית המסך)</p>" +
+            "<p>פתיחת טיקט <a href='https://app.meckano.co.il/#newSupportTicket'>בלשונית תמיכה</a></p>" +
+            "<p>הודעות מהירות בוואטסאפ - <a href='https://api.whatsapp.com/send?phone=972542304207&text=%D7%A9%D7%9C%D7%95%D7%9D+%D7%9E%D7%A7%D7%90%D7%A0%D7%95'>להתחלת שיחה לחצו כאן</a></p>" +
+            "<p>תודה על ההבנה</p>"
+    },
+
+    settingsMonthFormat: ["Current day", "Until the end of the current month"],
+    settingsWeekFormat: ["Current day", "Current week"],
+    settingsTwoWeekFormat: ["Current day", "Two weeks"],
+
+    arrowRightWeek: "Back",
+    arrowLeftWeek: "Next",
+    inputEmployee:"Please select an employee",
+
+    errorEventNotAbleReportSweepingAbsence: "Pay attention,<br>" +
+        "There is an error with your request.<br>" +
+        "Can't update event and hours at the same date.",
+    errorSweepingUpdateEventBYPolicy: "Unable to complete request for some of the employees according to their current balance",
+    errorSweepingUpdateNoPermission: "No permission to report absence",
+
+    scheduleReportsBy: "by",
+    scheduleReportsDate: "on date",
+
+    unableSignScientificReport: "Attention! Attendance hours should be the same as task hours.",
+    unableSignReports: "We are unable to sign because the following employees have missing attendance reports:",
+    unableSignReport: "We are unable to sign because of missing attendance reports",
+
+    userContractDialogSaveTitle: "Link to contract",
+    userContractDialogSave: "Save",
+    userContractDialogMoveTitle: "Transfer users associated to",
+    userContractDialogMove: "Execute",
+
+    dataLog: {
+        departmentId: ["Department movement", "General"],
+        employeeType: ["Employee status", ""],
+        sections: {
+            done: "Changes were made:"
+        },
+        from: "from"
+    },
+
+    employeeTypes: [
+        "Regular",
+        "Inactive",
+        "Maternity leave",
+        "Unpaid vacation",
+        "Sick leave",
+        "Unpaid sick leave",
+        "Terminated",
+        "Resigned",
+        "Deceased",
+        "Retired",
+        "Absent",
+        "In training",
+        "Studies",
+        'Travel abroad'
+    ],
+
+    locationsReportTitle: "Locations daily report",
+    phonesReportTitle: "Phones daily report",
+
+    adminFileSalary: {
+        companyNotExist: "Company does not exists",
+        invalidCompanyId: "Invalid company number"
+    },
+
+    errorDownloadToManyFiles: "You can only download 15 items at a time",
+
+    errorDisclaimerDialogSave: "חובה לבחור את מיקום הדיווח",
+
+    clickToWatchDocument: "Click to watch document",
+
+    overtimeExcludedDefaultName: "Overtime",
+    regularTimeExcludedDefaultName: "Regular hours",
+    extraHours100: "Extra hours at 100",
+
+    breaks: {
+        start: "Take a break",
+        continueBreak: "Resume break",
+        errorMessage: "According to the system settings, this operation cannot be performed"
+    },
+
+    empStatusActive: "Active",
+    empStatusInactive: "Inactive",
+    empStatusDeleted: "Deleted",
+
+    lang:"en",
+
+    systemUpdateHelpDialog: {
+        idMissing: "נא להזין קוד תוכן",
+        titleMissing: "נא להזין כותרת נושא",
+        textMissing: "נא להזין תוכן הודעה"
+    },
+
+    linksAdminDialog: {
+        file: 'שם קובץ',
+        link: 'קישור',
+        deleteGroup: "האם אתה בטוח שברצונך למחוק את הקבוצה?",
+        errorMessage: {
+            id: "נא להזין קוד תוכן",
+            desc1: "נא להזין כותרת נושא",
+            file: "נא להעלות קובץ",
+            link: "נא להוסיף קישור",
+            newGroup: "נא להזין שם קבוצה חדשה"
+        }
+    },
+
+    depManager: "Team leader",
+    depManagers: "Team leaders",
+
+    scouterDialog: {
+        title:"Switching to a shift placement system - Scouter",
+        body:"Click confirm to switch to the Scouter system"
+    },
+
+    noPermission: {
+        docPermission: "You do not have permission to upload documents"
+    },
+
+    errorDescription: "Status can't be empty",
+
+    eventUpdateForPopUpTitle: "Event update for:",
+
+    employeeExpensesTypes:{
+        1: "Car",
+        2: "Taxi",
+        3: "Hospitality",
+        4: "Office supplies",
+        5: "Public transport",
+        6: "Food",
+        7: "Flight",
+        8: "No invoice",
+        9: "Parking",
+        10: "Petrol",
+        11: "Hotel",
+        12: "Other"
+    },
+
+    employeeExpensesErrors: {
+        'category': "Category can't be empty",
+        'invoice': "Invoice number can't be empty",
+        'description': "Description can't be empty",
+        'amount': "Amount can't be empty",
+        'currency': "Please select a currency type for the expense",
+        'file': "Must upload invoice file"
+    },
+
+    employeeExpensesDeleteMessage: "Are you sure you want to delete expenses?",
+    employeeExpensesNoneSelectedText: "Click to search",
+
+    employeeExpensesStatus: {
+        'pending': 'Pending',
+        'confirmed': 'Approved',
+        'declined': 'Declined'
+    },
+
+    errorDownloadReport: "Oops, that happens too." +"<br>"+ "We were unable to produce the requested report." +"<br>"+ "Contact us and we will be happy to check why.",
+
+    errorProccess : "Dear user," +"<br>"+ "The system is currently processing the requested file. Please wait for the operation to complete. Once finished, you can proceed with the requested action.",
+
+
+    selectSuppliers: "Select suppliers",
+
+    searchEmployeesError: "Search field is empty",
+    searchEmployeesSearchByError: "Must choose category to search",
+
+    connected: "Online",
+    unConnected: "Offline",
+
+    missingExists: "Event name already exists",
+
+    tofes101sent: "The form has been sent successfully",
+    tofes101question: "Send email to the employee with 101 form?",
+
+    confirmed: "Approved",
+    pending: "Pending",
+    tofes101question: "Send email to the employee with 101 form?",
+
+    cantUpdateMissing: "This event does not match to current user",
+
+    duplicateRow: "Duplicate this item?",
+
+    locationSettings: {
+        badIPAddress: "Insert valid IP address: xxx.xxx.xxx.xxx",
+        table: {
+            location: {
+                header: "Location",
+                defaultVal: "Location name"
+            },
+            ipAddress: {
+                header:  "IP Address",
+                defaultVal: "000.000.000.000"
+            }
+        }
+    },
+
+    confirmDeletePolicy: " Do you want to delete this policy?",
+    errorEmployeeInactive: "Cloud not make the request, employee is inactive.",
+
+    errorEmployeesInDepartment: "Attention! Deleting a department with active employees is not feasible. Please ensure the department is empty of employees before attempting deletion.",
+
+    errorEventInBankHours: "Please note: This event is linked to the hours bank policy, so the calculation units cannot be changed.",
+
+    lockCeleryWizard: {
+        lockText: `
+            <h4 class="text-blue">Lock changes</h3>
+            <p>Once changes are locked, you'll be able to export the payroll file, but further editing will be disabled. To unlock and make edits again, a one-time verification code will be sent to you via SMS</p>
+        `,
+        unlockText: `
+            <h4 class="text-blue">Unlock verification</h3>
+            <p>Payroll files can be exported even when the lock is active. Unlocking the lock will enable editing of existing salary files. To confirm this action, a one-time verification code will be sent to you via SMS. Please enter the verification code</p>
+            <input type="text" class="verification-code" placeholder="Enter code">
+            <p class="lockCeleryWizard-error hidden">The code must be numeric 5 digits length</p>
+            <p class="lockCeleryWizard-error-code hidden">Please enter valid code</p>
+        `
+    },
+
+    confirmReactivateUser:
+        "<p>Reactivating an employee will delete the work end date and restore their last recorded departmental assignment.</p>" +
+        "<p>To proceed click 'Confirm.'</p>",
+
+    errorDatesAreInFuture: 'Attention! Future reporting is not allowed for employees of the "Innovation Authority”.',
+
+    scientificReportPercent: 'R&D percentage',
+
+    maritalStatus: {
+        0: "Single",
+        1: "Married",
+        2: "Divorced",
+        3: "Widow/er"
+    },
+
+    gender: {
+        'm': "Male",
+        'f': "Female"
+    },
+
+    additionalFieldsEmpty: '<span>Feel like you need extra information? <a>click here</a> for custom fields</span>',
+
+    directManager: "Manager Name",
+
+    chooseDepartment: "Department",
+
+    downloadAllFilesConfirm:
+        'By clicking "Confirm," the system will create and download a ZIP file containing all the files for the selected time range.',
+
+    salaryFormatIsLocked: `<span style='font-weight: bold'>File Locked for Editing</span><br>
+        The payroll file has been locked for changes by another system administrator. Editing is not possible until the lock is released.`,
+    salaryFormatIsLockedCancelBtn: 'OK',
+    confirmTooltipConfirm: "Confirm",
+    confirmTooltipCancel: "Cancel",
+
+    tofes101EmailBtn :"Email",
+    tofes101SMSBtn : "SMS" ,
+    tofes101SMSBtnLimit : "Mobile alert limit reached",
+    tofes101EmailsValidation: "The email address entered is invalid. Please enter a valid address in the format user@example.com.",
+    tofes101sentSuccessfully: "Action completed successfully! The form will be sent at the next hour.",
+    tofes101sentFailed: "The action failed. Please try again or contact support if the issue persists.",
+
+    confirmTooltipCancel: "Cancel",
+
+    addPhoneReportingNumber: "Add a phone number to report",
+    editPhoneReportingNumber: "Edit a phone number to report",
+
+    supportTickets: {
+        adminAlert: [
+            "Attention! You are about to be exposed to sensitive personal data, and you must behave with the necessary caution. Your access has been granted for",
+            " hours."
+        ]
+    },
+
+    onlyAccessLogButtonText: "Abnormal connection" ,
+    employeeAddProfilePicture1 : "<span>Click here</span> to upload picture" ,
+    employeeAddProfilePicture2 : "picture from computer" ,
+    closeCollapseble : "Show less" ,
+    openCollapseble : "Show more"
+};

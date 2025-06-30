@@ -1,0 +1,259 @@
+
+const Register = Backbone.Model.extend({
+	defaults: {
+		companyName: null,
+		firstName: null,
+		lastName: null,
+		phone: null,
+		email: null,
+		password: null,
+		companyLanguage: "he"
+	},
+
+	url: function() {
+		return "register";
+	}
+});
+
+
+const RegisterRouter = Backbone.Router.extend({
+	view: null,
+	routes: {
+		"" : "register",
+		"register": "register",
+		"verificationCode": "verificationCode",
+	},
+
+	register: function() {
+		const registerForm = $("#RegisterForm");
+		registerForm.find("input[type='text'],input[type='password']").val("");
+		registerForm.show();
+		if (this.view && this.view.dispose) {
+			this.view.dispose();
+		}
+		this.view = new RegisterView();
+	},
+
+	verificationCode: function() {
+		const verificationCode = $("#verificationCode");
+		$("#RegisterForm").hide();
+		verificationCode.show();
+		verificationCode.find("input[type='text'],input[type='password']").val("");
+		if (this.view && this.view.dispose) {
+			this.view.dispose();
+		}
+		this.view = new ForgotPasswordView();
+	},
+});
+
+const RegisterManager = {
+	router: null,
+	init: function(passwordRecovery) {
+		this.router = new RegisterRouter();
+
+		if(passwordRecovery){
+			this.router.showPasswordRecovery();
+		}
+
+		Backbone.history.start();
+	}
+}
+
+const RegisterView = Backbone.View.extend({
+	isStrongPassword: false,
+	captchaToken:false,
+	isV2:false,
+	events: {
+		"mousedown button.showPassBtn": "showPassBtn",
+		"mouseup button.showPassBtn": "hidePassBtn",
+		"touchstart button.showPassBtn": "showPassBtn",
+		"touchend button.showPassBtn": "hidePassBtn",
+		"click input.registration": "register",
+		"click input.submit-verification-sms": "register",
+		"click a.resend": "register",
+		"click input.submit-update-phone": "updatePhone",
+		"click input.cancel-update-phone": "hideUpdatePhone",
+		"click input.register-success-button": "redirectToLogin",
+		"focus input": "inputChanged",
+		"blur input": "inputChanged",
+		"keyup input": "inputChanged",
+		"click input.show-change-phone-button": "showUpdatePhone"
+	},
+
+	initialize: function() {
+		this.el = $("#registerForm");
+		this.delegateEvents();
+
+		Application.initMeterStrengthPassword(this.el.find(".register-step-one"), this);
+	},
+
+	dispose: function() {
+		this.undelegateEvents();
+	},
+
+	inputChanged: function(ev) {
+		const el = $(ev?.currentTarget);
+		if (!el) return;
+
+		if (ev?.type !== "focusout" || el.val() && el.val().length ) {
+			el.addClass('focus');
+		} else {
+			el.removeClass('focus');
+		}
+	},
+
+	register: function(e) {
+		this.el.find("div.registerNotification").html("").hide();
+		if (!FieldInformation.validate(this.el, null, null, true)) {
+			return;
+		}
+		const password = this.el.find("input.password").val();
+		const repeatPassword = this.el.find("input#repeatPassword").val();
+
+		const isPrivacy = this.el.find("input.privacy").is(":checked");
+		const isNewsletter = this.el.find("input.newsletter").is(":checked");
+		const email = this.el.find("input.email").val();
+
+		if(!Application.validPassword(password, null, email)) {
+			this.el.find("div.registerNotification").html(tpl.errorPassword).show();
+			return this.el.find("input.meterPassword").addClass("invalid");
+		}
+
+		if(repeatPassword !== password) {
+			return this.el.find("input#repeatPassword").addClass("invalid");
+		}
+
+		if(!isPrivacy) {
+			return this.el.find("input.privacy").addClass("invalid");
+		}
+
+		const language = new URLSearchParams(window.location.search).get('l') ? 'eng' : 'He';
+		const verificationCodeSMS = this.el.find("input.verificationCodeSMS").val();
+		const isResend = e?.target?.classList?.contains('resend') || false;
+
+		this.toggleLoader();
+		const register = new Register(), self = this;
+		grecaptcha.enterprise.ready(async ()=> {
+		try {
+			if(!this.isV2) this.captchaToken = await grecaptcha.enterprise.execute('6Ld9x48lAAAAADB8NDj2CmlVBTfd9MIZflJFZ02_', {action: 'register'});
+
+			const user = {
+				companyName: this.el.find("input.companyName").val(),
+				firstName: this.el.find("input.firstname").val(),
+				lastName: this.el.find("input.lastname").val(),
+				phone: this.el.find("input.phone").val(),
+				updatePhone: this.el.find("input.update-phone").val(),
+				newsletter: isNewsletter,
+				privacy: isPrivacy,
+				email,
+				password,
+				language,
+				grecaptchaToken: this.captchaToken,
+			};
+			if(this.isV2) user.isV2 = true;
+			if(e?.target?.classList?.contains('submit-verification-sms')) user.verificationCodeSMS = verificationCodeSMS;
+			if(isResend) user.updatePhone = this.el.find("input.update-phone").val() || this.el.find("input.phone").val();
+			register.save(user,
+			{
+				success: function() {
+					self.toggleLoader();
+					if(isResend) return;
+					if(self.el.find(".register-step-two").hasClass("hidden")) {
+						self.el.find(".register-step-one").addClass('hidden');
+						self.el.find(".register-step-two").removeClass('hidden');
+						self.el.find(".verificationCodeSMS").focus();
+					} else {
+						if(!self.el.find(".update-phone-popup").hasClass("hidden")) {
+							self.hideUpdatePhone();
+						} else {
+							self.el.find(".register-step-two").addClass('hidden');
+							self.el.find(".register-step-three").removeClass('hidden');
+							self.el.find(".logoWrap").addClass('hidden');
+						}
+					}
+
+				},
+				error: function(code) {
+					let el = null;
+					let err = null;
+					switch (code) {
+						case 600:
+							el = self.el.find("div#captcha");
+							err = tpl.login_errors.badCaptcha;
+							break;
+						case 500:
+							self.isV2 = true;
+							grecaptcha.enterprise.render("captcha", {
+								sitekey: "6LeMS5AlAAAAAAyREiaY4_0Bw_TR4Nsr0nlWi_4T",
+								callback: (captchaToken)=>{
+									self.captchaToken = captchaToken;
+								},
+								action: "register",
+								hl: tpl.lang
+							});
+							break;
+						case 400:
+							err = tpl.login_errors.emailExists;
+							break;
+						case -1:
+							el = self.el.find("input.verificationCodeSMS");
+							err = tpl.login_errors.verificationCode;
+							break;
+					}
+					if (err) {
+						self.el.find("div.registerNotification").html(err).show();
+						if(el) {
+							el.addClass('invalid');
+						}
+					}
+					self.toggleLoader();
+				}
+			});
+			$(".registerNotification").hide();
+			} catch (err) {
+				self.toggleLoader();
+			}
+		})
+	},
+
+	showPassBtn:function(){
+		this.el.find("#password").attr('type', 'text');
+		this.el.find("#repeatPassword").attr('type', 'text');
+	},
+	hidePassBtn:function(){
+		this.el.find("#password").attr('type', 'password');
+		this.el.find("#repeatPassword").attr('type', 'password');
+	},
+
+	redirectToLogin: function (e) {
+		e.preventDefault();
+		const userLanguage = new URLSearchParams(window.location.search).get("l") ? "?l=en" : "";
+		const url = "login.php" + userLanguage;
+		location.href = url;
+	},
+
+	showUpdatePhone: function () {
+		this.el.find('.update-phone-popup').removeClass("hidden");
+	},
+
+	hideUpdatePhone: function () {
+		this.el.find('.update-phone-popup').addClass("hidden");
+	},
+
+	updatePhone: function () {
+		const elNewPhone = this.el.find("input.update-phone");
+		if(!FieldInformation.validPhone(elNewPhone.val())) {
+			elNewPhone.parent().find('p.updatePhoneError').text(tpl.phoneWrong);
+			elNewPhone.addClass('invalid');
+			return;
+		} else {
+			this.register();
+		}
+	},
+
+	toggleLoader: function () {
+		this.el.find(".submitButtonsWrapper").toggle();
+		this.el.find(".show-change-phone").toggle();
+		this.el.find(".big-preloader").toggle();
+	},
+});

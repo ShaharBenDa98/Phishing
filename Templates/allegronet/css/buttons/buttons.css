@@ -1,0 +1,42 @@
+.ButtonRow
+{
+	padding: 10px 0px 0px 0px;
+	height: 1px;
+	text-align: -moz-right;
+	_text-align: right;
+}
+.RTL
+.ButtonRow
+{
+	text-align: -moz-left;
+	_text-align: left;
+}
+DIV.ButtonRow
+{
+	height: 30px;
+}
+.ImageBtn,
+.ImageBtn_WithHover,
+.ImageBtn_OnlyHover
+{
+	cursor: pointer;
+}
+IMG.Icon
+{
+	/*
+	width: 17px;
+	height: 17px;
+	*/
+	vertical-align: middle;
+	margin: 1px;
+}
+IMG.IconSeperator
+{
+	height: 16px;
+	border-right: 1px solid white;
+	vertical-align: middle;
+	margin: 1px;
+	color: #BABDDD;
+	width: 1px;
+	_font-size: 1px;
+}

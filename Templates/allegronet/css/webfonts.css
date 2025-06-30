@@ -1,0 +1,85 @@
+/*** Load Some Nice Web Fonts ***/
+
+/*** OPEN SANS FAMILY ***/
+@font-face {
+    font-family: 'OpenSansLight';
+    src: url('fonts/OpenSans-Light-webfont.eot');
+    /* Do not remove the smiley! */
+	src: local('☺'),
+		url('fonts/OpenSans-Light-webfont.eot@') format('embedded-opentype'),
+		url('fonts/OpenSans-Light-webfont.woff') format('woff'),
+		url('fonts/OpenSans-Light-webfont.ttf') format('truetype'),
+		url('fonts/OpenSans-Light-webfont.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'OpenSansRegular';
+    src: url('fonts/OpenSans-Regular-webfont.eot');
+    /* Do not remove the smiley! */
+	src: local('☺'),
+		url('fonts/OpenSans-Regular-webfont.eot@') format('embedded-opentype'),
+		url('fonts/OpenSans-Regular-webfont.woff') format('woff'),
+		url('fonts/OpenSans-Regular-webfont.ttf') format('truetype'),
+		url('fonts/OpenSans-Regular-webfont.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'OpenSansSemibold';
+    src: url('fonts/OpenSans-Semibold-webfont.eot');
+    /* Do not remove the smiley! */
+	src: local('☺'),
+		url('fonts/OpenSans-Semibold-webfont.eot@') format('embedded-opentype'),
+		url('fonts/OpenSans-Semibold-webfont.woff') format('woff'),
+		url('fonts/OpenSans-Semibold-webfont.ttf') format('truetype'),
+		url('fonts/OpenSans-Semibold-webfont.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'OpenSansBold';
+    src: url('fonts/OpenSans-Bold-webfont.eot');
+    /* Do not remove the smiley! */
+	src: local('☺'),
+		url('fonts/OpenSans-Bold-webfont.eot@') format('embedded-opentype'),
+		url('fonts/OpenSans-Bold-webfont.woff') format('woff'),
+		url('fonts/OpenSans-Bold-webfont.ttf') format('truetype'),
+		url('fonts/OpenSans-Bold-webfont.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'OpenSansExtrabold';
+    src: url('fonts/OpenSans-ExtraBold-webfont.eot');
+    /* Do not remove the smiley! */
+	src: local('☺'),
+		url('fonts/OpenSans-ExtraBold-webfont.eot@') format('embedded-opentype'),
+		url('fonts/OpenSans-ExtraBold-webfont.woff') format('woff'),
+		url('fonts/OpenSans-ExtraBold-webfont.ttf') format('truetype'),
+		url('fonts/OpenSans-ExtraBold-webfont.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+/*** PT SANS FAMILY - WILL BE DEPRECATED ***/
+@font-face {
+	font-family: 'PTSansBold';
+	src: url('fonts/PTC75F-webfont.eot');
+	/* Do not remove the smiley! */
+	src: local('☺'),
+		url('fonts/PTC75F-webfont.woff') format('woff'),
+		url('fonts/PTC75F-webfont.ttf') format('truetype'),
+		url('fonts/PTC75F-webfont.svg') format('svg');
+	font-weight: bold;
+	font-style: normal;
+}

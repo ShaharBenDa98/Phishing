@@ -1,0 +1,1693 @@
+var tpl = {
+    allWorkers:"כל העובדים",
+    no:"אין",
+    questionsReportLocation:"בחר מיקום",
+    userQ:"עובד",
+    departmentQ:"חברה",
+    departmentQS:"מחלקה/ות",
+    workerQS:"עובד/ים",
+    reactivate:"הפוך לפעילה",
+    inputNumbers:"יש להזין מספרי עובדים",
+    address: "כתובת",
+    comment: 'הערות',
+    noComment: 'לא נרשמה הערה',
+    description: "תיאור",
+    rootDepartment: "ראשית",
+    MultipleChoice: "בחירה מרובה",
+    numDepartments: "מחלקות",
+    rootTask: 'ראשי',
+    parentQuestion: 'ללא',
+    noTasksDefined: "עוד לא הוגדרו משימות",
+    noTasksFound: "לא נמצאו משימות",
+    notAssociated: "ללא שיוך",
+    noFiltering: "ללא סינון",
+    noDepartmentFiltering: "ללא סינון",
+    nonAssociatedEmployees: "כללי",
+    inactiveEmployees: "עובדים לא פעילים",
+    allDepartments: "כל המחלקות",
+    naAssocUser: "משתמש אינו קיים",
+    nsAssocDepartment: "מחלקה אינה קיימת",
+    validEmailTextErr:"נא להזין אימייל חוקי",
+    validDepartment : "נא לבחור מחלקה",
+    validWorkerTag : "תג עובד לא תקין",
+    validDirectManager : "נא לבחור מנהל ישיר",
+    validContractId : "נא לבחור חוזה עבודה",
+    validRole : "נא לבחור או להזין תפקיד",
+    validUserCalender : "נא לבחור יומן חגים",
+    validAbsencePolicy : "נא לבחור מדיניות אירועים",
+    validStatus : "נא לבחור סוג עובד",
+    validUserTimezone : "נא לבחור אזור זמן",
+    validstdtMonthTextErr:"חובה להזין תקן חודשי",
+    validTH_valueErr:"חובה להזין סף שעות",
+    validTH_tableErr:"יש למלא את כל השדות בטבלה",
+    multDaySpan_valueErr:"חובה להזין זמן מנוחה בין משמרות",
+    weekly_rest_time_valueErr:"חובה להזין זמן מנוחה שבועי",
+    overtime_pay_valueErr:"חובה להזין ערך",
+    holiday_pay_valueErr:"חובה להזין ערך",
+    close: "סגור",
+    open: "פתח",
+    edit: "עריכה",
+    save: "שמירה",
+    update: "עדכון",
+    confirmLocked: "אישור",
+    cencleLocked: "ביטול",
+    arrowRight: "חודש אחורה",
+    arrowLeft: "חודש קדימה",
+    arrowUp: "לעובד הקודם",
+    arrowDown: "לעובד הבא",
+    iconTooltipNotify: "/images/icon-notify-white.png",
+    iconTooltipHours: "/images/report-tooltip-overtime.png",
+    iconTooltipComment: "/images/report-tooltip-comment.png",
+    iconTooltipLocations: "/images/report-tooltip-locations.png",
+    holidayWeekend:"סוף שבוע",
+    holidayWeekendJewishMessage:"זמני כניסת ויציאת השבת וחגי ישראל:",
+    holidayWeekendMessage:"זמני כניסת ויציאת החג",
+    noticeDeactivateEmployee: "האם להעביר עובד למצב לא פעיל?",
+    confirmToDeleteLocation: "האם ברצונך למחוק את המיקום?",
+    noticeDeleteEmployee: "מחיקת המשתמש לצמיתות תסיר את כל פרטיו והנתונים שנאספו עבורו כולל דוחות ומסמכים. לא ניתן יהיה לשחזר או לבטל פעולה זו אחרי שבוצעה.</br>לאישור הפעולה, הקלידו 'מחיקה' בשורת הטקסט ולחצו על אישור:",
+    textToConfirmDeleteUser: "מחיקה",
+    noticeOnlyManagerCanDeleteEmployee: "רק מנהל מערכת רשאי למחוק עובד לצמיתות",
+    noPermissionWatchEmployeesDetails: "אין הרשאה לצפות בפרטי עובדים",
+    noticeDepartmentDelete: "האם למחוק מחלקה? מחיקת מחלקה תהפוך את כל העובדים בה ללא משוייכים",
+    copyOf: "עותק של ",
+    associateAll: "שייך לכולם",
+    missingsNone: "ללא אירוע",
+    missingsAdd: "+",
+    checkinAndCheckoutReportFailed: "דיווחי כניסה ויציאה נכשלו עקב חפיפה בשעות",
+    checkinReportFailed: "דיווח כניסה נכשל עקב חפיפה בשעות",
+    checkoutReportFailed: "דיווח יציאה נכשל עקב חפיפה בשעות",
+    absenceReportFailed: "דיווח היעדרות נכשל",
+    closeWinIn: "מיד תועברו לדוח נוכחות להמשך טיפול בעוד",
+    seconds: "שניות",
+    userContractTitle:"חוזה עבודה המוגדר",
+    contractNum:"מספר החוזה: ",
+    contractName:"שם החוזה: ",
+    userContractNotExist:"חוזה עבודה לא מוגדר",
+    checkinAt: "כניסה בשעה",
+    checkin: "כניסה",
+    checkout: "יציאה",
+    hour: "שעה",
+    mustInputLocationFromMapAndSetRadius: "חובה להזין מיקום מתוך תיבת הבחירה וחובה להזין רדיוס",
+    phoneAlreadyExist: "לא ניתן להוסיף מספר טלפון שכבר קיים במערכת",
+    locationAlreadyExist: "לא ניתן להוסיף מיקום שכבר קיים במערכת",
+    moreThan1SamePhone: " טבלת הטלפונים מכילה שני מספרי טלפון דומים או יותר",
+    dropImage: "גרור תמונה לכאן",
+    inputImage: "העלו תמונה מהמחשב",
+    dropDocument: "גרור מסמך לכאן",
+    inputDocument: "העלו מסמך מהמחשב",
+    inputList: "בחירת טבלה לטעינה",
+    departmentOrEmployee: "מחלקה / עובד",
+    regularTimeWithOverTime: "לא ניתן לסמן חריגה כאשר הזמן מחושב כרגיל",
+    OverTimeSmallerThanRecognizeTime:"ערך לא יכול להיות נמוך מזמן שיוכר לעובד",
+    seperator: ">",
+    exportReport: "ייצא דוח",
+    exportFile: "ייצא קובץ",
+    goodMorning: "בוקר טוב",
+    goodEvening: "ערב טוב",
+    goodAfternoon: "צהריים טובים",
+    goodNight: "לילה טוב",
+    userLocked: "חשבון נעול, לחץ כדי לשחרר נעילה",
+    workerTag: "תג עובד",
+    emptyPassword: "נא לבחור סיסמה",
+    badEmail: "דואר אלקטרוני לא תקין",
+    missingFields: "נא למלא את כל השדות",
+    userEmailExists: "קיים כבר משתמש עם כתובת הדוא שצויינה",
+    allCompany: "עבור כל החברה",
+    captchaLock: "הטופס נעול: נא לגרור את הלשונית לשליחה",
+    captchaUnlock: "ניתן לשלוח את הטופס",
+    generateReport: "הפקת דוח",
+    addOverrideShift: "הוסף לחוזה",
+    erevHag:"ערב חג",
+    hag:"חג",
+    holHamoed:"חול המועד",
+    shabat:"ש",
+    everyone:"כולם",
+    allEmployees : "כל העובדים",
+    timeIn:"שעת כניסה",
+    timeOut:"שעת יציאה",
+    yoursHoursForThisDay:"שעות הנוכחות שלך ליום זה",
+    noReport:"אין דיווח",
+    employeeTimeDetails:"פירוט זמן לעובד",
+    departmentTimeDetails:"פירוט זמן למחלקה",
+    totalTasks:'סה"כ משימות',
+    totalHours:'סה"כ שעות',
+    updateOverrideShift: "עדכן חוזה",
+    commentMessageForLockedReport:"לנעילת הדוח מפני עריכה ושינויים עבור החודש הנוכחי.",
+    commentMessageForOpenReport:"לשחרור הדוח עבור עריכה ושינויים  לחודש הנוכחי.",
+    commentMessageForConfirmReport:"לאישור צפייה בדוח.",
+    commentMessageForNoConfirmReport:"לביטול אישור צפייה בדוח.",
+    reportLocked:"לא ניתן לשחרר את הדוח ללא אישור ממונה.",
+    reportUnlocked:"האם אתה בטוח שברצונך לשחרר את נעילת הדוח?",
+    toConfirmAndSubmitReport:"לאישור ושליחת דוח הנוכחות",
+    beforeReportLockedCompleteMissingReporting:"לא ניתן לנעול דוח מכיוון שישנם דיווחים חסרים",
+    beforeReportLockedWorning:"רגע לפני שלוחצים אישור!</br>הדוח ישלח לממונה, ויינעל מפני שינויים עתידיים.",
+    overTimeErr:"הזמן הכללי של דיווח המשימות גדול יותר מזמן דיווח הנוכחות",
+    cantAddRow:"לא ניתן להזין משימה חדשה כיוון שזמן דיווח המשימות גדול יותר או שווה לזמן דיווח הנוכחות",
+    bedTimeErr:"חובה להזין זמן חוקי",
+    cantDeleteOneTask:"לא ניתן להסיר משימה בודדת",
+    composerDetailsInfoTitle:"הסבר למילוי פרטי הדוח ",
+    composerDetailsInfoBody:"הזן את הפרטים ... טקסט טקסט טקסט",
+    composerHeaderInfoTitle:"הסבר ליצירת Header",
+    composerHeaderInfoBody:"גרור את השדות שהינך מעוניין להציג מהטבלה הימנית לתוך הטבלה השמאלית",
+    composerBodyInfoTitle:"הסבר ליצירת Body",
+    composerBodyInfoBody:"גרור את השדות שהינך מעוניין להציג מהטבלה הימנית לתוך הטבלה השמאלית",
+    composerFooterInfoTitle:"הסבר ליצירת Footer",
+    composerFooterInfoBody:"גרור את השדות שהינך מעוניין להציג מהטבלה הימנית לתוך הטבלה השמאלית",
+    endDateSmallerThanStartDat:"זמן סיום קטן מזמן התחלה",
+    endDateCanNotBeEmpty:"חובה להזין זמן סיום",
+    startDateCanNotBeEmpty:"חובה להזין זמן התחלה",
+    dateInRange:"תאריך לא תקין , תאריך קטן או שווה לתאריך הקודם ",
+    locatedHere:"ממוקם כאן",
+    allowedOnlyFromSearchPanel:"מיקום ניתן להזין רק מתיבת החיפוש מעל המפה כאשר הינך מוודא שהכתובת תקינה והמיקום שקיבלת במפה אכן תואמת לחיפוש",
+    editRatesCalculationForDate:"עריכת חישוב שעות עבור תאריך",
+    tooltips: {
+        employeeDeactivate: "העברה למצב לא פעיל",
+        employeeReactivate:"העברה למצב פעיל",
+        employeeReport: "דוח חודשי לעובד",
+        employeeProjectReport: "עדכון פרוייקט לעובד",
+        employeeEdit: "כרטיס עובד",
+        employeeDelete: "מחק עובד",
+        departmentInfo: "עריכת מחלקה",
+        departmentDelete: "מחיקת מחלקה",
+        departmentReport: "דוח מחלקה",
+        confirmation:"אישור",
+        cancelEdit: "ביטול עריכה",
+        cancel: "ביטול",
+        contractDetails: "חוזה עבודה משוייך לעובד",
+        duplicateDay: "שכפל יום נוכחי",
+        lockIconTooltipForLock:"לנעילת הדוח",
+        lockIconTooltipForOpen:"לשחרור הדוח מנעילה",
+        commentIconReportTooltip:"לצפייה בהערות של העובד",
+        employeelockIconToolTipForLocked:"לאישור ונעילת הדוח",
+        employeeCommentLockedReportTooltipNoComment:"הוסיפו הערה",
+        updateComment:"עדכון הערה",
+        calculateHours:"חישוב שעות",
+        holidayTimesIn:"זמני כניסת החג/שבת",
+        locationSign:"מיקומי החתמה",
+        updateBonus:"תוספת",
+        presenceHoursForThisDay:"שעות נוכחות ליום זה",
+        confirmLockedReport:"הדוח מאושר על ידי מנהל",
+        unconfirmLockedReport:"לאישור הדוח על ידי מנהל",
+        employeeCommentLockedReportTooltipComment:"הערות",
+        employeeDoc:"מסמך",
+        save:"שמור",
+        confirmAllDescription : "אישור כל הדיווחים",
+        exportXLS : "אקסל",
+        exportPDF : "PDF",
+        freeReporting : "עריכה מהירה",
+        activeEmployees: "עובדים פעילים",
+        moveToCheckin: "העברת דיווח לכניסה",
+        moveToCheckout: "העברת דיווח ליציאה",
+        blockLocation: "בורר החתמה או אי החתמה ממיקום ספציפי",
+        modify: "עריכה",
+        remove: "מחיקה",
+        duplicate: "שכפול",
+    },
+    errors: {
+        firstName: "נא להכניס שם פרטי",
+        lastName: "נא להכניס שם משפחה",
+        reportBadDates: "תאריכים נבחרים אינם תקינים, נא לנסות שוב",
+        reportBadDatesRange: "טווח התאריכים שבחרת אינו תקין, יש לבחור טווח הקטן משנה ולנסות שוב.",
+        reportBadEntry: "הערכים האפשריים לרשומה זו הם בין: ",
+        reportBadTime: "ערכי זמן שנבחר אינו תקין",
+        reportBadBaseTime: "תאריך שנבחר אינו תקין",
+        taskEntryCollides: "זמני דיווח שנבחרו מתנגשים עם דיווח קיים",
+        taskEntrySave: "שגיאה בשמירת הנתונים",
+        updateTasksFailed:"העדכון נכשל עבור חלק מהמשימות, ייתכן שהמשימות כבר קיימות או שחלוקת המשימות אינה נכונה. יש לעבור לדוח משימות ולעדכן את השעות בהתאם.",
+        taskEntryLargerThan: "זמן כניסה גדול מזמן היציאה",
+        lockHoursBadHours: "נא להזין מספר שעות",
+        checkInOrOutIsMandatory:"חובה להזין דיווח כניסה או דיווח יציאה לפני הצגת טופס השאלות",
+        checkinNullForThisQuestion:"השאלה מוגדרת עבור דיווח כניסה, יש להזין דיווח כניסה תחילה",
+        checkoutNullForThisQuestion:"השאלה מוגדרת עבור דיווח יציאה, יש להזין דיווח יציאה תחילה",
+        answerContainsOnlyNumbers:"התשובה חייבת להכיל מספרים בלבד",
+        answerContainsOnlyChars:"התשובה חייבת להכיל טקסט בלבד",
+        contractNotExist:"יש להגדיר חוזה עבודה לעובד על מנת לערוך את החוזה",
+        changePasswordDays: "נא להזין מספר ימים",
+        answerIsMandatory: "שאלת חובה לא ניתן לדלג",
+        numbersOnly: "ניתן להזין מספרים בלבד",
+        textOnly: "ניתן להזין טקסט בלבד",
+        eventsCalendarTypes: "חובה לבחור אירועים",
+        eventsCalendarName: "חובה להזין שם יומן",
+        salarySystemTagContainsNumbers:"תג עובד במערכת שכר חייב להכיל מספרים",
+        contractPercent: "חובה להזין מספר בין 1 ל 100",
+    },
+    confirm: {
+        autoCheckin: "כניסה זה הושלמה אוטומטית לפי הגדרות החוזה, אנא אשר.",
+        autoCheckout: "יציאה זו הושלמה אוטומטית לפי הגדרות החוזה, אנא אשר.",
+        fillCheckinFirst: "נא למלא שדה כניסה לפני שדה יציאה."
+    },
+    mb: {
+        undo: "ביטול",
+        error: "חלה שגיאה",
+        departmentSaved: "מחלקה נשמרה",
+        questionSaved:"השאלה נשמרה",
+        saving: "שומר נתונים",
+        employeeSaved: "🎉 השינויים נשמרו בהצלחה",
+        infoSaved: "פרטים נשמרו",
+        contractSaved: "נתוני חוזה נשמרו",
+        taskSaved: "משימה נשמרה",
+        companySaved: "פרטי חברה נשמרו",
+        companySettingsSaved: "הגדרות חברה נשמרו",
+        alertsSettingsSaved: "הגדרת התראות נשמרה",
+        locationSaved: "מיקום נשמר",
+        locationRemoved: "מיקום הוסר",
+        companyPhonesSettingsSaved: "הגדרות טלפוניה נשמרו",
+        employeeAdded: "עובד נוסף",
+        departmentAdded: "מחלקה נוספה",
+        emailReportAdded: "דוח נשמר",
+        supportTicketSaved: "קריאת שירות נשלחה",
+        dataImportProgress: "מבצע יבוא",
+        dataImportError: "שגיאה ביבוא",
+        dataImportSuccess: "יבוא בוצע בהצלחה",
+        updateCredentialsSaved: "עדכון הרשאות נשמר",
+        deleting: "מוחק נתונים",
+        deletedData: "הנתונים נמחקו",
+        operationPerformedSuccessfully: "הפעולה בוצעה בהצלחה",
+    },
+
+
+    //dataExportComposer///
+    dataExportListSubTitle:"ניהול מבנה רשומה",
+    newDataExportSubtitle:"יצירת מערכת ייצוא לשכר חדשה",
+    editDataExportSubtitle:"עדכון מערכת ייצוא לשכר",
+    componentsForFileName : {
+        companyId:["מזהה חברה",0], //must to start with value 0 in the array
+        companyName:["שם חברה",0],
+        companyNum:["מס' חברה",1],
+        eventNum:["מס' אירוע",1]
+    },
+    datesForFileName: [
+        "ddmmyyyy",
+        "yymmdd",
+        "mmddyy",
+        "mm",
+        "yy",
+        "yyyy",
+        "mmyyyy",
+        "yymm",
+    ],
+    typesForFileName:{
+        constant:"קבוע",
+        date:"תאריך",
+        component:"רכיב",
+    },
+    constantsForLine:{
+        //[key,desc,value]
+        0:["0","0"],
+        1:["1","1"],
+        2:["2","2"],
+        3:["3","3"],
+        4:["4","4"],
+        5:["5","5"],
+        6:["6","6"],
+        7:["7","7"],
+        8:["8","8"],
+        9:["9","9"],
+        space:["רווח","&nbsp;"],
+        dot:["נקודה","."],
+        plus:["פלוס","+"],
+        minus:["מינוס","-"],
+    },
+    componentsForLine : {
+        //0 - can be freq value
+        // - 1 - need input value, can't be freq value (except specialHours )
+        // - 2 do not need to input value but could not be feq value
+        // - 3 need input value and can be freq value
+        employeeWorkerTag:["תג עובד",2],//must to start with value 0 in the array
+        idNum:["תעודת זהות",2],
+        employeeSalarySystemTag:["תג עובד במערכת שכר",2],//must to start with value 0 in the array
+        employeeId:["מזהה עובד",2],
+        companyId:["מזהה חברה",2],
+        travelExpensesMonthly:["החזר נסיעות חודשי",0],
+        travelExpensesDaily:["החזר נסיעות יומי",0],
+        componentNum:["מס' רכיב",1],
+        companyNum:["מס' חברה",1],
+        eventNum:["מספר אירוע",1],
+        factory:["מספר מפעל",1],
+        standardNumDays:["ימי תקן",0],
+        presenceNumDays:["ימי נוכחות",0],
+        paidNumDays:["ימים משולמים",0],
+        effectiveTotalHours:["סך שעות לחישוב",0],
+        presenceTotalHours:["סך שעות עבודה",0],
+        standardTotalHours:["סך שעות תקן",0],
+        underTimeTotalHours:["שעות חוסר",0],
+        breakTotalHours:["הפסקה",0],
+        odefTimeTotalHours:["שעות חורגות מהתקן",0],
+        odefTime100TotalHours:["100% עודף",0],
+        hours100:["100%",0],
+        hours125:["125%",0],
+        hours150:["150%",0],
+        hours175:["175%",0],
+        hours200:["200%",0],
+        specialHours:["שעות מיוחדות",3],
+        hoursPaid:["שעות משולמות",0],
+        hoursDailyAverage:["ממוצע שעות יומי",0],
+        departmentNumber:["מספר מחלקה",2],
+        holidayHours:["שעות חג",0],
+        billableHolidaysHours:["שעות חג לחישוב",0],
+        holidayDays:["ימי חג",0],
+        travelExpenses:["החזר הוצאות נסיעה",0],
+        daysLack:["ימי חוסר", 0],
+        lineNumber:["מס' שורה רץ", 2],
+        startDate:["תאריך התחלה ddmmyyyy", 2],
+        endDate:["תאריך סיום ddmmyyyy", 2],
+        monthStartDate:["תאריך התחלת החודש ddmmyyyy", 2],
+        monthendDate:["תאריך סיום החודש ddmmyyyy", 2],
+        standardLessHrs100:["שעות תקן פחות שעות 100%",0],
+        hrs100LessBreak:["שעות 100% פחות שעות הפסקה",0],
+        effectiveHoursLessBreak:["שעות לחישוב פחות שעות הפסקה",0],
+        bonus:["תוספת",0],
+        parentingHours:["שעות הורות", 0],
+        shiftName:["שם משמרת",3],
+    },
+    datesForLine: [
+        "ddmm",
+        "mmyy",
+        "yymm",
+        "ddmmyy",
+        "yymmdd",
+        "mmddyy",
+        "ddmmyyyy",
+        "mm",
+        "yy",
+        "mmyyyy",
+    ],
+    namedHoursForLine: "שעות עם שם",
+
+    showAbsenceAs : {
+        0: "ברירת מחדל",
+        1: "שעות",
+        2: "יחידות",
+        3: "ימים",
+        4: "שעות 100% בלבד",
+        100: "תאריך התחלה",
+        101: "תאריך סיום",
+    },
+
+    absenceCalculationTable : {
+        0: "עמודה 1",
+        1: "עמודה 2",
+        2: "עמודה 3",
+        3: "עמודה 4",
+        4: "יתרת הימים",
+        5: "סך הכל לתשלום",
+        6: "עמודה 1 (יחידות)",
+    },
+
+    typesForLine:{
+        constant:"קבוע",
+        date:"תאריך",
+        component:"רכיב",
+        absence:"היעדרות"
+    },
+    dataExportComposerErrors:{
+        payrollWizardNameRequired: "חובה להזין שם ייצוא לשכר",
+        fileNameRequired: "חובה להזין שם קובץ",
+        rowsFormatSettingsRequired: "חובה להזין מבנה שורות",
+    },
+
+    emailWrong:"אימייל לא חוקי",
+    phoneWrong:"טלפון לא חוקי",
+    phoneAlertMissing: "שימו לב, לא הוגדר מספר טלפון נייד. בלחיצה על שמירה, תופעל ההתראה ותישלח לכל עובד בנפרד.",
+
+    alertsTypes: {
+        //email alert 0-99
+        0: "עדכון ידני של העובד",
+        1: "חריגה מתקן יומי",
+        2: "חריגה מתקן חודשי",
+        3: "כניסה לשעות נוספות",
+        4: "עבודה מעל 12 שעות",
+        5: "מרווח פחות מ 8 שעות בין משמרת ראשונה לשנייה",
+        6: "הוספת עובד חדש",
+        7: "הוספת מסמך חדש",
+        8: "שליחת דוח חוסרים לעובד",
+        9: "תזכורת לנעילת דוח חודשי",
+        10: "חוסר בדיווח שעות מעל 5 ימים",
+        11: "חריגה ממכסת 16 שעות נוספות בשבוע",
+        12: "סטאטוס אישורי אירוע והיעדרות",
+        13: "עדכון אירוע על ידי העובד",
+        14: "שליחת דוח נוכחות לעובדים",
+        15: "סטאטוס נעילת דוח חודשי",
+        16: "שינוי סטאטוס עובד/ת",
+        17: "שליחת מייל מזל טוב ביום הולדת",
+        18: "יום עבודה קטן מ",
+        19: "7 ימי עבודה רצופים ללא יום מנוחה",
+        20: "תזכורת יום הולדת עובד",
+        21: "תזכורת על וותק עובד",
+        22: "עדכון אירוע ספציפי על ידי עובד",
+        23: "חריגה משעות שבועיות",
+        24: "חריגה משעות 100% שבועיות",
+        99: "טקסט חופשי",
+
+        //sms alert 100+
+        100: "עבודה מעל מספר שעות",
+        101: "אי דיווח כניסה עד השעה",
+        102: "אי דיווח יציאה עד השעה",
+        103: "עדכון ידני של העובד",
+        104: "עדכון אירוע על ידי העובד",
+        105: "חריגה ממכסת שעות נוספות בשבוע",
+        106: "שליחת הודעת מזל טוב ביום הולדת",
+        107: "תזכורת לנעילת דוח חודשי",
+        199: "טקסט חופשי",
+    },
+
+    sendAlertFreq : ["יומי","שבועי","חודשי"],
+    sendAlertSendType : ["אימייל","SMS"],
+    sendAlertSendFor : ["כולם","מחלקה","עובד"],
+    sendAlertSendForDefault : "בחירת עובדים" ,
+    enterMichpalCode: "נא להזין מספר חברה במערכת מיכפל",
+    enterOketchCode: "נא להזין מספר חברה במערכת עוקץ",
+    _listShow: "הצג רשימה &rsaquo;",
+    _listHide: "הסתר רשימה &rsaquo;",
+    _downLink: "הורדה",
+    _linkUrl: "קישור",
+    _reportBonusEdit: "להזנת נתון יש ללחוץ על עריכה",
+    _reportBonusNoData: "לא הוזנו נתונים",
+    composerHeaderColumns: {
+        employeeName:"שם העובד",
+        employeeFirstName:"שם פרטי",
+        employeeLastName:"שם משפחה",
+        employeeWorkerTag:"תג עובד במערכת נוכחות",
+        employeeSalaryId:"תג עובד במערכת שכר",
+        employeeDepartment:"הצגת מחלקות",
+        department:"שם מחלקה",
+        employeeCompany:"שם חברה",
+        employeeContractName:"הסכם עבודה",
+        employeeContractId:"מספר הסכם עבודה",
+        employeeInitWorkDay:"תאריך יצירת עובד",
+        employeeStartWorkDay:"תאריך תחילת עבודה",
+        employeeEndWorkDay:"תאריך סיום עבודה",
+        employeeEmail:"דואר אלקטרוני",
+        employeeId:"תעודת זהות",
+        employeeBirthDay:"תאריך לידה",
+        employeeFamilyStatus:"מצב משפחתי",
+        employeeAddress:"רחוב",
+        employeeCity:"עיר",
+        employeePhone:"טלפון",
+        employeeWorkStatus:"סטטוס עובד",
+        employeeRole:"תפקיד",
+        salary:"שכר",
+        employeeSex:"מין",
+        statusDescription: "סוג עובד",
+        employeeCalendar: "יומן חגים",
+        employeeBankName: "שם בנק",
+        employeeBankId: "מספר בנק",
+        employeeBranchId: "מספר סניף",
+        employeeAccountNum: "מספר חשבון",
+        eventPolicyName: "שם מדיניות",
+        employeeSeniorityWorks: "ותק בעבודה",
+        employeeDirectManager: "מנהל ישיר",
+        employeeResignationReason: "סיבת עזיבה",
+    },
+    composerBodyColumns: {
+        day:"יום בשבוע",
+        date:"תאריך",
+        dayType:"סוג יום",
+        timeIn:"זמן דיווח כניסה",
+        timeOut:"זמן דיווח יציאה",
+        totalWorkHours:"סך שעות העבודה",
+        totalWorkHoursBruto:"שעות ברוטו",
+        effectiveHours:"שעות לחישוב",
+        standartHours:"שעות תקן",
+        underTimeHours:"שעות חוסר",
+        extraHours:"שעות עודף",
+        extraHours100:"שעות עודף ב 100%",
+        event:"אירוע",
+        hours100:"שעות 100%",
+        hours125:"שעות 125%",
+        hours150:"שעות 150%",
+        hours175:"שעות 175%",
+        hours200:"שעות 200%",
+        allOverTime:"שעות נוספות",
+        allOverTimeSeparation:"שעות נוספות עם שם",
+        totalHoursIncludeAbsences:"סך שעות כולל היעדרויות",
+        lateToShift:"איחור למשמרת",
+        comment:"הערות",
+        bonus:"תוספת",
+        salary:"שכר",
+        locationIn:"מיקום דיווח כניסה",
+        locationOut:"מיקום דיווח יציאה",
+        phoneCheckIn:"טלפון כניסה",
+        phoneCheckOut:"טלפון יציאה",
+        addressCheckIn:"כתובת כניסה",
+        addressCheckOut:"כתובת יציאה",
+        descriptionCheckIn:"תיאור כניסה",
+        descriptionCheckOut:"תיאור יציאה",
+        employeeName:"שם העובד",
+        employeeId:"תעודת זהות",
+        employeeTag:"קוד עובד",
+        employeeDepartment:"שם מחלקה",
+        employeeDepartmentNumber:"מספר מחלקה",
+        employeeRole:"תפקיד",
+        statusDescription:"סוג עובד",
+        calc:"עלות",
+        employeeBirthDay:"תאריך לידה",
+        breakTotal:"הפסקה",
+        checkInPhoneDescription:"תיאור טל' בכניסה",
+        checkOutPhoneDescription:"תיאור טל' ביציאה",
+        hours100_calc:'שע"נ 100%', //only for company 464 lam research
+        salarySystemTag: 'תג עובד לשכר',
+        directManager: 'מנהל ישיר',
+        parentingHours: 'שעות הורות'
+    },
+    composerFooterColumns: {
+        totalWorkDaysNum:"סך ימי נוכחות",
+        standartDaysNum:"סך ימי תקן",
+        totalWorkHours:"סך שעות נוכחות",
+        totalWorkHoursBruto:"סך שעות ברוטו",
+        standartHours:"סך שעות תקן",
+        effectiveHours:"סך שעות לחישוב",
+        totalLateToShiftDaysNum:"כמות איחורים למשמרת",
+        extraHours:"סך שעות חורגות מהתקן",
+        extraHours100:"סך שעות חורגות מהתקן ב 100%",
+        underTimeHours:"סך שעות חוסר",
+        underTimeHours_m:"סך שעות חוסר חודשי",
+        breakTotal:"סך שעות הפסקה",
+        employeeBirthDay:"תאריך לידה",
+        hours100:"סך שעות 100%",
+        hours125:"סך שעות 125%",
+        hours150:"סך שעות 150%",
+        hours175:"סך שעות 175%",
+        hours200:"סך שעות 200%",
+        allOverTime:"שעות נוספות",
+        allOverTimeSeparation:"שעות נוספות עם שם",
+        holidayHours:"שעות חג",
+        totalHoursIncludeAbsences:"סך שעות כולל היעדרויות",
+        bonus:"תוספת",
+        salary:"שכר",
+        events:"הצגת אירועים",
+        employeeSign:"חתימת עובד",
+        moderateSign:"חתימת מנהל ממונה",
+        managerSign:"חתימת מנהל ראשי",
+        underTimeHours_wo_extra:"חוסר לאחר קיזוז עודף",
+        travelExpenses:"נסיעות",
+        questions:"טפסים לדיווח",
+        hours100_calc_wo_182:'קיזוז שע"נ 182', //only for company 464 lam research
+        hours100_calc_wo_standard:'קיזוז שע"נ תקן', //only for company 464 lam research
+        infoEmployeeCard:"הערות כרטיס עובד",
+        daysLack:"ימי חוסר",
+        hoursDailyAverage:"ממוצע שעות יומי",
+        attendanceDaysAccordingStandardDays: "סך ימי נוכחות בהתאם לתקן",
+        eventsBalances: "יתרות אירועים",
+        extraHours:"שעות עודף",
+        paidDaysNum:"ימים משולמים",
+        signingSources: "מקורות החתמה",
+        standardLessHrs100: "שעות תקן פחות שעות 100%",
+        hrs100LessBreak: "שעות 100% פחות שעות הפסקה",
+        parentingHours: 'שעות הורות',
+        reportSign: 'חתימת דוח נוכחות'
+    },
+    composerTaskBodyColumns: {
+        day:"יום בשבוע",
+        date:"תאריך",
+        timeIn:"זמן דיווח כניסה",
+        timeOut:"זמן דיווח יציאה",
+        totalTasksHours:"סך שעות",
+        comment:"הערות",
+        locationIn:"מיקום דיווח כניסה",
+        locationOut:"מיקום דיווח יציאה",
+        addressCheckIn:"כתובת כניסה",
+        addressCheckOut:"כתובת יציאה",
+        descriptionCheckIn:"תיאור כניסה",
+        descriptionCheckOut:"תיאור יציאה",
+        employeeName:"שם העובד",
+        employeeTag:"קוד עובד",
+        employeeDepartment:"שם מחלקה",
+        employeeRole:"תפקיד",
+        statusDescription:"סוג עובד",
+        employeeBirthDay:"תאריך לידה",
+        salary:"שכר",
+        taskName:"תיאור משימה",
+        taskNamePath:"נתיב משימה",
+        taskNumber:"מספר משימה",
+        taskCost:"עלות משימה",
+        event:"אירוע",
+    },
+    composerTaskFooterColumns: {
+        taskPresenceNumDays:"סך ימים",
+        totalTasksHours:"סך שעות",
+        employeeBirthDay:"תאריך לידה",
+        employeeSign:"חתימת עובד",
+        moderateSign:"חתימת מנהל ממונה",
+        managerSign:"חתימת מנהל ראשי",
+        infoEmployeeCard:"הערות כרטיס עובד",
+        tasksDuration:"פירוט זמן למשימות",
+        taskCost:"סך עלות",
+        events:"הצגת אירועים",
+    },
+
+    composerFooterColumnsForConcentratedReport: {
+        totalWorkDaysNum:"סך ימי נוכחות",
+        standartDaysNum:"סך ימי תקן",
+        totalWorkHours:"סך שעות נוכחות",
+        totalWorkHoursBruto:"סך שעות ברוטו",
+        standartHours:"סך שעות תקן",
+        effectiveHours:"סך שעות לחישוב",
+        totalLateToShiftDaysNum:"כמות איחורים למשמרת",
+        extraHours:"סך שעות חורגות מהתקן",
+        extraHours100:"סך שעות חורגות מהתקן ב 100%",
+        underTimeHours:"סך שעות חוסר",
+        underTimeHours_m:"סך שעות חוסר חודשי",
+        hours100:"סך שעות 100%",
+        hours125:"סך שעות 125%",
+        hours150:"סך שעות 150%",
+        hours175:"סך שעות 175%",
+        hours200:"סך שעות 200%",
+        employeeBirthDay:"תאריך לידה",
+        allOverTime:"שעות נוספות",
+        allOverTimeSeparation:"שעות נוספות עם שם",
+        holidayHours:"שעות חג",
+        totalHoursIncludeAbsences:"סך שעות כולל היעדרויות",
+        bonus:"תוספת",
+        salary:"שכר",
+        events:"הצגת אירועים",
+        employeeName:"שם עובד",
+        employeeFirstName:"שם פרטי",
+        employeeLastName:"שם משפחה",
+        employeeSalaryId:"מספר בשכר",
+        employeeDepartment:"שם מחלקה",
+        employeeDepartmentNumber:"מספר מחלקה",
+        employeeId:"תעודת זהות",
+        employeeAddress:"כתובת",
+        employeeCity:"עיר",
+        employeePhone:"טלפון נייד",
+        employeeRole:"תפקיד",
+        employeeEmail:"אימייל",
+        employeeWorkerTag:"תג עובד",
+        travelExpenses:"נסיעות",
+        employeePosition:"מצב נוכחי",
+        employeeStartWorkDay:"תאריך תחילת עבודה",
+        employeeEndWorkDay:"תאריך סיום עבודה",
+        calc:"עלות",
+        totalOdefHours:"סך שעות עודף",
+        infoEmployeeCard:"הערות כרטיס עובד",
+        daysLack:"ימי חוסר",
+        hoursDailyAverage:"ממוצע שעות יומי",
+        dateCreated:"תאריך יצירת עובד",
+        month:"חודש",
+        year:"שנה",
+        taskNumber:"מספר פרויקט",
+        taskName:"שם הפרויקט",
+        totalHoursPerTask:"סך שעות לפרויקט",
+        percentTaskFromTotalHours:"אחוז משימה מנוכחות חודשית",
+        employeeContractName:"הסכם עבודה",
+        employeeContractId:"מספר הסכם עבודה",
+        statusDescription: "סוג עובד",
+        breakTotal:"הפסקה",
+        attendanceDaysAccordingStandardDays: "סך ימי נוכחות בהתאם לתקן",
+        employeeCalendar: "יומן חגים",
+        hours100_calc_wo_182:'קיזוז שע"נ 182', //only for company 464 lam research
+        hours100_calc_wo_standard:'קיזוז שע"נ תקן', //only for company 464 lam research
+        employeeBankName: "שם בנק",
+        employeeBankId: "מספר בנק",
+        employeeBranchId: "מספר סניף",
+        employeeAccountNum: "מספר חשבון",
+        eventsBalances: "יתרות אירועים",
+        eventPolicyName: "שם מדיניות",
+        employeeSeniorityWorks: "ותק בעבודה",
+        reportLockStatus:"סטטוס נעילת דוח",
+        employeeDirectManager: "מנהל ישיר",
+        employeeWorkStatus:"סטטוס עובד",
+        employeeSex:"מין",
+        paidDaysNum:"ימים משולמים",
+        signingSources: "מקורות החתמה",
+        employeeResignationReason: "סיבת עזיבה",
+        standardLessHrs100: "שעות תקן פחות שעות 100%",
+        hrs100LessBreak: "שעות 100% פחות שעות הפסקה",
+        contractPercent: "אחוז משרה",
+        parentingHours: "שעות הורות"
+    },
+
+    composerTypes: {
+        0: "מפורט",
+        1: "מרוכז",
+        2: "",
+        3: "",
+        4: "רוחבי",
+        5: "משימות",
+    },
+
+    tamal5Components:{
+        tamal_presenceDaysNum:"ימי נוכחות",
+        tamal_presenceDaysNum_1:"ימי נוכחות",
+        tamal_presenceDaysNum_2:"ימי נוכחות",
+        tamal_presenceHours:"סך שעות",
+        tamal_presenceHours_1:"סך שעות",
+        tamal_presenceHours_2:"סך שעות",
+        tamal_hours100Num:"100%",
+        tamal_hours100Num_1:"100%",
+        tamal_hours100Num_2:"100%",
+        tamal_hours125Num:"125%",
+        tamal_hours150Num:" 150%",
+        tamal_hours175Num:" 175%",
+        tamal_hours200Num:"200%",
+        tamal_vecationDaysNum:"חופשה",
+        tamal_sickDaysNum:"מחלה",
+        tamal_breakDaysNum:"הפסקה",
+        tamal_travelExpenses_montly:"החזר נסיעות חודשי",
+        tamal_travelExpenses_daily:"החזר נסיעות יומי"
+    },
+
+    MichpalComponents:{
+        michpal_presenceDaysNum:"ימי נוכחות",
+        michpal_presenceDaysNum_1:"ימי נוכחות",
+        michpal_presenceDaysNum_2:"ימי נוכחות",
+        michpal_presenceDaysNum2:"כמות ימי עבודה בפועל",
+        michpal_totalHours:"סך שעות עבודה",
+        michpal_totalHours_1:"סך שעות עבודה",
+        michpal_totalHours_2:"סך שעות עבודה",
+        michpal_arrivments:"נסיעות",
+        michpal_hours100Num:"100%",
+        michpal_hours100Num_1:"100%",
+        michpal_hours100Num_2:"100%",
+        michpal_hours125Num:"125%",
+        michpal_hours150Num:"150%",
+        michpal_hours175Num:"175%",
+        michpal_hours200Num:"200%",
+        michpal_sickDaysNum:"מחלה",
+        michpal_vecationDaysNum:"חופשה",
+        michpal_reserveDaysNum:"מילואים",
+        michpal_holidayDaysNum:"חג",
+        michpal_travelExpenses_montly:"החזר נסיעות חודשי",
+        michpal_travelExpenses_daily:"החזר נסיעות יומי",
+        michpal_standardNumDays:"ימי תקן",
+        michpal_standardHours:"שעות תקן",
+        michpal_standardMonthlyHours:"תקן חודשי קבוע",
+    },
+    HargalComponents:{
+        presenceDaysNum_1:"ימי עבודה",
+        arrivments:"ימי עבודה (נסיעות)",
+        totalHours:"סך שעות נוכחות",
+        totalLackHours:"שעות חוסר",
+        totalStandardHours:"שעות תקן",
+        totalOdefHours:"שעות עודף",
+        hours100Num_1:"שעות רגילות 100%",
+        hours100Num_2:"שעות רגילות 100%",
+        hours125Num:"ש.נ 125%",
+        hours150Num:"ש.נ 150%",
+        hours175Num:"ש.נ 175%",
+        hours200Num:"ש.נ 200%",
+        sickDaysNum:"מחלה",
+        vecationDaysNum:"חופש",
+        reserveDaysNum:"מילואים",
+        holidayDaysNum:"חג"
+    },
+    hilanComponents: {
+        event:"מספר אירוע",
+        factory:"מספר מפעל",
+        standardDays:"ימי תקן",
+        presenceDaysNum:"ימי נוכחות",
+        presenceDaysNum_1:"ימי נוכחות",
+        presenceDaysNum_2:"ימי נוכחות",
+        effectiveHours:"סך שעות לחישוב",
+        totalHours:"סך שעות עבודה", /* presence */
+        underTimeHours:"שעות חוסר",
+        breakHours:"הפסקה",
+        odefTime:"שעות חורגות מהתקן",
+        odefTime100:"שעות 100% עודף",
+        hours100Num:"100%",
+        hours100Num_1:"100%",
+        hours100Num_2:"100%",
+        hours125Num:"125%",
+        hours150Num:" 150%",
+        hours175Num:" 175%",
+        hours200Num:"200%",
+        vacationDaysNum:"חופשה",
+        sickDaysNum:"מחלה",
+        holidayDaysNum:"חג",
+        reserveDaysNum:"מילואים",
+        holidayByManagerNum:'חופש ע"ח מעביד',
+        absenceByManagerNum:'היעדרות ע"ח מעביד'
+
+    },
+
+    confirmSendPassword: "לחיצה על אישור תשלח לעובד סיסמא חדשה לכתובת המייל ולמספר טלפון המעודכנים בכרטיס עובד",
+    statusNameEmpty: "נא להזין תיאור לסוג עובד",
+    roleNameEmpty: "נא להזין תיאור לתפקיד",
+    fieldTypeEmpty: "נא להזין סוג שדה",
+    fieldNameEmpty: "נא להזין תיאור שדה",
+    fieldOptionsEmpty: "נא להזין אפשרויות לבחירה",
+    confirmDelete: "האם למחוק?",
+
+    questionTypes: {
+        yesno: "כן/לא",
+        freetext: "טקסט חופשי",
+        textonly: "טקסט בלבד",
+        number: "מספר בלבד",
+        selection: "בחירה",
+        selectionLocation: "בחירת מיקום",
+    },
+
+    login_errors:{
+        badLogin:"שם משתמש או סיסמה אינם נכונים.",
+        accountLock:"הגישה לחשבונך נחסמה למשך 15 דקות עקב מספר ניסיונות כניסה כושלים.",
+        accountBadIp:"כתובת IP לא מורשת, לא ניתן להיכנס לחשבונך.",
+        passwordMisMatch:"הסיסמאות שהוזנו אינן תואמות.",
+        passwordChanged:"הסיסמה שונתה בהצלחה",
+        fatal_error:"אירעה שגיאה, נסו שוב",
+        badPW:"ישנה טעות בשם המשתמש ו/או הסיסמה.<br/> נותרו עוד X נסיונות עד לחסימת החשבון.",
+        badPWLAST:"ישנה טעות בשם המשתמש ו/או הסיסמה.<br/> נותר ניסיון אחרון לפני שהכניסה לחשבון תחסם למשך 15 דקות.",
+        samePassword:"הסיסמה החדשה לא יכולה להיות זהה לסיסמה הנוכחית. נא להזין סיסמה אחרת.",
+        recentPassword : "הסיסמה החדשה לא יכולה להיות זהה לאחת מהסיסמאות האחרונות שהיו בשימוש. יש לבחור סיסמה אחרת.",
+        verificationCode:"קוד אימות שגוי",
+        badSsoLoginWith: "לא הצלחנו למצוא חשבון עם כתובת המייל שהזנת",
+        enforceSso: "יש לבצע התחברות באמצעות SSO",
+        badCaptcha: "חובה לסמן אימות",
+        emailExists: "היי, גם זה קורה. נראה שלא הצלחנו לפתוח לך מנוי, אבל אל דאגה צוות השירות שלנו כאן לעזור לך. פנו אלינו בטופס יצירת קשר ונדאג לחזור בהקדם.",
+        currentPasswordEmpty: "נא להזין את הסיסמה הנוכחית לצורך שינוי סיסמה.",
+        currentPasswordIncorrect: "הסיסמה הנוכחית שהוזנה אינה נכונה."
+    },
+    pw_login_errors:{
+        badLogin:"כתובת המייל שהוזנה לא נמצאה.",
+    },
+    operation_failed:"הפעולה נכשלה",
+    mustDoc:"יש להעלות מסמך אישור לסוג אירוע זה",
+
+    companyDetails:{
+        "totalBilling":"<b>סך לחיוב</b>",
+        "monthly":"חודשי",
+        "oneTime":"חד פעמי",
+        "confirmCloseService": "ברצונך לסגור את השירות?",
+        "successCloseService": "השירות נסגר בהצלחה",
+        "errorFields": "נא להזין ערכים תקינים",
+        "successAddService": "השירות נוסף בהצלחה",
+        "successEditContact": "הפרטים נשמרו בהצלחה",
+        "successRemoveContact": "איש הקשר נמחק בהצלחה",
+        "confirmRemoveContact": "ברצונך למחוק איש קשר?",
+        "successAddContact": "איש קשר נוסף בהצלחה",
+        "successUpdateCompany": "פרטי החברה עודכנו בהצלחה",
+        "successUpdateCreditCard": "כרטיס אשראי עודכן בהצלחה",
+        "areYouSureCloseCompany" : "האם אתה בטוח שברצונך לסגור את החברה? הסגירה תעביר את כל העובדים למצב לא פעיל",
+        "canNotCloseCompanyBecauseRentClock" : "לא ניתן לסגור לקוח קיים, ללקוח קיים שעון בשכירות, יש לבצע איסוף של השעון לפני סגירת מערכת. תודה",
+        "mustBankDetails" : "חובה להזין את כל פרטי הוראת קבע",
+        "mustCreditCardDetails" : "חובה להזין פרטי כרטיס אשראי",
+        "companiesNotClosure": "זו חברה מיוחדת, לא ניתן לסגור אותה",
+        "markServicePaid": "לסמן שהשירות שולם?",
+        "successMarkServicePaid": "השירות סומן ששולם",
+        "mustChoosePaymentMethod" : "חובה לבחור אמצעי תשלום",
+
+    },
+
+    companyDetailsErrors: {
+        "name" : "חובה להזין שם חברה",
+        "phone" : "חובה להזין טלפון תקין",
+        "email" : "חובה להזין אימייל תקין",
+        "address" : "חובה להזין כתובת",
+        "country" : "חובה להזין שם מדינה",
+        "city" : "חובה לבחור עיר",
+        "companyNumber" : "חובה להזין ח.פ/ע.מ",
+        "companyNumberIsrael" : "לא ניתן להזין מעל 9 תווים",
+        "numInCrm" : "חובה להזין מס במערכת CRM",
+        "supplier" : "חובה לבחור ספק",
+        "invoicecompanyName" : "חובה להזין שם חברה בחשבונית",
+        "packageBasicOption" : "חובה לבחור את אופן החיוב"
+    },
+
+    companyIdentify: "מזהה חברה",
+
+    reportList: "רשימת הדוחות",
+    createNewReport: "יצירת דוח חדש",
+
+    buttons:{
+        saveChanges: "שמור שינויים",
+        saveAndClose: "שמור וסגור",
+        update: "עדכון",
+        save: "שמירה",
+        continue: "המשך",
+        success: "&#10003;",
+        error: "&#x2716;",
+        supportSend: "שלח טופס",
+        clickToAdd:"לחצו להוסיף",
+    },
+
+    powerUpsButtons:{
+        purchase: "הוספה",
+        remove: "הסרה",
+        include: "כלול",
+    },
+
+    powerUpsAction:{
+        purchaseWithMonthFree: "שדרגו את המערכת עם התוסף ל-30 ימים מתנה החל מהיום.<br>לאחר תקופת הניסיון, העלות לתוסף היא: ",
+        purchaseUtilizingMonthFree: "שדרגו את המערכת עם התוסף.<br>העלות לתוסף היא: ",
+        purchaseIls: ' ש"ח.<br>',
+        purchaseIlsPerUser: ' ש"ח לעובד פעיל.<br>',
+        purchaseMonthlyRecurring: '(התשלום הינו חודשי מתחדש, ניתן להסיר את השירות בכל עת)',
+        remove: "האם את/ה בטוח שברצונך להסיר את השירות?",
+        purchaseScouter: "<br><br>בעת לחיצה על 'המשך' המערכת תבצע רענון מחדש של הדף וזאת בכדי להטמיע את ניהול המשמרות וסנכרון העובדים. ניתן יהיה לגשת לניהול המשמרות בכפתור שנמצא בצמוד לעץ עובדים.",
+    },
+
+    powerUpsTitles:{
+        api: "API",
+        dataExportComposer: "אשף השכר",
+        scientistReport: "רשות החדשנות",
+        questions: "טפסים לדיווח",
+        tasks: "ניהול משימות",
+        reportsComposer: "אשף הדוחות",
+        modificationReport: "דוח שינויים",
+        specialReport: "דוחות מיוחדים",
+        alerts: "ניהול התראות",
+        filesLinks: "טפסים להורדה",
+        departments: "ניהול מחלקות",
+        locationsMap: "ניהול מיקומים",
+        phoneReporting: "דיווח טלפוני",
+        contracts: "חוזי עבודה",
+    },
+
+    areYouSureRemoveEventsCalendar: "האם ברצונך למחוק את היומן אירועים?",
+    areYouSureRemoveLine: "האם ברצונך למחוק את השורה?",
+    areYouSureRestoreLine: "האם ברצונך לשחזר אירוע זה?",
+    areYouSureRemoveReport: "האם ברצונך למחוק את הדוח?",
+    areYouSureRemoveShift: "האם ברצונך למחוק את המשמרת?",
+    areYouSureRequestMakeBilling: "האם אתה בטוח שברצוך לשלוח בקשה לחיוב לקוחות? (נא לבדוק את החודש והשנה!!!)",
+    areYouSureRequestMasavBilling: 'האם אתה בטוח שברצוך לבצע חיוב מס"ב? (נא לבדוק את החודש והשנה!!!)',
+    areYouSureRemoveComment: "האם ברצונך למחוק את ההערה?",
+    areYouSureRemoveBonus: "האם ברצונך למחוק את התוספת?",
+    areYouSureRemoveBreak: "האם ברצונך למחוק את ההפסקה?",
+
+    needSelectRowOfCredential: "יש לסמן שורת הרשאה",
+    needSelectRowOfCredential2 : "יש לבחור עבור מי תחול ההרשאה לפני המשך הפעולה." ,
+
+    averageDailyHoursToEmployeeChart: "ממוצע יומי לעובד",
+    totalWorkHoursChart: "סיכום שעות יומי",
+    regularHoursVsOvertimeChart: "חלוקת שעות בשבוע האחרון",
+
+    areYouSureRemoveDevice: "למחוק את המכשיר?",
+
+    startDateOrEndDateMissing: "לא נבחר תאריך התחלה / סיום",
+    startCheckinOrCheckoutMissing: "לא נבחר שעה כניסה / יציאה",
+    missingUpdateFor: "לא נבחר עבור מי לעדכן את האירוע",
+    missingUpdateForEmployees: "יש לבחור עובדים",
+    missingUpdateForDepartments: "יש לבחור מחלקות",
+    startDateGreaterThanOrEqualEndDate: "תאריך התחלה חייב להיות גדול / שווה לתאריך סיום",
+    confirmSweepingUpdateMissings: "בעת לחיצה על אישור, הארוע יעודכן עבור העובד/ים בהתאם לתאריכים.",
+    confirmSweepingUpdateMissingsEmployee: "בעת לחיצה על אישור, הארוע יעודכן בהתאם לתאריכים שנבחרו.",
+    missingEventType: "לא נבחר סוג אירוע",
+    confirmQuickUpdateEmployee: "במידה וקיימים דיווחים בתאריכים שנבחרו - לחיצה על המשך תבצע עדכון מחדש, האם להמשיך?",
+    confirmQuickUpdateMonthRange: "בחירת תאריכים צריכים להיות בטווח של עד חודש.",
+    missingLinkedToHoursBank: "מקושר לבנק שעות",
+
+    multyselect : {
+        clickToSelect : "לחצו לבחירה",
+        selected : "# נבחרו",
+        checkAll : "",
+        uncheckAll : "",
+        filter : "",
+        search : "חיפוש...",
+        selectTask : "על איזו משימה עובדים היום?"
+    },
+
+    dataSecurity :{
+        warningAlertText : "כאשר אימות דו שלבי מופעל, מתווסף שלב נוסף בעת הכניסה למערכת אשר מחייב הזנת קוד שישלח למספר הנייד. חשוב לשים לב שאכן מוגדר מספר נייד עבור איש קשר בפרטי חברה.",
+    },
+
+    companyPaymentMethod : {
+        edit : "עריכה",
+        save : "שמירה"
+    },
+
+    reportsComposer:{
+        displayLine: "יוצג בשורה",
+        displayFormat: "יוצג בפורמט",
+        totalHours: "סך שעות",
+        effectiveHours:"שעות לחישוב",
+        percentages:"לפי אחוזים",
+        default:"ברירת מחדל",
+        hours:"שעות",
+        decimal:"עשרוני",
+        days: "ימים",
+        hoursAndDays: "שעות וימים",
+        units: "יחידות",
+        firstLLastName:"פרטי + משפחה",
+        lastFirstName:"משפחה + פרטי",
+        listReportsIsEmpty:"רשימת הדוחות ריקה, לא ניתן לייצר קובץ",
+        reportNameRequired: "חובה להזין שם הדוח",
+        mustEnterNumber: "חובה להזין מספר",
+        successfullyDeleted: "נמחק בהצלחה",
+        updateReport: "עדכון דוח",
+        mustChooseFields: "חובה לבחור שדות להצגה",
+        department: "מחלקה",
+        departmentPath: "הצגת מחלקות",
+    },
+
+    manageTasks: {
+        departments: "מחלקות",
+        employees: "עובדים",
+        and: "ו"
+    },
+
+    selected: "נבחרו",
+    selectedAllDepartments : "כל המחלקות" ,
+    selectedAllTasks : "כל המשימות" ,
+    selectedTasks : "משימות" ,
+    popupPresence: {
+        yourAttendanceForDay: "שעות הנוכחות שלך ליום זה",
+        noReport: "אין דיווח",
+        timeIn:"שעת כניסה",
+        timeOut:"שעת יציאה",
+    },
+
+    doYouWantUpdateTasks: "האם ברצונך לעדכן את המשימות?",
+
+    mustInputPhoneAndDescription: "חובה להזין מספר טלפון ותיאור קצר",
+
+    missingMustDoc : {
+        updateMissing : "עדכון אירוע ",
+        mustDoc : "מחייב הוספת מסמך"
+    },
+
+    addressNotFound: "הכתובת לא נמצאה",
+
+    noResults: "אין תוצאות מתאימות",
+
+    messageBeforeCreateSubManager: "הינך עומד/ת להוסיף משתמש חדש לניהול מלא של המערכת. הרשאות מלאות לצפייה, עריכה ועדכון במערכת יישלחו כעת. למשתמש זה לא תהיה אפשרות גישה לפרטי חברה ופרטי תשלום.",
+    messageBeforeDeleteUserAccount: "האם ברצונך לבצע מחיקת משתמש?",
+    messageBeforeSendAccessDetails: "לחיצה על אישור תשלח סיסמא חדשה לכתובת המייל המעודכנת במנוי",
+
+    next: "הבא",
+
+    smsPackages: {
+        "messageBeforeAddSMSPackage": "בעת לחיצה על אישור, חבילת ההודעות שבחרת תתווסף לשירות שלך. החבילה תתווסף ליתרת ההודעות הקיימת שלך.",
+        "messages": "הודעות",
+        "shekel": 'ש"ח',
+    },
+
+    preventHoursErrorMessage: {
+        daysPreventError: "חובה לבחור ימים",
+        endHourError: "זמן הסיום חייב להיות גדול מזמן התחלה",
+        deleteWarning: "האם אתה בטוח?",
+    },
+
+    reportBlockByPreventHour: "באפשרותך לדווח נוכחות בזמנים מוגדרים. שעה זו נחסמה לדיווח על ידי מנהל המערכת.",
+    taskReportBlockByPreventHour: "באפשרותך לדווח משימות בזמנים מוגדרים. שעה זו נחסמה לדיווח על ידי מנהל המערכת",
+    reportBlockByPreventHourForManager: "יש לשים לב, עדכון שעות בזמנים שאינם תואמים את הסכם העבודה",
+    taskStopAlreadyExist: {
+        beforeTaskName: "למשימה",
+        afterTaskName: "קיים כבר דיווח סיום,",
+        afterTaskTime: "לכן לא ניתן לדווח סיום נוסף.",
+    },
+
+
+    shortAllDaysType: {
+        0: "א", 1: "ב", 2: "ג", 3: "ד", 4: "ה", 5: "ו", 6: "ש", 7: "ערב חג", 8: "חג", 9: "חול המועד"
+    },
+
+    fieldsToAddEmployee: {
+        0: {className: "workerTag", text: "תג עובד"},
+        1: {className: "email", text: 'דוא"ל'},
+        2: {className: "phone", text: "טלפון"},
+        3: {className: "userLanguage", text: "שפה"},
+        4: {className: "departmentId", text: "מחלקה"},
+        5: {className: "directManager", text: "מנהל ישיר"},
+        6: {className: "idNum", text: "תעודת זהות"},
+        7: {className: "birthday", text: "ת. לידה"},
+        8: {className: "sex", text: "מין"},
+        9: {className: "marital", text: "מצב משפחתי"},
+        10: {className: "status", text: "סוג עובד"},
+        11: {className: "role", text: "תפקיד"},
+        12: {className: "employedFrom_ts", text: "תחילת עבודה"},
+        13: {className: "salarySystemTag", text: "תג עובד/ת בשכר"},
+        14: {className: "userTimezone", text: "אזור זמן"},
+        15: {className: "userCalendar", text: "יומן חגים"},
+        16: {className: "contractId", text: "חוזה עבודה"},
+        17: {className: "address", text: "כתובת"},
+        18: {className: "city", text: "עיר"},
+        19: {className: "salary", text: "שכר"},
+        20: {className: "travelExpenses", text: "נסיעות"},
+        21: {className: "absencePolicy", text: "מדיניות צבירה"},
+    },
+
+    settingsCreateAndManageEmployee:{
+        0: {className:"enableCheckingIDNumber", text:"הפעלת מנגנון בדיקת תעודת זהות תקינה"},
+        1: {className:"allowSameSalaryTag", text:"אפשר כפילות מספרי עובדים במערכת השכר"}
+    },
+
+    permissionsToAddEmployees: {
+        0: {className: "useEntry", text: "דיווח נוכחות באתר האינטרנט"},
+        1: {className: "useEntryInApp", text: "לדווח נוכחות באמצעות אפליקציה"},
+        2: {className: "userCanWatchUserCard", text: "צפייה בכרטיס העובד האישי"},
+        3: {className: "useEntryInAppMustGPS", text: "דיווח נוכחות מחייב הפעלת שירותי מיקום"},
+        4: {className: "useTasks", text: "לדווח על משימות ופרוייקטים"},
+        5: {className: "watchSelfReport", text: "לצפות בדוחות נוכחות"},
+        6: {className: "modifySelfReport", text: "לערוך שינויים בדיווחי הנוכחות"},
+        7: {className: "modifyEventsAndAbsences", text: "לעדכן אירוע והיעדרות"},
+        8: {className: "watchSelfTaskReport", text: "לצפות בדוחות משימות"},
+        9: {className: "modifySelfTaskReport", text: "לערוך שינויים בדיווחי המשימות"},
+        10: {className: "reportingByPhone", text: "לדווח נוכחות באמצעות חיוג טלפוני"},
+        11: {className: "phoneWithProjectCode", text: "לדווח על משימות ופרוייקטים בטלפון"},
+        12: {className: "manualBreak", text: "הצג כפתור יציאה להפסקה"},
+        13: {className: "innovationAuthority", text: "עובד/ת רשות החדשנות"},
+        14: {className: "expenseReimbursement", text: "ניהול דיווחי הוצאות"},
+    },
+
+    subscriberRegistration:{
+        continue: "הבא",
+        back: "הקודם",
+        finish: "סגור",
+        save: "שמירה",
+        yourPackageChoose: "מסלול נבחר עבור העסק שלך",
+        untilNumEmployees: "עד %NUM_EMPLOYEES_CHOOSE% עובדים",
+        shekel: 'ש"ח',
+        errorCreateToken: "נתוני האשראי שגויים",
+        errorAccountDetails: "הפרטים שהזנת שגויים",
+        errorGeneral: "אירעה שגיאה בשמירה, נא ליצור קשר עם התמיכה",
+    },
+
+    legendForStep: {
+        0: "מוכנים לצאת לדרך",
+        1: "בחירת חבילה",
+        2: "עדכון פרטים",
+        3: "תהליך הושלם",
+    },
+
+    legendForCloseCompany: {
+        0: "ביטול מנוי",
+        1: "אימות",
+        2: "אישור",
+    },
+
+    mustToApprovalOfPolicies: "יש לסמן",
+
+    needAvoidedFromRetroactiveReporting: "יש להימנע בעתיד מדיווח רטרואקטיבי",
+
+    notApprovedIp: "שימו לב, הנכם מדווחים מכתובת IP לא מזוהה במערכת, <br> דיווח זה ייחשב רטרואקטיבית בדוח.<br> להגדרת כתובת IP יש לפנות למנהל המערכת.",
+
+    kioskDescriptionExist: "התיאור קיים עבור מכשיר אחר",
+
+    manualReportingOnlyRetroactive: "לא ניתן לדווח עתידית",
+
+    lockMonthReportAllDepartment: "האם לבצע נעילת דוח עבור כלל המחלקה?",
+    unlockMonthReportAllDepartment: "האם לבצע פתיחת דוח עבור כלל המחלקה?",
+    managerViewReportAllDepartment: "האם לאשר דוח עבור כלל המחלקה?",
+
+    methodCalculateDaysSuccession: {
+        departments: "מחלקות: ",
+        contracts: "חוזי עבודה: ",
+        statuses: "סוגי עובדים: ",
+        infoText: `השורה הראשונה בטבלה מייצגת את הימים, השורה מתחת מייצגת את האחוז היחסי.
+         לדוגמא: אם נכתוב 1 ביום הראשון ומתחת נכתוב 0.25, הארוע ביום הראשון יחושב לפי 25%.
+          אם נכתוב בעמודה ליד 3 ומתחת 0.5 אז החל מהיום השני ובמשך 3 ימים נוספים יחושב לפי 50% וכן הלאה.`
+    },
+
+    areYouSure: "האם לבצע?",
+
+    payable: "לתשלום",
+
+    errorExtraRatesToShifts: {
+        startEndEqual: "שעת כניסה ויציאה תואמות",
+        overlappingHours: "קיימת חפיפה בשעות",
+        rate: "יש למלא את השדות החסרים",
+    },
+
+    years: "שנים",
+
+    months: "חודשים",
+
+    invalidDateText: "לא ניתן להזין תאריך עתידי",
+    invalidDateFormat: "תבנית תאריך לא תקינה",
+    invalidDate: "נא לבחור תאריך תקין",
+
+    errorPassword: "סיסמה לא תקינה. סיסמה חייבת להיות באורך של שמונה תווים לפחות, מורכבת מאותיות וספרות, ואינה כוללת את האימייל של העובד.",
+    errorRepeatPassword: "סיסמה ואימות סיסמה לא תואמים.",
+
+    strengthPasswordDescription: {
+        0: "",
+        1: "חלש",
+        2: "טוב",
+        3: "טוב מאוד",
+        4: "חזק",
+    },
+
+    emailReportTypes: {
+        1: "יומי",
+        2: "חודשי מרוכז",
+        3: "חודשי לעובד",
+        4: "חברה כולל",
+        5: "חוסרים",
+        7: "דוח אירועים",
+        8: "דוח שינויים",
+        9: "חודשי מרוכז - מחלקתי",
+        10: "ממתינים לאישור",
+        11: "דוח משימות",
+    },
+
+    doYouWantMoveToArchive: "האם ברצונך להעביר לארכיון?",
+    doYouWantPermanentlyDelete: "האם ברצונך לבצע מחיקה לצמיתות?",
+
+    email: "מייל",
+    mobile: "מספר נייד",
+
+    confirmToDeleteAnswers: "מחיקת הנתונים עבור התאריך הנבחר יסירו את כל הנתונים שנאספו לתאריך המוצג. לא ניתן יהיה לשחזר או לבטל פעולה זו אחרי שבוצעה.<br/>הקלידו 'מחיקה' בשורת הטקסט:",
+    textToConfirmDeleteAnswers: "מחיקה",
+
+    noFileUpload: "לא נבחר קובץ",
+    doYouWantUploadUsers: "האם לבצע טעינה של טבלת רשימת העובדים למערכת?",
+
+    usersAdditionalFieldsTypes: {
+        1: "טקסט חופשי",
+        2: "מספר בלבד",
+        3: "טקסט בלבד",
+        4: "בחירה",
+        5: "תאריך",
+    },
+
+    mandatoryField: "שדה חובה",
+    invalidPassport : "מספר תעודת זהות לא תקין" ,
+    employeeEmailExists : "דואר אלקטרוני קיים כבר במערכת"  ,
+    employeeIdNumExists  : "תעודת זהות קיימת בכרטיס עובד" ,
+    employeeTagExists :   "תג עובד קיים כבר במערכת, נא לבחור תג עובד אחר" ,
+    salaryTagExists :   "תג עובד קיים כבר במערכת שכר, נא לבחור תג עובד אחר" ,
+
+    yesNoOptions: {
+        none: "",
+        כן: "כן",
+        לא: "לא",
+    },
+
+    datesFormat: {
+        "DDMMYYYY": "25.08.1999",
+        "MMDDYYYY": "08.25.1999",
+    },
+
+    scientistReportErrorPdfDownload: "חלק מדוחות העובדים כוללים מספר רב של משימות ולא ניתן להורידם בפורמט PDF. להורדה מחדש יש לבחור סוג קובץ XLS ולבצע הפקה חוזרת.",
+
+    changesTakeActionAfterReloading: "שינויים יתבצעו לאחר רענון מחדש של הדף",
+
+    unCalculatedHours:{
+        "errorOverDiffHours":"! לא ניתן להוסיף שעות מעבר להפרש השעות",
+        "updateSuccess":"העדכון בוצע בהצלחה",
+        "confirmAddBalance": "הוספת שעות עודף",
+    },
+
+    scheduleReport:{
+        hour: "שעה",
+        hoursExceeding: "מעל כמות שעות",
+    },
+
+    signature: {
+        toSignReport: "לחתימת הדוח",
+        signedReport: "הדוח נחתם",
+        lockTitle: "נעילת דוחות מפני שינויים",
+    },
+
+    holidayHours: "שעות חג",
+
+    noticeSendAccessDetails: "שליחת פרטי גישה לכלל העובדים תגרום לשינוי סיסמאות הכניסה למערכת.</br>לאישור הפעולה, הקלידו 'שליחה' בשורת הטקסט ולחצו על אישור:",
+    textToConfirmSendAccessDetails: "שליחה",
+
+    absencePolicy:{
+        policyType:{
+            select: {
+                placeholder: "סוג",
+                0: "צבירה",
+                1: "בנק שעות",
+                2: "שעות הורות"
+            }
+        },
+        errors:{
+            PolicyNameEmpty:"חובה להזין שם מדיניות",
+            AbsenceAlreadyExist:"קיימת מדיניות עבור אירוע זה",
+            AbsenceNameEmpty:"חובה לבחור אירועים",
+            updateEventByPolicy: "שימו לב! יתרה נוכחית לא מאפשרת עדכון אירוע",
+            sweepingUpdateEventBYPolicy: "שימו לב! לא ניתן לבצע עדכון לחלק מהעובדים עקב יתרה נוכחית שלילית",
+            daysCountEmpty: "יש למלא כמות ימים",
+            dateOrCountEmpty: "יש למלא חודש ויום או כמות חודשים",
+            dayAndMonth: "יש למלא יום וחודש",
+            parentingMinutesEmpty: "יש למלא מספר דקות רצויות",
+            parentingMaxMinutesEmpty: 'יש להזין ערך מספרי להגדרת תנאי ההשלמה של שעות הורות. תנאי זה מגדיר מתי תבוצע השלמת "שעות הורות" ביחס לתקן היומי של העובד. הערך המומלץ הוא "60" דקות, בהתאם להגדרת שעת הורות. במקרים שבהם נדרשת השלמה בכל מצב, ניתן להזין ערך גבוה יותר בדקות. לדוגמה, עבור משמרת בת 9 שעות, יש להזין "540" דקות.',
+            parentingHoursEmpty: "יש להזין ערך מספרי לתנאי העברה לשכר. ברירת המחדל היא 174 שעות, בהתאם להגדרות החוק. ניתן להזין \"0\" כדי ששעות הורות יועברו לשכר בכל מקרה.",
+            errorBalance: "לתשומת לבך! חובה להזין ערך מספרי גדול מ-0 עבור סוג זה של מדניות."
+        }
+    },
+
+    areYouSureCancelRequestEvent: "האם לבטל בקשה ולהסיר את האירוע מהדוח נוכחות?",
+
+    errorBulkUpdateContractsDates: "שימו לב! לא ניתן היה להשלים את הפעולה במלואה עבור חלק מהעובדים בעקבות התנגשות היסטוריית חוזים. להמשך טיפול יש לבצע את השינוי בחוזה עבודה הנמצא בכרטיס העובד הרצוי.",
+    reportIsLocked: "הדוח נעול מפני שינויים, לא ניתן לבצע דיווח בתאריך זה.",
+
+    totalMonthlyChart: "סיכום שעות חודשי",
+    daysListShort : [
+        "א",
+        "ב",
+        "ג",
+        "ד",
+        "ה",
+        "ו",
+        "ש",
+    ],
+    monthList: [
+        "",
+        "ינואר",
+        "פברואר",
+        "מרץ",
+        "אפריל",
+        "מאי",
+        "יוני",
+        "יולי",
+        "אוגוסט",
+        "ספטמבר",
+        "אוקטובר",
+        "נובמבר",
+        "דצמבר",
+    ],
+    dateRanges: {
+        today:"היום",
+        yesterday:"אתמול",
+        currentWeek:"שבוע נוכחי",
+        lastWeek:"שבוע שעבר",
+        currentMonth:"חודש נוכחי",
+        lastMonth:"חודש קודם"
+    },
+
+    reportSent: "הדוח נשלח בהצלחה",
+    sendReportTooltip: "שליחת הדוח",
+    exportReportCompressed: "ייצא דוח",
+
+    isScietistClient: "שים לב! לקוח מדען ראשי",
+
+    refreshReport: "רענן",
+    watchReport: "הצג דוח",
+    eventNotAbleToEnterHours: "לא ניתן להזין ארוע ושעות יחד",
+    errorEventNotAbleToEnterHours: "לא ניתן להזין ארוע ושעות יחד באותו תאריך",
+    errorEventNotAbleToEnterHoursSweeping: "שימו לב,<br>" +
+        "קיימת שגיאה בביצוע הבקשה.<br>" +
+        "לא ניתן להזין אירוע ושעות נוכחות יחד באותו תאריך לחלק מהעובדים.",
+    errorUpdatedForContract: "לא ניתן לעדכן ארוע זה לעובד",
+
+
+    moveToContractTooltipMessage: "היי! כל העובדים המשוייכים לחוזה זה יעברו לחוזה החדש. האם הינך רוצה לבצע פעולה זאת?",
+
+    reportLockedByManager: "הדוח נעול לשינויים, לפתיחת הדוח לעריכה יש לפנות למנהל המערכת",
+
+    systemUpdateNotificationDialog: {
+        userTypeMissing: "נא לסמן למי להציג",
+        textMissing: "נא להזין הודעה"
+    },
+
+    systemAlertAdminDialog: {
+        applicationHe: "<p><strong>לקוחות יקרים,</strong></p>" +
+            "<p>כרגע קיים קושי בהתחברות עם האפליקציה.</p>" +
+            "<p>אנו מתנצלים על אי הנעימות ופועלים במהירות לתיקון התקלה.</p>" +
+            "<p>תודה, מקאנו.</p>",
+        reportsHe: "<p><strong>לקוחות יקרים,</strong></p>" +
+            "<p>כרגע קיים קושי בהוצאה והורדה של דוחות מהמערכת.</p>" +
+            "<p>אנו מתנצלים על אי הנעימות ופועלים במהירות לתיקון התקלה.</p>" +
+            "<p>תודה, מקאנו.</p>",
+        applicationEn: "<p><strong>Dear customers,</strong></p>" +
+            "<p>There is currently a difficulty connecting with the mobile application.</p>" +
+            "<p>We apologize for the inconvenience and are working quickly to correct the problem.</p>" +
+            "<p>Thank you, Meckano.</p>",
+        reportsEn: "<p><strong>Dear customers,</strong></p>" +
+            "<p>Currently there is a difficulty in issuing and downloading reports from the system</p>" +
+            "<p>We apologize for the inconvenience and are working quickly to correct the problem.</p>" +
+            "<p>Thank you, Meckano.</p>",
+        telephonyHe: "<p><strong>שלום,</strong></p>" +
+            "<p>בעקבות תקלה במערכת הטלפונייה, אנו נתקלים בקשיים בקבלה והוצאת שיחות שירות.</p>" +
+            "<p>אנו פועלים מול ספק המרכזייה על מנת לטפל בזה בהקדם.</p>" +
+            "<p>צוות התמיכה זמין עבורך במגוון ערוצים אחרים:</p>" +
+            "<p>במייל <a href='mailto:support@meckano.co.il'>support@meckano.co.il</a></p>" +
+            "<p>בצ׳אט לייב במערכת(אייקון המופיע בתחתית המסך)</p>" +
+            "<p>פתיחת טיקט <a href='https://app.meckano.co.il/#newSupportTicket'>בלשונית תמיכה</a></p>" +
+            "<p>והודעות מהירות בוואטסאפ - <a href='https://api.whatsapp.com/send?phone=972542304207&text=%D7%A9%D7%9C%D7%95%D7%9D+%D7%9E%D7%A7%D7%90%D7%A0%D7%95'>להתחלת שיחה לחצו כאן</a></p>" +
+            "<p>תודה על ההבנה</p>",
+        telephonyEn: "<p><strong>Hello</strong></p>" +
+            "<p>We have been encountered malfunctions with our telephone lines.</p>" +
+            "<p>As a result, calls are being dropped or not connecting at all.</p>" +
+            "<p>Support and service are available to you at</p>" +
+            "<p>Support mail: <a href='mailto:support@meckano.co.il'>support@meckano.co.il</a></p>" +
+            "<p>Live chat in the system (icon that appears at the bottom of the screen)</p>" +
+            "<p>Opening support ticket in the <a href='https://app.meckano.co.il/#newSupportTicket'>Support tab</a></p>" +
+            "<p>And send us quick messages on WhatsApp - <a href='https://api.whatsapp.com/send?phone=972542304207&text=%D7%A9%D7%9C%D7%95%D7%9D+%D7%9E%D7%A7%D7%90%D7%A0%D7%95'>to start a conversation click here</a></p>" +
+            "<p>Thank you for your understanding.</p>",
+    },
+
+    settingsMonthFormat: ["יום נוכחי", "סוף חודש נוכחי"],
+    settingsWeekFormat: ["יום נוכחי", "שבוע נוכחי"],
+    settingsTwoWeekFormat: ["יום נוכחי", "שבועיים מלאים"],
+
+    arrowRightWeek: "שבוע אחורה",
+    arrowLeftWeek: "שבוע קדימה",
+    inputEmployee:"נא לבחור עובד",
+
+    errorEventNotAbleReportSweepingAbsence: "שימו לב,<br>" +
+        "קיימת שגיאה בביצוע הבקשה.<br>" +
+        "לא ניתן להזין אירוע ושעות נוכחות יחד באותו תאריך.",
+    errorSweepingUpdateEventBYPolicy: "שימו לב! לא ניתן לבצע עדכון עקב יתרה נוכחית שלילית",
+    errorSweepingUpdateNoPermission: "אין הרשאה לדווח היעדרות",
+
+    scheduleReportsBy: "נוצר על ידי",
+    scheduleReportsDate: "בתאריך",
+
+    userContractDialogSaveTitle: "שיוך לחוזה עבודה",
+    userContractDialogSave: "שמור",
+    userContractDialogMoveTitle: "העברת עובדים משוייכים לחוזה",
+    userContractDialogMove: "בצע",
+
+
+    unableSignScientificReport: "שגיאה! שעות נוכחות צריכות להיות זהות לשעות מדווחות למשימה",
+    unableSignReports: "לא ניתן לבצע חתימה משום שקיימים חוסרים בנוכחות אצל העובדים הבאים:",
+    unableSignReport: "לא ניתן לבצע חתימה משום שקיימים חוסרים בנוכחות",
+
+    dataLog: {
+        departmentId: ["בוצע מעבר מחלקה:", "ראשית"],
+        employeeType : ["בוצע מעבר מצב נוכחי:", ""],
+        sections: {
+            done: "בוצעה"
+        },
+        from: "מתאריך"
+    },
+
+    employeeTypes: [
+        "מן המניין",
+        "לא פעיל",
+        "חופשת הריון",
+        "חופשה ללא תשלום",
+        "מחלה",
+        "מחלה ללא תשלום",
+        "פוטר",
+        "התפטר",
+        "נפטר",
+        "פרישה",
+        "נעדר",
+        "השתלמות",
+        "לימודים",
+        'פעילות בחו"ל'
+    ],
+
+    locationsReportTitle: "דוח יומי מיקומים",
+    phonesReportTitle: "דוח יומי טלפוני",
+
+    adminFileSalary: {
+        companyNotExist: "החברה לא קיימת",
+        invalidCompanyId: "המספר חברה לא תקין"
+    },
+
+    errorDownloadToManyFiles: "ניתן לבחור עד 15 מסמכים בפעם אחת",
+
+    errorDisclaimerDialogSave: "חובה לבחור את מיקום הדיווח",
+
+    clickToWatchDocument: "לחץ לצפייה במסמך",
+
+    overtimeExcludedDefaultName: "שעות נוספות",
+    regularTimeExcludedDefaultName: "שעות רגילות",
+    extraHours100: "שעות עודף ב 100",
+
+    breaks: {
+        start: "התחלת הפסקה",
+        continueBreak: "המשך הפסקה",
+        errorMessage: "בהתאם להגדרות המערכת לא ניתן לבצע פעולה זו"
+    },
+
+    empStatusActive: "עובד פעיל",
+    empStatusInactive: "עובד לא פעיל",
+    empStatusDeleted: "עובד מחוק",
+
+    lang:"he",
+
+    systemUpdateHelpDialog: {
+        idMissing: "נא להזין קוד תוכן",
+        titleMissing: "נא להזין כותרת נושא",
+        textMissing: "נא להזין תוכן הודעה"
+    },
+
+    linksAdminDialog: {
+        file: 'שם קובץ',
+        link: 'קישור',
+        deleteGroup: "האם אתה בטוח שברצונך למחוק את הקבוצה?",
+        errorMessage: {
+            id: "נא להזין קוד תוכן",
+            desc1: "נא להזין כותרת נושא",
+            file: "נא להעלות קובץ",
+            link: "נא להוסיף קישור",
+            newGroup: "נא להזין שם קבוצה חדשה"
+        }
+    },
+
+    depManager: "מנהל/ת צוות",
+    depManagers: "מנהלי צוות",
+
+    scouterDialog: {
+        title:"מעבר למערכת שיבוץ משמרות - Scouter",
+        body:"לחצו אישור למעבר למערכת סקאוטר (המערכת תפתח בחלון נפרד)"
+    },
+
+    errorDescription: "לא ניתן לשמור סטטוס ריק",
+
+    noPermission: {
+        docPermission: "אין לך הרשאה להעלות מסמכים"
+    },
+
+    eventUpdateForPopUpTitle: ":עדכון אירוע עבור",
+
+    employeeExpensesTypes: {
+        1: "רכב",
+        2: "מונית",
+        3: "אירוח",
+        4: "ציוד משרדי",
+        5: "תחבורה ציבורית",
+        6: "אוכל",
+        7: "טיסה",
+        8: "אש\"ל ללא קבלות",
+        9: "חניה",
+        10: "דלק",
+        11: "מלון",
+        12: "אחר"
+    },
+
+    employeeExpensesErrors: {
+        'category': "יש לבחור קטגוריה מתאימה",
+        'invoice': "לא ניתן לשמור מספר חשבונית ריק",
+        'description': "לא ניתן לשמור תיאור ריק",
+        'amount': "לא ניתן לשמור סכום ריק",
+        'currency': "לתשומת לבך! חובה לבחור סוג מטבע עבור ההוצאה",
+        'file': "לא ניתן לשמור הוצאות בלי קובץ חשבונית"
+    },
+
+    employeeExpensesDeleteMessage: "האם אתה בטוח שברצונך למחוק את הוצאות?",
+    employeeExpensesNoneSelectedText: "לחצו לחיפוש",
+
+    employeeExpensesStatus: {
+      'pending': 'ממתין',
+      'confirmed': 'אושר',
+      'declined': 'לא אושר'
+    },
+
+    errorDownloadReport: "אופס, גם זה קורה. " +"<br>"+ "לא הצלחנו להפיק את הדוח המבוקש." +"<br>"+ "צרו קשר איתנו ונשמח לבדוק מדוע.",
+    errorProccess : "משתמש יקר," +"<br>"+ "המערכת מעבדת כעת את הקובץ המבוקש. אנא המתן לסיום הפעולה. לאחר השלמתה, תוכל להמשיך בפעולה המבוקשת.",
+
+    selectSuppliers: "בחר ספקים",
+
+    searchEmployeesError: "שדה חיפוש ריק",
+    searchEmployeesSearchByError: "חובה לבחור קטגוריה לחיפוש",
+
+    connected: "מחובר",
+    unConnected: "לא מחובר",
+
+    missingExists: "שם אירוע כבר קיים",
+
+    tofes101sent: "הטופס נשלח בהצלחה",
+    tofes101question : "איך לשלוח את טופס 101 לעובד/ת?" ,
+    confirmTooltipCancel: "ביטול",
+    tofes101EmailBtn :"דוא”ל",
+    tofes101SMSBtn : "SMS" ,
+    tofes101SMSBtnLimit : "מכסת הודעות לנייד הסתיימה",
+    tofes101EmailsValidation: "כתובת המייל שהוזנה אינה תקינה. אנא הזן כתובת חוקית בפורמט user@example.com.",
+    tofes101sentSuccessfully: "הפעולה בוצעה בהצלחה! הטופס יישלח בשעה הקרובה.",
+    tofes101sentFailed: "הפעולה נכשלה. אנא נסו שוב או פנו לתמיכה במידה והבעיה נמשכת.",
+
+    cantUpdateMissing: "ארוע זה לא תואם את דוח העובד",
+
+    confirmed: "אושר",
+    pending: "ממתין",
+
+    duplicateRow: "האם לבצע שכפול?",
+
+    locationSettings: {
+        badIPAddress: "נא להכניס כתובת ip תקינה בפורמט xxx.xxx.xxx.xxx",
+        table: {
+            location: {
+                header: "תיאור מיקום",
+                defaultVal: "מיקום"
+            },
+            ipAddress: {
+                header: "כתובת IP",
+                defaultVal: "000.000.000.000"
+            }
+        }
+    },
+
+    confirmDeletePolicy:"האם ברצונך למחוק מדיניות זו?",
+    errorEmployeeInactive: "לא ניתן לבצע את הפעולה, העובד אינו פעיל.",
+
+    errorEmployeesInDepartment: "לתשומת לבך! מחיקת מחלקה עם עובדים פעילים לא אפשרית. על מנת למחוק את המחלקה עליך לוודא שהיא ריקה מעובדים.",
+
+    errorEventInBankHours: "לתשומת לבך! אירוע זה מקושר למדיניות בנק שעות לכן לא ניתן לשנות את יחידות החישוב.",
+
+    confirmReactivateUser:
+        "<p>החזרת עובד לסטטוס פעיל תמחק את תאריך סיום העסקה ותשיב אותו לשיוך המחלקתי האחרון שלו.</p>" +
+        "<p>לצורך אישור הפעולה לחצו על אישור.</p>",
+
+    errorDatesAreInFuture: 'לתשומת לבך! לא ניתן לבצע דיווח עתידי לעובד "רשות החדשנות".',
+
+    scientificReportPercent: 'אחוז תעסוקה במו"פ',
+
+    lockCeleryWizard: {
+        lockText: `
+            <h4 class="text-blue">נעילת שינויים</h3>
+            <p>נעילת השינויים תאפשר ייצוא קובץ שכר, אך תמנע את עריכת קובץ השכר. פתיחת הנעילה תדרוש קוד אימות חד-פעמי שישלח בהודעת SMS בעת שחרור הנעילה.</p>
+        `,
+        unlockText: `
+            <h4 class="text-blue">אימות שחרור נעילה</h3>
+            <p> ניתן לייצא קבצי שכר גם כאשר הנעילה פעילה. שחרו הנעילה יאפשר עריכה של קבצי שכר קיימים. לצורך אישור הפעולה, ישלח אליך קוד אימות חד-פעמי בהודעת SMS. יש להזין את קוד האימות:</p>
+            <input type="text" class="verification-code" placeholder="קוד אימות">
+            <p class="lockCeleryWizard-error hidden">הקוד חייב להיות מספרי באורך 5 ספרות</p>
+            <p class="lockCeleryWizard-error-code hidden">נא להזין קוד תקין</p>
+        `
+    },
+
+    maritalStatus: {
+        0: "רווק/ה",
+        1: "נשוי/אה",
+        2: "גרוש/ה",
+        3: "אלמן/ה"
+    },
+
+    gender: {
+      'm': "זכר",
+      'f': "נקבה"
+    },
+
+    additionalFieldsEmpty: '<span>מרגיש שחסר לך מידע? <a>לחץ כאן</a> ליצירת שדה מותאם אישית</span>',
+
+    directManager: "מנהל ישיר",
+
+    chooseDepartment: "שיוך למחלקה",
+
+    supportTickets: {
+      adminAlert: [
+          "שימו לב! הנכם עומדים להיחשף לנתונים אישיים רגישים, ועליכם לנהוג בזהירות המתבקשת. קיבלתם גישה למשך",
+          "שעות."
+      ]
+    },
+    chooseDepartment: "שיוך למחלקה",
+
+    downloadAllFilesConfirm:
+        'האם ברצונך להוריד את כל הקבצים?\n' +
+        '<br/>' +
+        'בלחיצה על "אישור" המערכת תיצור ותוריד למחשבך קובץ ZIP המכיל את כל הקבצים עבור טווח הזמן שנבחר.\n',
+
+    salaryFormatIsLocked: `<span style='font-weight: bold'>הקובץ נעול לעריכה</span><br>
+        קובץ השכר ננעל לשינויים על ידי מנהל מערכת אחר. לא ניתן לבצע עריכה עד לשחרור הנעילה.`,
+    salaryFormatIsLockedCancelBtn: 'אישור',
+    confirmTooltipConfirm: "אישור",
+    confirmTooltipCancel: "ביטול",
+
+    addPhoneReportingNumber: "הוספת מספר טלפון לדיווח",
+    editPhoneReportingNumber: "עריכת מספר טלפון לדיווח",
+
+    onlyAccessLogButtonText: "התחברות חריגה" ,
+    employeeAddProfilePicture1 : "<span>לחצו כאן</span> להעלות תמונה" ,
+    employeeAddProfilePicture2 : "תמונה מהמחשב" ,
+    closeCollapseble : "צמצם רשימת הרשאות" ,
+    openCollapseble : "הרחב רשימת הרשאות" ,
+    uploadEmployeeFile : "טעינת קובץ עובדים"
+};

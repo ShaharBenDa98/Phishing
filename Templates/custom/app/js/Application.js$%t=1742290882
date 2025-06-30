@@ -1,0 +1,3441 @@
+const Application = {
+    api: "/meckano/api/",
+    mapquest_key: 'GtfWWv9ysrwicEPr9ANZYvj1hSZfEkCJ',
+    locationAPI_TOKEN : "f8a1560b0af4c1",
+    users: null,
+    timeEntries: null,
+    taskEntries: null,
+    departments: null,
+    contracts: null,
+    statuses: null,
+    usersAdditionalFields: null,
+    roles: null,
+    tasks: null,
+    questions: null,
+    timezones: null,
+    company: null,
+    manager: null,
+    locations: null,
+    router: null,
+    organizer: null,
+    moderatorOrganizer: null,
+    companyTimeView: null,
+    user: null,
+    messageBar: null,
+    scheduleReports: null,
+    emailReports: null,
+    firstLogin: false,
+    tooltipAnimationDuration: 50,
+    lineTooltipDelay: 1,
+    SITE_UPLOADED_IMAGES: "uploads/img/",
+    SITE_UPLOADED_DOCUMENTS: "uploads/documents/",
+    SITE_UPLOADED_KIOSK_IMAGES: "uploads/imgKiosk/",
+    MIN_PASSWORD_LENGTH: 8,
+    _tplMissingObject: null,
+    _tplNoData: null,
+    pageElements: null,
+    defaultStart: "21-12-2011",
+    defaultEnd: "20-1-2012",
+    defaultDay: "20-12-2011",
+    menu: null,
+    numOfBigCompany : 500,
+    listOfDirectManager: null,
+    userTime: null,
+    todo: null,
+    systemAlerts: null,
+    currentIp: null,
+    SystemUpdateNotificationUser: null,
+    dateRangePickers: {},
+    isFromByDate:true,
+    selectedRow:null,
+    companiesWithBrigades: [8936],
+    companyHasBrigades: false,
+    brigadeId: null,
+    selectedUser: null,
+    inactiveUsers: null,
+    inactiveLoaded: false,
+    absencePolicies: null,
+    salaryProcessCountDownWorker : null ,
+
+    initialize: function(apiUrl, user, callback, defaultStart, defaultEnd, defaultDay, firstLogin) {
+        const self = this;
+        $.ajaxSetup({cache: false});
+        this.api = apiUrl;
+        this.defaultDay = defaultDay;
+        this.defaultStart = defaultStart;
+        this.defaultEnd = defaultEnd;
+        this.user = new User();
+        this.user.set(user, {silent: true});
+        this.messageBar = new MessageBar();
+        this._tplMissingObject = _.template($("#MissingObjectView").html());
+        this._tplNoData = _.template($("#NoDataView").html());
+        this.companyTimeView = new CompanyTimeView();
+        this.firstLogin = firstLogin;
+        this.originalStart = defaultStart;
+        this.originalEnd =  defaultEnd;
+        let $dfr = new jQuery.Deferred();
+
+
+        if(this.companiesWithBrigades.indexOf(Application.user.get('companyId')) !== -1){
+            this.companyHasBrigades = true;
+            if(user.userType == 1 || user.userType == 2){
+                const dfrBrigades = this.fetchBrigades();
+                $.when(dfrBrigades).done(function(){
+                    let brigadeId = self.brigades.models.length > 0 ? self.brigades.models[0].get('id') : null;
+                    let params = brigadeId ? [ callback, brigadeId ] : [ callback ];
+                    if (user.userType == 1) {
+                        new BrigadesMainDropdownView('brigade-dropdown-main-manager');
+                        $dfr = self.loadManager(...params);
+                    }else if(user.userType == 2){
+                        new BrigadesMainDropdownView('brigade-dropdown-main-moderator');
+                        $dfr = self.loadModerator(...params);
+                    }
+                })
+            }else {
+                $dfr = this.load(callback);
+            }
+        }else{
+            if (user.userType == 1) {
+                $dfr = this.loadManager(callback);
+            }
+            else if (user.userType == 2) {
+                $dfr = this.loadModerator(callback);
+            }
+            else {
+                $dfr = this.load(callback);
+            }
+        }
+
+        this.fixFooterUrls();
+        this.fixFooterPosition();
+        $(window).resize(function() {
+            Application.fixFooterPosition();
+        });
+
+        //check server status
+        if(!isLocalServer) {
+            setInterval(function () {
+                Pace.ignore(function () {
+                    $.ajax({
+                        url: Application.api + 'system_check/',
+                        async: true,
+                    })
+                        .done(function (data) {
+                            if (data == "sql_down") location.reload();
+                        });
+                });
+            }, 5000);
+        }
+
+        $("li.todoListIcon").unbind("click").click(function () {
+            self.showTodoList();
+        });
+
+        $("li.employeesTreeIcon").unbind("click").click(function () {
+            self.showEmployeesTree();
+        });
+
+        $("li.scouterIcon").unbind("click").click(function (ev) {
+            ev.preventDefault();
+            const fnChangeView = () => {
+                const url = $(this).find("a").attr("href");
+                window.open(url, "_blank");
+            };
+            const params = {
+                title: tpl.scouterDialog.title,
+                body: tpl.scouterDialog.body,
+            }
+            customDialog.show(params, fnChangeView);
+        });
+
+        this.bindDisplayModeEvents();
+        var mode = this.user.get("displayMode") == 1 ? "dark" : "light";
+        var darkMode = DarkMode();
+        darkMode.setMode(mode);
+        var darkModeButton = DarkModeButton("a.displayMode");
+        darkModeButton.set(this.user.get("displayMode"));
+
+        if($("div.navigateSideView ul li.employeesTreeIcon").length) {
+            this.showEmployeesTree();
+        }else{
+            this.showTodoList();
+        }
+        if(!this.todo) {
+            this.todo = new toDoView($("div.wrapperTodoList"));
+        }else {
+            this.todo.render();
+        }
+
+        $.when($dfr).done(()=>{
+            this.fetchSystemAlerts();
+        });
+        new ChatWidget(Application);
+        this.setCurrentIp();
+        if(this.user.isManager() === true){
+            this.fetchSupportKeyTime();
+        }
+    },
+
+    fetchSupportKeyTime: function(){
+        const supportKeys = new SupportKey({action: 'getCode'});
+        supportKeys.fetch({
+            success: function(result, data) {
+                const supportKeyTimer = new SupportKeyTimer(result.get('valid_until'));
+                if(data?.key){
+                    supportKeyTimer.show().run();
+                }else{
+                    supportKeyTimer.hide();
+                }
+            }
+        });
+    },
+
+    bindDisplayModeEvents: function(){
+        $("body").find("div#footer a.displayMode").on("click",function(event) {
+            var mode = Application.user.get("displayMode") == 1 ? 0 : 1;
+            Application.user.attributes.displayMode = mode;
+            Application.user.save();
+            var darkMode = DarkMode();
+            darkMode.setMode((mode ? "dark" : "light"));
+        });
+    },
+
+    fetchSystemAlerts: function(){
+        const  self = this;
+
+        if (!this.systemAlerts) {
+            this.systemAlerts = new SystemAlertCollection({userType: this.user.get("userType"), supplier: this.company.get("supplier")});
+        }
+
+        this.systemAlerts.fetch({
+            success: function() {
+                self.systemAlerts.models = self.systemAlerts.models.filter((n) => n.attributes.archived === 0);
+                if(self.systemAlerts.models.length > 0 && !self.isFirstLogin()){
+                    if(self.systemAlerts.models[0].get("dateCreated") && localStorage.getItem("meckano_" + self.systemAlerts.models[0].get("dateCreated"))){
+                        return;
+                    }
+                    systemAlertsDialog.show(self.systemAlerts.models[0]);
+
+                    if(self.systemAlerts.models[0].get("dateCreated")){
+                        localStorage.setItem("meckano_" + self.systemAlerts.models[0].get("dateCreated"), true);
+                    }
+                }
+            },
+            error: function() {
+
+            }
+        });
+    },
+
+    loadManager: function(callback, brigadeId=null, withNavigate = true) {
+        $('div.employeesTreeLoader').show();
+        const $dfr1 = this.fetchUsers(brigadeId);
+        const $dfr2 = this.fetchDepartments(brigadeId);
+        const $dfr3 = this.fetchCompany();
+        const $dfr4 = this.fetchManager();
+        const $dfr5 = Application.fetchStatuses();
+        const $dfr6 = Application.fetchRoles();
+        const $dfr7 = this.fetchTimezone();
+        const $dfr8 = this.fetchContracts();
+        const $dfr9 = this.fetchUsersAdditionalFields();
+        const $dfr10 = this.fetchSystemUpdateNotifications();
+        const $dfr11 = this.fetchCompanyDisplaySettings();
+        const $dfr12 = new jQuery.Deferred();
+        const $dfr13 = this.fetchAbsencePolicies();
+
+        const router = new Meckano();
+        this.router = router;
+        const self = this;
+
+
+        $.when($dfr1, $dfr2, $dfr3, $dfr4, $dfr5, $dfr6, $dfr7, $dfr8, $dfr9, $dfr10, $dfr11, $dfr13).done(function() {
+            Application.users.setRelatedInfo(Application.departments);
+            Application.company.setRelatedInfo(self.companyDisplaySettings.models[0].attributes);
+
+            if(Application.users && Application.users.length > 0){
+                Application.inactiveLoaded =  !!Application.users.models[0].get("inactiveLoaded");
+            }
+
+            $('div.employeesTreeLoader').hide();
+
+            if(!Application.organizer)Application.organizer = new OrganizerView();
+            else Application.organizer.updateState();
+
+            self.pageElements = new PageElementsView();
+            if ($.isFunction(callback)) {
+                callback();
+            }
+            self.menu = new MainMenu();
+            if (self.firstLogin) {
+                //redirect to add employee page
+                window.location.hash = "employees";
+            }
+
+            try{
+                Backbone.history.start();
+            }catch(err){}
+
+
+            var remainderOfTrialPackage = Application.company.get("billing").remainderToTrialPackage;
+            if(remainderOfTrialPackage !== "undefined" && remainderOfTrialPackage <= 96) {
+                subscriberRegistrationDialog.show();
+            }
+
+            if(!Application.user.get("credentials").hasOwnProperty("whitelable")){
+                self.SystemUpdateNotificationUser = new SystemUpdateNotificationUserView("body");
+            }
+            new SystemAlertView("body");
+
+            if(self.company.get("declinedBilling")) {
+                const creditCardNumber = self.company.get("billing").creditCardNumber.substring(self.company.get("billing").creditCardNumber.length - 4);
+                $("#declinedBilling-dialog .text").html($("#declinedBilling-dialog .text").html().replace("%CREDIT_CARD_NUMBER%", creditCardNumber));
+                declinedBillingDialog.show();
+            }
+            $('body').trigger('brigadeChanged', {brigadeId: brigadeId, withNavigate: withNavigate});
+            $dfr12.resolve();
+        });
+        return $dfr12.promise();
+    },
+
+    loadModerator: function(callback, brigadeId=null, withNavigate = true) {
+        $('div.employeesTreeLoader').show();
+        const $dfr1 = this.fetchUsers(brigadeId);
+        const $dfr2 = this.fetchDepartments(brigadeId);
+        const $dfr3 = this.fetchTasks();
+        const $dfr4 = this.fetchCompany();
+        const $dfr5 = this.fetchManager();
+        const $dfr6 = this.fetchTimeEntries();
+        const $dfr7 = this.fetchTaskEntries();
+        const $dfr8 = this.fetchContracts();
+        const $dfr9 = Application.fetchStatuses();
+        const $dfr10 = Application.fetchRoles();
+        const $dfr11 = this.fetchQuestions();
+        const $dfr12 = this.fetchTimezone();
+        let $dfr13;
+        if(Application.user.get("isModeratorCanAddEmployees") || Application.user.get("isModeratorCanWatchReportComposer")){
+            $dfr13 = this.fetchUsersAdditionalFields();
+        } else{
+            $dfr13 = new jQuery.Deferred();
+            $dfr13.resolve();
+        }
+        const $dfr14 = this.fetchSystemUpdateNotifications();
+        const $dfr15 = this.fetchCompanyDisplaySettings();
+        const $dfr16 = new jQuery.Deferred();
+        const $dfr17 = this.fetchAbsencePolicies();
+
+        const router = new MeckanoModerator();
+
+        this.router = router;
+        const self = this;
+        $.when($dfr1, $dfr2, $dfr3, $dfr4, $dfr5, $dfr6, $dfr7,$dfr8, $dfr9, $dfr10, $dfr11, $dfr12, $dfr13, $dfr14, $dfr15, $dfr17).done(function() {
+            Application.users.setRelatedInfo(Application.departments);
+            Application.tasks.setRelatedInfo(Application.users, Application.departments);
+            Application.company.setRelatedInfo(self.companyDisplaySettings.models[0].attributes);
+
+            if(Application.users && Application.users.length > 0){
+                Application.inactiveLoaded =  !!Application.users.models[0].get("inactiveLoaded");
+            }
+
+            const organizerConf = {
+                reportDepartments: [-99],
+                reportUsers: [],
+                taskReportUsers: []
+            };
+
+            if (self.user.get("credentials").watchSelfReport) {
+                for (var i=0; i<self.users.length; i++) {
+                    organizerConf.reportUsers.push(self.users.at(i).get("id"));
+                }
+            } else {
+                organizerConf.reportUsers = [-99];
+            }
+
+            if(self.user.get("credentials").watchSelfTaskReport){
+                for (var i=0; i<self.users.length; i++) {
+                    organizerConf.taskReportUsers.push(self.users.at(i).get("id"));
+                }
+            } else {
+                organizerConf.taskReportUsers = [-99];
+            }
+            $('div.employeesTreeLoader').hide();
+            Application.organizer = new WorkClock("WorkClock");
+
+            if(!Application.moderatorOrganizer) Application.moderatorOrganizer = new OrganizerView(organizerConf);
+            else Application.moderatorOrganizer.updateState();
+
+            self.pageElements = new PageElementsView();
+            if ($.isFunction(callback)) {
+                callback();
+            }
+            self.menu = new EmployeeMenu();
+
+            try{
+                Backbone.history.start();
+            }catch(err){}
+
+            self.SystemUpdateNotificationUser = new SystemUpdateNotificationUserView("body");
+            new SystemAlertView("body");
+            $('body').trigger('brigadeChanged', {brigadeId: brigadeId, withNavigate: withNavigate});
+            $dfr16.resolve();
+        });
+        return $dfr16.promise();
+    },
+
+    load: function(callback) {
+        const $dfr1 = this.fetchTimeEntries();
+        const $dfr2 = this.fetchTaskEntries();
+        const $dfr3 = this.fetchTasks();
+        const $dfr4 = this.fetchDepartments();
+        const $dfr5 = this.fetchCompany();
+        const $dfr6 = this.fetchStatuses();
+        const $dfr7 = this.fetchRoles();
+        const $dfr8 = this.fetchQuestions();
+        const $dfr9 = this.fetchUser();
+        const $dfr10 = this.fetchSystemUpdateNotifications();
+        const $dfr11 = this.fetchCompanyDisplaySettings();
+        const $dfr12 = new jQuery.Deferred();
+        const $dfr13 = this.fetchAbsencePolicies();
+
+        const router = new MeckanoUser();
+        this.router = router;
+        const self = this;
+        $.when($dfr1, $dfr2, $dfr3, $dfr4, $dfr5, $dfr6, $dfr7, $dfr8, $dfr9, $dfr10, $dfr11, $dfr13).done(function() {
+            Application.organizer = new WorkClock();
+            Application.company.setRelatedInfo(self.companyDisplaySettings.models[0].attributes);
+
+            if ($.isFunction(callback)) {
+                callback();
+            }
+
+            self.menu = new EmployeeMenu();
+            Backbone.history.start();
+            self.SystemUpdateNotificationUser = new SystemUpdateNotificationUserView("body");
+            new SystemAlertView("body");
+            $dfr12.resolve();
+        });
+        return $dfr12.promise();
+    },
+
+    fetchBrigades: function() {
+        this.brigades = new BrigadeCollection();
+        const $dfr = new jQuery.Deferred();
+        this.brigades.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    showEmployeesTree: function(){
+        $("div.wrapperTodoList").hide();
+
+        // trick for know if is mode no users on tree employee (to know which div to display no user or tree
+        $("div.organizerNoUsers").show();
+        if($("div.organizerNoUsers.active").length){
+            $("div.organizerNoUsers").removeClass("active").hide().show("fast");
+        }else{
+            $("div.organizerNoUsers").hide();
+            $("div.forTreeEmployees").show("fast");
+        }
+        $("div.navigateSideView ul").parent().removeClass("todoMode");
+        $("div.navigateSideView ul li.employeesTreeIcon").addClass("active");
+        $("div.navigateSideView ul li.todoListIcon").removeClass("active");
+        $("#organizer div.wrapperSearch input").removeClass("todo-filter").addClass("organizer-filter");
+
+        if(this.user.isEmployee()){
+            $("#organizer div.wrapperSearch").hide();
+        }
+    },
+
+    showTodoList: function(){
+        // if true its mean that no users in tree employee
+        if($("div.organizerNoUsers").length){
+            $("div.organizerNoUsers").addClass("active").hide();
+        }
+        $("div.forTreeEmployees, div.organizerNoUsers").hide();
+        $("div.wrapperTodoList").fadeIn(500);
+        $("div.navigateSideView ul").parent().addClass("todoMode");
+        $("div.navigateSideView ul li.todoListIcon").addClass("active");
+        $("div.navigateSideView ul li.employeesTreeIcon").removeClass("active");
+        $("#organizer div.wrapperSearch input").removeClass("organizer-filter").addClass("todo-filter");
+
+        if(this.user.isEmployee()){
+            $("#organizer div.wrapperSearch").show();
+        }
+    },
+
+    missingObjectView: function() {
+        return $(this._tplMissingObject());
+    },
+
+    noDataView: function(message) {
+        return this._tplNoData({message: message});
+    },
+
+    handleMissingObject: function(object, target) {
+        if (object == undefined || !object) {
+            target.empty().append(this.missingObjectView());
+            return false;
+        }
+        return true;
+    },
+
+    fetchCompany: function() {
+        if (!this.company) {
+            this.company = new Company();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.company.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchManager: function() {
+        if (!this.manager) {
+            this.manager = new Manager();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.manager.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchLocations: function() {
+        if (!this.locations) {
+            this.locations = new LocationsMapCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.locations.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchUsers: function(brigadeId=null) {
+        if(!_.isNull(brigadeId)){
+            this.users = new UserCollection({ brigadeId });
+        }else{
+            this.users = new UserCollection();
+        }
+
+        var $dfr = new jQuery.Deferred();
+        this.users.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchUser: function() {
+        var $dfr = new jQuery.Deferred();
+        this.user.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchDepartments: function(brigadeId=null) {
+        if (brigadeId) {
+            this.departments = new DepartmentCollection({ brigadeId });
+        }else{
+            this.departments = new DepartmentCollection();
+        }
+
+        var $dfr = new jQuery.Deferred();
+        this.departments.fetch({success: $dfr.resolve});
+
+        return $dfr.promise();
+    },
+
+    fetchContracts: function() {
+        if (!this.contracts) {
+            this.contracts = new ContractCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.contracts.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchStatuses: function() {
+        if (!this.statuses) {
+            this.statuses = new StatusesCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.statuses.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchUsersAdditionalFields: function() {
+        if (!this.usersAdditionalFields) {
+            this.usersAdditionalFields = new UsersAdditionalFieldsCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.usersAdditionalFields.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchSystemUpdateNotifications: function() {
+        if (!this.systemUpdateNotifications) {
+            this.systemUpdateNotifications = new SystemUpdateNotificationsCollection(Application.user.get("userType"));
+        }
+        var $dfr = new jQuery.Deferred();
+        this.systemUpdateNotifications.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchRoles: function() {
+        if (!this.roles) {
+            this.roles = new RolesCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.roles.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchTasks: function() {
+        if (!this.tasks) {
+            this.tasks = new TaskCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.tasks.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchQuestions: function() {
+        if (!this.questions) {
+            this.questions = new QuestionsCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.questions.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchTaskEntries: function() {
+        if (!this.taskEntries) {
+            this.taskEntries = new RecentTaskEntryCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.taskEntries.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchTimeEntries: function() {
+        if (!this.timeEntries) {
+            this.timeEntries = new RecentTimeEntryCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.timeEntries.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchTimezone: function() {
+        if (!this.timezones) {
+            this.timezones = new TimezoneCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.timezones.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchCompanyDisplaySettings: function() {
+        if (!this.companyDisplaySettings) {
+            this.companyDisplaySettings = new companyDisplaySettingsCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.companyDisplaySettings.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchAbsencePolicies: function() {
+        if (!this.absencePolicies) {
+            this.absencePolicies = new AbsencePolicyCollection();
+        }
+
+        const $dfr = new jQuery.Deferred();
+        this.absencePolicies.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+
+    /*fetchSlimList: function(inactive){
+        if (!this.slimList) {
+            this.slimList = SlimListCollection;
+        }
+        var $dfr = new jQuery.Deferred();
+        this.slimList.fetch({success: $dfr.resolve, inactive: (inactive ? true : false)});
+        return $dfr.promise();
+    },*/
+
+    fetchScheduleReports: function() {
+        if (!this.scheduleReports) {
+            this.scheduleReports = new ScheduleReportsCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.scheduleReports.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    fetchEmailReports: function() {
+        if (!this.emailReports) {
+            this.emailReports = new EmailReportCollection();
+        }
+        var $dfr = new jQuery.Deferred();
+        this.emailReports.fetch({success: $dfr.resolve});
+        return $dfr.promise();
+    },
+
+    contentElement: function() {
+        return $("#mainview");
+    },
+
+    fillFormWithModel: function($form, model) {
+        var attrs = model.attributes;
+        for (var k in attrs) {
+            var $inp = $form.find("." + k);
+            if (!$inp || !$inp.length) {
+                continue;
+            }
+            var type = $inp.attr("type");
+            if (type == "checkbox") {
+                $inp.attr("checked", (model.get(k)) ? true: false);
+            }
+            else if (type == "radio") {
+                $form.find("input." + k).each(function() {
+                    var $elm = $(this);
+                    if ($elm.val() == model.get(k)) {
+                        $elm.attr("checked", true);
+                    }
+                });
+            }
+            else {
+                $inp.val(model.get(k));
+            }
+        }
+    },
+
+    fillTextFields: function(el, o) {
+        for (let k in o) {
+            if (el.find("input[type='text']." + k)) {
+                el.find("input[type='text']." + k).val(o[k]);
+            }
+
+            if(el.find("textarea." + k)){
+                el.find("textarea." + k).val(o[k]);
+            }
+
+            if (el.find("span." + k)) {
+                let val = o[k];
+                switch (k) {
+                    case "directManager":
+                        val = val && this.users?.get(val) ? `${this.users.get(val).get("firstName")}  ${this.users.get(val).get("lastName")}` : '';
+                        break;
+                    case "marital":
+                        val = tpl.maritalStatus[val];
+                        break;
+                    case "sex":
+                        val = tpl.gender[val];
+                        break;
+                    case "activeState":
+                        val = val === 1 ? tpl.empStatusActive : tpl.empStatusInactive;
+                        break;
+                    case "departmentId":
+                        val = this.departments.get(val)?.get("name") || '';
+                        break;
+                }
+
+                el.find("span." + k).text(val || '-');
+            }
+
+        }
+    },
+
+    fillRadioGroup: function(el, cls, val) {
+        el.find("input." + cls + "[value='" + val +"']").attr("checked", true);
+    },
+
+    initCheckboxes: function(el) {
+        el.find("input[type='checkbox']").change(function() {
+            var f = $(this).is(":checked"), span = $(this).parents("div:first").find("span");
+            if (f) {
+                span.removeClass("inactive");
+            }
+            else {
+                span.addClass("inactive");
+            }
+        }).trigger("change");
+    },
+
+    initRadioGroup: function(el, cls) {
+        el.find("input[type='radio']." + cls).change(function() {
+            var v = $(this).val();
+            el.find("input[type='radio']." + cls).each(function() {
+                var val = $(this).val(), span = $(this).next("span");
+                if (val == v) {
+                    span.removeClass("inactive")
+                }
+                else {
+                    span.addClass("inactive")
+                }
+            });
+        });
+        el.find("input[type='radio']." + cls + ":checked").trigger("change");
+    },
+
+    initRadioGroupMultipleSpan: function(el, cls) {
+        el.find("input[type='radio']." + cls).change(function() {
+            var v = $(this).val();
+            el.find("input[type='radio']." + cls).each(function() {
+                var val = $(this).val(), span = $(this).parents(":first").find("span");
+                if (val == v) {
+                    span.removeClass("inactive")
+                }
+                else {
+                    span.addClass("inactive")
+                }
+            });
+        });
+        el.find("input[type='radio']." + cls + ":checked").trigger("change");
+    },
+
+    dateFormat: function() {
+        var format = Utils.getRealFormatOfCompany();
+        format = format.toLowerCase().replace("yyyy", "yy");
+        return format;
+    },
+
+    dateFormatRegex: function() {
+        return /^[0-9]{1,2}[\\/-\\.][0-9]{1,2}[\\/-\\.][0-9]{4}$/;
+    },
+
+    inputVal: function(el, cls) {
+        var v = el.find("input." + cls).val();
+        return (!v || v == "") ? null : v;
+    },
+
+    inputDateVal: function(el, cls){
+        var v = Application.inputVal(el, cls);
+        if(!v){
+            return null;
+        }
+        v = Utils.convertDateStrToDbFormat(v);
+        return v;
+    },
+
+    textVal: function(el, cls) {
+        var v = el.find("textarea." + cls).val();
+        return (!v || v == "") ? null : v;
+    },
+
+    selectVal: function(el, cls) {
+        var v = el.find("select." + cls).val();
+        return (!v || v == "") ? null : v;
+    },
+
+    radioVal: function(el, cls) {
+        return el.find("input[type='radio']." + cls + ":checked").val();
+    },
+
+    checkboxVal: function(el, cls) {
+        return el.find("input[type='checkbox']." + cls).is(":checked");
+    },
+
+    validPassword: function(val, user, registerEmail=null) {
+        if (!val || val.length < this.MIN_PASSWORD_LENGTH) {
+            return false;
+        }
+
+        const email = user?.get("email") || registerEmail;
+        if (email && email.length) {
+            if (email.indexOf(val) != -1 || val.indexOf(email) != -1) {
+                return false;
+            }
+        }
+        if (!/[0-9]/.test(val) || !/[^0-9]/.test(val)) {
+            //require numbers
+            return false;
+        }
+        if (!/[A-Za-z]/.test(val) || !/[^A-Za-z]/.test(val)) {
+            //require letters
+            return false;
+        }
+        return true;
+    },
+
+    initMeterStrengthPassword: function(el, mainObj){
+        el.find("input.meterPassword").unbind("keyup").keyup(function (e) {
+            var val = $(this).val();
+            var result = zxcvbn(val);
+
+            // Update the password strength meter
+            el.find('#password-strength-meter').val(result.score);
+
+            // Update the text indicator
+            if (val !== "") {
+                var description = tpl.strengthPasswordDescription[result.score];
+                mainObj.isStrongPassword = result.score >= 2;
+                if(result.score > 0){
+                    el.find("div.wrapperPasswordStrength").show();
+                }else{
+                    el.find("div.wrapperPasswordStrength").hide();
+                }
+            } else {
+                var description = "";
+                el.find("div.wrapperPasswordStrength").hide();
+                mainObj.isStrongPassword = false;
+            }
+            el.find('#password-strength-text').text(description);
+        });
+    },
+
+    validPasswordForEmail: function(val, email) {
+        if (!val || val.length < this.MIN_PASSWORD_LENGTH) {
+            return false;
+        }
+        if (email && email.length) {
+            if (email.indexOf(val) != -1 || val.indexOf(email) != -1) {
+                return false;
+            }
+        }
+        if (!/[0-9]/.test(val) || !/[^0-9]/.test(val)) {
+            //require numbers and letters
+            return false;
+        }
+        return true;
+    },
+
+    splitDay:function(day){
+        var o = this.seperateUrlDate(day);
+        return o;
+    },
+
+    workMonthRangeFromSingleDate: function(day) {
+        var o = this.seperateUrlDate(day);
+        return this.datesForWorkMonth(o.month, o.year);
+    },
+
+    datesForWorkMonth: function(month, year, separator) {
+        separator = typeof separator == "undefined" ? "/" : separator;
+
+        if(this.company.get("workMonthStart") != 1 && this.company.get("workMonthStart") > new Date().getDate()){
+            month--;
+            if (month == 0) {
+                month = 12;
+                year--;
+            }
+        }
+
+        var prevMonth = month - 1;
+        var prevYear = year;
+        if (prevMonth == 0) {
+            prevMonth = 12;
+            prevYear--;
+        }
+
+        if(this.company.get("workMonthStart") == 1){
+            var lastDay = new Date(prevYear, prevMonth, 0).getDate();
+            var endMonth = prevMonth;
+            var endYear = prevYear;
+        } else{
+            var lastDay = this.company.get("workMonthStart") - 1;
+            var endMonth = month;
+            var endYear = year;
+        }
+
+        var indexes = Utils.getYMDIndexesFromCompanyFormat();
+        var dateArr = [];
+
+        dateArr[indexes.dayIndex] = this.company.get("workMonthStart").toString().padStart(2, '0');
+        dateArr[indexes.monthIndex] = prevMonth.toString().padStart(2, '0');
+        dateArr[indexes.yearIndex] = prevYear;
+        var start = dateArr.join(separator);
+
+        dateArr[indexes.dayIndex] = lastDay.toString().padStart(2, '0');
+        dateArr[indexes.monthIndex] = endMonth.toString().padStart(2, '0');
+        dateArr[indexes.yearIndex] = endYear;
+        var end = dateArr.join(separator);
+
+        return {
+            start: start,
+            end: end,
+        }
+    },
+
+    urlDate: function(str) {
+        return str.replace(/[\/]+/g, "-");
+    },
+
+    inputDate: function(str) {
+        if (!str) return;
+        return str.replace(/[-]+/g, "/");
+    },
+
+    seperateUrlDate: function(str, isByCompanyFormat) {
+        isByCompanyFormat = typeof isByCompanyFormat === "undefined" ? true : isByCompanyFormat;
+        var indexes = Utils.getYMDIndexesFromCompanyFormat();
+        if(!isByCompanyFormat){
+            indexes.dayIndex = 0;
+            indexes.monthIndex = 1;
+            indexes.yearIndex = 2;
+        }
+        var s = str.split("-");
+        return {
+            day: parseInt(s[indexes.dayIndex], 10),
+            month: parseInt(s[indexes.monthIndex], 10),
+            year: parseInt(s[indexes.yearIndex], 10)
+        };
+    },
+
+    setDefaultStart: function(defaultStart) {
+        this.defaultStart = defaultStart;
+    },
+
+    setDefaultEnd: function(defaultEnd) {
+        this.defaultEnd = defaultEnd;
+    },
+
+    getDefaultStart: function() {
+        return this.defaultStart;
+    },
+
+    getDefaultEnd: function() {
+        return this.defaultEnd;
+    },
+
+    getDefaultDay: function() {
+        return this.defaultDay;
+    },
+
+    getDatePicker: function(el, isSingle = false, dates, isUntil, isMonthly = false, doesOpenUp = false) {
+        if(this.dateRangePickers[el.attr("class")]) this.dateRangePickers[el.attr("class")].remove();
+
+        const separator = ' - ';
+        const dateFormat = "DD/MM/YYYY";
+        const isHebrew = this.user.get("userLanguage") === 'Hebrew';
+        const ops = {
+            "autoApply": true,
+            "locale":{},
+            "drops": doesOpenUp ? "up" : "down"
+        };
+
+        if(isHebrew) {
+            ops.locale= {
+                "daysOfWeek": tpl.daysListShort,
+                "monthNames": tpl.monthList.slice(1),
+                "firstDay": 0,
+                separator,
+            };
+        }
+        ops.locale.format = dateFormat;
+        if(!isSingle){
+            const {today, yesterday, currentWeek, lastWeek, currentMonth, lastMonth} = tpl.dateRanges;
+            ops.ranges = {};
+            if(!isMonthly) {
+                ops.ranges[today] = [moment(), moment()];
+                ops.ranges[yesterday] = [moment().subtract(1, 'days'), moment().subtract(1, 'days')];
+                ops.ranges[currentWeek] = [moment().startOf('week'), moment().endOf('week')];
+                ops.ranges[lastWeek] = [moment().subtract(6, 'days'), moment()];
+            }
+            ops.ranges[currentMonth] = [moment().startOf('month'), moment().endOf('month')];
+            const startOfLastMonth = moment().subtract(1, 'month').startOf('month');
+            const endOfLastMonth = moment().subtract(1, 'month').endOf('month');
+            ops.ranges[lastMonth] = [startOfLastMonth, endOfLastMonth];
+             ops.alwaysShowCalendars = true ;
+             ops.opens = isHebrew ? "left" : "right";
+             const workMonthStart = Application.company.get("workMonthStart");
+             if(workMonthStart !== 1) {
+                 ops.ranges[currentMonth] = [moment(Application.originalStart, dateFormat), moment(Application.originalEnd, dateFormat)];
+                 ops.ranges[lastMonth] = [moment(Application.originalStart, dateFormat).subtract(1,'month'), moment(Application.originalEnd, dateFormat).subtract(1,'month')];
+             }
+             if (dates) {
+                 ops.startDate = dates.start || moment(Application.defaultStart, dateFormat);
+                 ops.endDate = dates.end || moment(Application.defaultEnd, dateFormat);
+                 if(dates.minDate) ops.minDate = dates.minDate;
+                 if(dates.maxDate) ops.maxDate = dates.maxDate;
+             } else {
+                 ops.startDate = moment(Application.defaultStart, dateFormat);
+                 ops.endDate = moment(Application.defaultEnd, dateFormat);
+             }
+        } else {
+            // Single date picker
+            ops.singleDatePicker = true;
+            ops.opens = "center";
+            if(dates) {
+                if(dates.minDate) ops.minDate = dates.minDate;
+
+                if(dates.maxDate) ops.maxDate = moment(dates.maxDate).startOf('day');
+
+                if(dates.defaultDay) {
+                    if(dates.defaultDay === "empty") {
+                        ops.autoUpdateInput = false;
+                    }
+                    else ops.startDate = dates.defaultDay;
+                }
+            }
+        }
+        const datePicker = el.daterangepicker(ops)
+          .on('show.daterangepicker', ()=>{ el.addClass('open') ;})
+          .on('hide.daterangepicker', ()=>{ el.removeClass('open') ;});
+        this.dateRangePickers[el.attr("class")] = datePicker.data('daterangepicker');
+
+        el.on('apply.daterangepicker', function(ev, picker){
+            datePicker.startDate = picker.startDate.format(dateFormat);
+            datePicker.endDate = picker.endDate.format(dateFormat);
+        });
+
+        datePicker.getStartDate = function(){
+            if(!datePicker.startDate){
+                datePicker.startDate = el.val().split(separator)[0];
+            }
+            return datePicker.startDate;
+        }
+
+        datePicker.getEndDate = function(){
+            if(!datePicker.endDate){
+                datePicker.endDate = el.val().split(separator)[1];
+            }
+            return datePicker.endDate;
+        }
+
+        datePicker.setStartDate = function(date) {
+            datePicker.data('daterangepicker').setStartDate(date);
+        }
+        datePicker.setEndDate = function(date) {
+            datePicker.data('daterangepicker').setEndDate(date);
+        }
+        datePicker.closeOnScroll = function(selector) {
+            el.on('show.daterangepicker', (ev, picker)=>{
+                $(selector).on('scroll',()=>{
+                    picker.hide();
+                });
+                $(window).on('scroll',()=>{
+                    picker.hide();
+                });
+            })
+            el.on('hide.daterangepicker', ()=>{
+                $(selector).unbind('scroll');
+                $(window).unbind('scroll');
+            })
+        }
+
+        return datePicker;
+    },
+
+    getYearMonth: function(el, date = this.defaultEnd, sep = "-") {
+        if (!this.isFromByDate) return {month:el.find("select.selected-month").val(), year:el.find("select.selected-year").val()};
+        const {m,y} = Utils.convertDateStrToYMD(date, null, sep);
+        return {month:m+1, year:y};
+    },
+
+    /**
+     * gets the timestamp (utc, real timestamp)
+     */
+    timestamp: function() {
+        var cd = new Date();
+        var utc = Date.UTC(cd.getUTCFullYear(),
+            cd.getUTCMonth(),
+            cd.getUTCDate(),
+            cd.getUTCHours(),
+            cd.getUTCMinutes(),
+            cd.getUTCSeconds(),
+            cd.getUTCMilliseconds());
+
+        return utc;
+    },
+
+    isNight: function() {
+        var cd = new Date(), hours = cd.getHours(), minutes = cd.getMinutes();
+        return ((hours == 20 && minutes >= 46) || (hours >= 21) || (hours >= 0 && hours <=4));// 20:45 - 04:59
+    },
+
+    isEvening: function() {
+        var cd = new Date(), hours = cd.getHours(), minutes = cd.getMinutes();
+        return ((hours == 16 && minutes >= 46) || (hours >= 17 && hours <=20) || (hours == 20 && minutes <= 45));// 16:46 - 20:45
+    },
+
+    isAfternoon: function() {
+        var cd = new Date(), hours = cd.getHours(), minutes = cd.getMinutes();
+        return ((hours >= 12 && hours < 16) || (hours == 16 && minutes <= 45));// 12:00 - 16:45
+    },
+
+    isMorning: function() {
+        var cd = new Date(), hours = cd.getHours(), minutes = cd.getMinutes();
+        return (hours >= 5 && hours <= 11);//05:00 - 11:59
+    },
+
+    timestampSeconds: function() {
+        return Math.floor(this.timestamp() / 1000);
+    },
+
+    restDateTimestamp: function(restDate, endOfDay) {
+        var hh, mm, ss, mil;
+        if (endOfDay == undefined || endOfDay == false) {
+            hh = mm = ss = mil = 0;
+        }
+        else {
+            hh = 23;
+            mm = 59;
+            ss = 59;
+            mil = 999;
+        }
+
+        var o = this.seperateUrlDate(restDate);
+        return Math.floor(Date.UTC(o.year, o.month-1, o.day, hh, mm, ss, mil) / 1000);
+    },
+
+    fixFooterPosition: function() {
+        var windowHeight = $(window).height();
+        // 95 - height of div#header
+        // 46 - height of div#main-menu
+        // 71 - height of div#toolbar (with padding and border)
+        // 2 - height of div#divSeparatorToFooter
+        // 37 - height of div#footer
+        var cntMinHeight = windowHeight - (95 + 46 + 71 + 37);
+        if (cntMinHeight > 0) {
+            $("#meckano").css("height", cntMinHeight);
+        }
+    },
+
+    fixFooterUrls: function() {
+        $("#footer a").not("#footer a.language").attr("target", "_blank");
+    },
+
+    isFirstLogin: function() {
+        return this.firstLogin;
+    },
+
+    clearFirstLogin: function() {
+        this.firstLogin = false;
+    },
+
+    navigateLogout: function () {
+        var userLanguage = (Application.user.get("userLanguage") == "English") ? "&l=en" : "";
+        var url = "login.php?op=logout" + userLanguage;
+        window.location.href = url;
+    },
+
+    timeStr2float: function(time){
+        var t = time.split(":");
+        var h = parseFloat(t[0]);
+        var m = parseFloat(t[1]);
+        var floatTime = parseFloat((m/60).toFixed(2)) + h;
+        return floatTime;
+    },
+
+    float2Time:function(d){
+        var hour = Math.floor(d);
+        var minute = (d - Math.floor(d)) * 60;
+        if (minute == 0) {
+            minute = "00";
+        }
+        minute = Math.round(minute);
+        if(minute<10)
+            minute = "0" + minute;
+        if(hour<10)
+            hour = "0" + hour;
+        return hour + ":" + minute
+    },
+
+    fetchDirectManager: function(){
+        var $dfr1 = new jQuery.Deferred();
+        this.listOfDirectManager = new ListDirectManagerCollection();
+        this.listOfDirectManager.fetch({success: $dfr1.resolve});
+        return $dfr1.promise();
+    },
+
+    fillDirectManager: function($sel, userObj, reFetch=false){
+        if(typeof userObj == "undefined"){
+            userObj = null;
+        }
+        var self = this;
+        var $dfr = new jQuery.Deferred();
+        if(this.listOfDirectManager === null || reFetch){
+            $dfr = this.fetchDirectManager();
+        }else {
+            $dfr.resolve();
+        }
+        $sel.find('option').not(':first').remove();
+        $.when($dfr).done(function() {
+            var found = null;
+            var $selOptions = "";
+            for(var i = 0; i < self.listOfDirectManager.models.length; i++){
+                var user = self.listOfDirectManager.at(i).attributes;
+                if(userObj !== null) {
+                    if (user.id == userObj.get("id")) {
+                        continue;
+                    }
+                    if (user.id == userObj.get("directManager")) {
+                        found = user.id;
+                    }
+                }
+                $selOptions += "<option value='" + user.id + "' >" + user.fullName + " </option>";
+            }
+            $sel.append($selOptions);
+
+            Utils.initMultiselect($sel, false, true, false, found, tpl.directManager);
+        });
+    },
+
+    filterMissingsByPermissions: function(absenceId){
+        absenceId = typeof absenceId === "undefined" ? null : absenceId;
+        const allBankMissingIds = Utils.getBankHoursAbsenceIds();
+        const selectedUser = Application.user.isEmployee() ? Application.user : Application.selectedUser;
+        const userBankPolicies = selectedUser?.get("absencePoliciesBalances")?.filter(({ disabled, policyType }) => disabled == 0 && policyType == 1);
+
+        return Application.company.getMissings().filter(function(missing){
+            const userBankPolicy = userBankPolicies?.find(( { missingId } ) => missingId == missing.id);
+            if (allBankMissingIds && allBankMissingIds.includes(missing.id + "")) {
+                if (selectedUser && (!userBankPolicy || userBankPolicy.missingId != missing.id)) return false;
+            }
+
+            if(Application.user.isManager()){
+                return true;
+            }
+
+            if(absenceId && absenceId == missing.id){
+                return true;
+            }
+
+            if(!missing.permissionsEventUpdate || Object.keys(missing.permissionsEventUpdate).length == 0 ||
+                (Object.keys(missing.permissionsEventUpdate).length == 1 && missing.permissionsEventUpdate.hasOwnProperty("updatedForIds"))){
+                return true;
+            }
+
+            if(missing.permissionsEventUpdate.hasOwnProperty("manager")){
+                return false;
+            }
+
+            if(missing.permissionsEventUpdate.hasOwnProperty("employeeTypeIds")){
+                if(missing.permissionsEventUpdate.employeeTypeIds.includes(Application.user.get("status").toString())){
+                    return true;
+                }
+            }
+
+            if(missing.permissionsEventUpdate.hasOwnProperty("calendarEventsIds")){
+                if(missing.permissionsEventUpdate.calendarEventsIds.includes(Application.user.get("userCalendar").toString())){
+                    return true;
+                }
+            }
+
+            if(missing.permissionsEventUpdate.hasOwnProperty("departmentIds")){
+                if(missing.permissionsEventUpdate.departmentIds.includes(Application.user.get('departmentId').toString())){
+                    return true;
+                }
+            }
+
+            if(missing.permissionsEventUpdate.hasOwnProperty("employeeIds")){
+                if(missing.permissionsEventUpdate.employeeIds.includes(Application.user.get('id').toString())){
+                    return true;
+                }
+            }
+
+            if (missing.permissionsEventUpdate.hasOwnProperty("updatedForContractIds")) {
+                return true;
+            }
+
+            return false;
+        });
+    },
+    setCurrentIp: function () {
+        var self = this;
+        var userIpObj = new UserIpCollection();
+        userIpObj.fetch({
+            success: function() {
+                self.currentIp = userIpObj.at(0).get("ip");
+            },
+            error: function(code, data, msg) {
+
+            }
+        });
+    },
+
+    taskContainsChildren: function(tasks, task) {
+            let children = tasks.getChildren(task);
+            return children.length > 0 ?? false;
+    },
+
+    getAllTaskChildren: function (tasks, task, index = 1, idsOnly = false, taskIds = []) {
+        const children = tasks.getChildren(task, idsOnly);
+        let options = "";
+        let i = index;
+        for (const child of children) {
+            taskIds.push(child.id + "");
+            if(Application.taskContainsChildren(tasks, child)) {
+                i++;
+                const levelChild = tasks.getChildren(child);
+
+                for (const level of levelChild) {
+                    if (!Application.taskContainsChildren(tasks, level)) continue;
+                    options += `<option class="level_${i}" value='${level.get("id")}'> ${level.get("taskId")} - ${level.get("description")}</option>`;
+                }
+                // If a child contain another children as create a new level of children
+                options += Application.getAllTaskChildren(tasks, child, i, null, taskIds);
+            } else {
+                options += `<option class="level_${i + 1}" value='${child.get("id")}'> ${child.get("taskId")} - ${child.get("description")}</option>`;
+            }
+        }
+
+        return idsOnly ? taskIds : options;
+    },
+
+    getTaskHierarchy: function(tasks, taskList, tasksForUser = true) {
+        let selOptions = "";
+        for (let i=0; i < taskList.length; i++) {
+            const task = taskList[i].t;
+            let departmentIds = JSON.parse(task.get("departmentIds"));
+            departmentIds = departmentIds ? departmentIds : [];
+            let employeeIds = JSON.parse(task.get("employeeIds"));
+            employeeIds = employeeIds ? employeeIds : [];
+            const userDepartmentId = Application.user.get("departmentId").toString();
+            if((departmentIds.length || employeeIds.length ) && tasksForUser) {
+                if (departmentIds.indexOf(userDepartmentId) === -1 && employeeIds.indexOf(Application.user.get("id").toString()) === -1) {
+                    continue;
+                }
+            }
+            const parent = tasks.getParents(task);
+            const containChildren = Application.taskContainsChildren(tasks, task);
+            //contain children but is a first parent
+            if (containChildren && parent.length === 0) {
+                selOptions += `<option class="first-parent" value='${task.get("id")}'> ${task.get("taskId")} - ${task.get("description")}</option>`;
+            }
+            //contain children but is also a child. Parent before 1 because is a recursive loop and we need enter here just one time per family;
+            if (containChildren && parent.length === 1) {
+                selOptions += `<option class='level_1' value='${task.get("id")}'> ${task.get("taskId")} - ${task.get("description")}</option>`;
+                selOptions += Application.getAllTaskChildren(tasks, task);
+                continue;
+            }
+
+            // Dont have a parent and dont have children
+            if (!containChildren && (parent.length === 0 || parent.length === 1)) {
+                selOptions += `<option ${parent.length === 1 ? "class='level_1'" : ''} value='${task.get("id")}'> ${task.get("taskId")} - ${task.get("description")}</option>`;
+            }
+        }
+
+        return selOptions;
+    }
+};
+
+var PageElementsView = Backbone.View.extend({
+    company: null,
+    manager: null,
+    initialize: function() {
+        this.company = Application.company;
+        this.manager = Application.manager;
+        this.company.bind("change", this.companyUpdated, this);
+        this.manager.bind("change", this.managerUpdated, this);
+    },
+
+    companyUpdated: function() {
+        if (this.company.get("logo")) {
+            var logo = Application.SITE_UPLOADED_IMAGES + this.company.get("logo");
+            $("img.upload-logo").attr("src", logo).show();
+        } else {
+            $("img.upload-logo").attr("src", "").hide();
+        }
+        $("div#sideview div.company-name span").text(this.company.get("name"));
+    },
+
+    managerUpdated: function() {
+        $("div#current-user span.current-user").text(this.manager.fullName());
+    }
+
+});
+
+var FieldInformation = {
+    NONE: 0,
+    TEXT: 1,
+    INTEGER: 2,
+    UINTEGER: 3,
+    DOUBLE: 4,
+    EMAIL: 5,
+    PHONE: 6,
+    INTEGER_TEXT: 7,
+    DATE: 8,
+    URL: 9,
+    ID_NUMBER: 10,
+    DEDUCTIONS: 11,
+    HOME_PHONE: 12,
+    apply: function (el) {
+        var self = this;
+        el.find("input,select,textarea").each(function () {
+            var element = $(this), metadata = element.metadata({type: "attr", name: "json"});
+            if (!metadata) {
+                return;
+            }
+            self.setInfo(element, metadata)
+        });
+    },
+
+    applyActiveInactive: function(el){
+        var self = this;
+        el.find("input[type=radio], input[type=checkbox]").each(function (i, inp) {
+            var element = $(this);
+            self.singActiveOrInactive(el, $(inp))
+            element.change(function (e){
+                self.singActiveOrInactive(el, $(e.target));
+            });
+        });
+    },
+
+    singActiveOrInactive: function(mainEl, elm){
+        var type = elm.attr("type");
+        switch (type){
+            case "checkbox":
+                if(elm.is(":checked")){
+                    elm.siblings("span").removeClass("inactive");
+                    elm.parents("div.icb").find("span").removeClass("inactive");
+                }else{
+                    elm.siblings("span").addClass("inactive");
+                    elm.parents("div.icb").find("span").addClass("inactive");
+                }
+                break;
+            case "radio":
+                var radioName = elm.attr("name");
+                mainEl.find("input[type=radio][name=" + radioName + "]").siblings("span").addClass("inactive");
+                mainEl.find("input[type=radio][name=" + radioName + "]").parents("div.icb").find("span").addClass("inactive");
+                mainEl.find("input[type=radio][name=" + radioName + "]:checked").siblings("span").removeClass("inactive");
+                mainEl.find("input[type=radio][name=" + radioName + "]:checked").parents("div.icb").find("span").removeClass("inactive");
+                break;
+        }
+    },
+
+    applyInfo: function (el) {
+        var self = this;
+        el.find("a,div,input,select,textarea").each(function () {
+            var element = $(this), metadata = element.metadata({type: "attr", name: "json"});
+            if (!metadata) {
+                return;
+            }
+            self.setInfo(element, metadata)
+        });
+    },
+
+    setInfo: function (el, md) {
+        if (md.info) {
+            el.hover(function (e) {
+                    if (md.tooltip == 1) {
+                        LineTooltip.show({text: md.info, adj: el}, e);
+                    } else {
+                        InfoTooltip.show({text: md.info, adj: el, offsetTop:-10}, e);
+                    }
+                },
+                function (e) {
+                    if (md.tooltip == 1) {
+                        LineTooltip.hide();
+                    } else {
+                        InfoTooltip.hide();
+                    }
+
+                });
+            el.bind("keyup", function () {
+                if (md.tooltip == 1) {
+                    LineTooltip.hide();
+                } else {
+                    InfoTooltip.hide();
+                }
+            });
+        }
+        if (md.mask && md.mask.length) {
+            el.mask(md.mask);
+        }
+    },
+
+    excludeFromValidation: function (el) {
+        el.data("_valExclude", true);
+    },
+
+    inlcudeInValidation: function (el) {
+        el.data("_valExclude", false);
+    },
+
+    isExcluded: function (el) {
+        var data = el.data("_valExclude");
+        if (data && data == true) {
+            return true;
+        }
+        return false;
+    },
+
+    customFieldError: function (el, err, offsetLeft, offsetTop, showConfirm = false, fnConfirm) {
+        offsetLeft = typeof offsetLeft === "undefined" ? 0 : offsetLeft;
+        offsetTop = typeof offsetTop === "undefined" ? 0 : offsetTop;
+
+        var fnCancel = function () {
+            NoticeTooltip.hide();
+            el.unbind("keyup", fnCancel);
+        }
+        el.bind("keyup", fnCancel);
+        el.scrollMinimal(false);
+        NoticeTooltip.show({
+            adj: el,
+            showConfirm: showConfirm,
+            showCancel: true,
+            text: err,
+            image: tpl.iconTooltipNotify,
+            manual: true,
+            offsetLeft: offsetLeft,
+            offsetTop: offsetTop,
+            onCancel: function (e, context) {
+                fnCancel();
+            },
+            onConfirm: function (e, context) {
+                if (jQuery.isFunction(fnConfirm)) fnConfirm();
+            }
+        }, null);
+    },
+
+    validate: function (el, fnBeforeError, fnAfterError, isRegisterPage) {
+        var self = this;
+        fnBeforeError = ($.isFunction(fnBeforeError)) ? fnBeforeError : null;
+        fnAfterError = ($.isFunction(fnAfterError)) ? fnAfterError : null;
+        var errorFound = false;
+        el.find("input,select,textarea").each(function () {
+            if (errorFound) {
+                return;
+            }
+            const element = $(this), metadata = element.metadata({type: "attr", name: "json"});
+            if (self.isExcluded(element)) {
+                return;
+            }
+
+            let val = element.val();
+            if(_.isNull(val) && element.is('select')){
+                const options = element.find('option');
+                if($(options[0]).attr('disabled') === true){
+                    options.each(function(i, el){
+                        $(el).attr('disabled', false);
+                    });
+                    val = element.val();
+                    options.each(function(i, el){
+                        $(el).attr('disabled', true);
+                    });
+                }
+            }
+
+            if (metadata.required && (!val || val.length == 0)) {
+                if (fnBeforeError) {
+                    fnBeforeError(element);
+                }
+                if (!isRegisterPage) self.showErrorTooltip(element, metadata);
+
+                if(element.hasClass('firstname') || element.hasClass('lastname') ||
+                    element.hasClass('email') || element.hasClass('password') ||
+                    element.hasClass('phone') || element.hasClass('companyName'))
+                {
+                    element.parent().find('p').text(metadata.error);
+                    element.addClass('invalid');
+                } else {
+                    self.showErrorTooltip(element, metadata);
+                }
+                if (fnAfterError) {
+                    fnAfterError(element);
+                }
+                errorFound = true;
+                return;
+            } else {
+              element.removeClass('invalid');
+            }
+            if (!val || val.length == 0) {
+                return;
+            }
+            //validate
+            if (!self.validateValue(val, metadata)) {
+                if (fnBeforeError) {
+                    fnBeforeError(element);
+                }
+                if (fnAfterError) {
+                    fnAfterError(element);
+                }
+                if (!isRegisterPage) self.showErrorTooltip(element, metadata);
+
+                element.parent().find('p').text(metadata.error);
+                element.addClass('invalid');
+                errorFound = true;
+            } else {
+                element.removeClass('invalid');
+            }
+        });
+        return !errorFound;
+    },
+
+    openErrorTooltip: function (el) {
+        var metadata = el.metadata({type: "attr", name: "json"});
+        this.showErrorTooltip(el, metadata);
+    },
+
+    showErrorTooltip: function (el, metadata) {
+        if (metadata.error && metadata.error.length) {
+            el.data("_infoDisabled", true);
+            setTimeout(function(){
+                el.scrollMinimal(false);
+                NoticeTooltip.show({
+                    adj: el.is('select') ? el.parent() : el,
+                    showConfirm: false,
+                    showCancel: false,
+                    text: metadata.error,
+                    image: tpl.iconTooltipNotify,
+                    onCancel: function (e, context) {
+                        el.data("_infoDisabled", false);
+                    }
+                }, null);
+            },0)
+        }
+    },
+
+    validateValue: function (val, metadata) {
+        switch (metadata.type) {
+            default:
+            case this.URL:
+            case this.NONE:
+            case this.TEXT:
+                return true;
+
+            case this.DATE:
+                return this.validDate(val, true);
+
+            case this.DOUBLE:
+                return this.validDouble(val);
+
+            case this.EMAIL:
+                return this.validEmail(val);
+
+            case this.INTEGER:
+                return this.validNumeric(val);
+
+            case this.UINTEGER:
+                return this.validUNumeric(val);
+
+            case this.PHONE:
+                return this.validPhone(val);
+
+            case this.INTEGER_TEXT:
+                return this.validIntegerText(val);
+
+            case this.ID_NUMBER:
+                return this.validIntegerText(val) && this.validIdNumber(val);
+
+            case this.DEDUCTIONS:
+                return this.validateDeductions(val);
+
+            case this.HOME_PHONE:
+                return this.validHomePhone(val) || this.validPhone(val);
+        }
+    },
+
+    validEmail: function (email) {
+        const re = /^(\S+)(\.|-)?(\w+)?(\.|-)?(\w+)?(\.|-)?(\w+)?@(\w{1,25})(\.|-)?(\w+)?(\.|-)?(\w+)?(\.)(\w+)$/;
+        return re.test(email);
+    },
+
+    validNumeric: function (n) {
+        return (/^-?[0-9]+$/).test(n);
+    },
+
+    validIntegerText: function (n) {
+        return (/^[0-9\s-]+$/).test(n);
+    },
+
+    validUNumeric: function (n) {
+        return (/^[0-9]+$/).test(n);
+    },
+
+    validDouble: function (n) {
+        return (/^[0-9]+(\.[0-9]+)?$/).test(n);
+    },
+
+    validPhone: function (s) {
+        s = s.replace(" ", "");
+        return (/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,8}$/).test(s);
+    },
+
+    validHomePhone: function (phone) {
+        phone = phone.replace(" ", "");
+        return (/^[\+]?[(]?[0-9]{2}[)]?[-\s\.]?[0-9]{2}[-\s\.]?[0-9]{3,5}$/).test(phone);
+    },
+
+    validDate: function (val, fullYearFormat) {
+        if (!val || !val.length) {
+            return false;
+        }
+
+        fullYearFormat = typeof fullYearFormat !== "undefined" ? fullYearFormat : false;
+
+        const indexes = Utils.getYMDIndexesFromCompanyFormat();
+        //sscanf does not work on explorer
+        const res = val.split("/");
+        for (var i = 0; i < res.length; i++) {
+            res[i] = parseInt(res[i], 10);
+        }
+        if (res.length != 3 || !res[0] || !res[1] || !res[2]) {
+            return false;
+        }
+
+        //make sure it's an actual date
+        const dt = new Date( `${res[indexes.monthIndex]}/${res[indexes.dayIndex]}/${res[indexes.yearIndex]}`);
+        const companyFormat = Utils.getRealFormatOfCompany(fullYearFormat)
+        let year = dt.getFullYear();
+        if(companyFormat.toLowerCase().indexOf("yyyy") == -1){
+            year = year.toString().substr(2, 2);
+        }
+
+        return (dt.getDate() != res[indexes.dayIndex] || dt.getMonth() != (res[indexes.monthIndex] - 1) || year != res[indexes.yearIndex]) ? false : true;
+    },
+
+    validTime: function (val) {
+        if (!val || !val.length) {
+            return false;
+        }
+
+        var res = val.split(":");
+        for (var i = 0; i < res.length; i++) {
+            res[i] = parseInt(res[i], 10);
+        }
+
+        if (res.length != 2 || res[0] === null || res[1] === null) {
+
+            return false;
+        }
+        if (res[0] < 0 || res[0] > 23 || res[1] < 0 || res[1] > 59) {
+            return false;
+        }
+        return true;
+    },
+
+    validIPV4: function (val) {
+        return (/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/).test(val);
+    },
+
+    validIPV46: function(val){
+        const ipv46_regex = /(?:^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}$)|(?:^(?:(?:[a-fA-F\d]{1,4}:){7}(?:[a-fA-F\d]{1,4}|:)|(?:[a-fA-F\d]{1,4}:){6}(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|:[a-fA-F\d]{1,4}|:)|(?:[a-fA-F\d]{1,4}:){5}(?::(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,2}|:)|(?:[a-fA-F\d]{1,4}:){4}(?:(?::[a-fA-F\d]{1,4}){0,1}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,3}|:)|(?:[a-fA-F\d]{1,4}:){3}(?:(?::[a-fA-F\d]{1,4}){0,2}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,4}|:)|(?:[a-fA-F\d]{1,4}:){2}(?:(?::[a-fA-F\d]{1,4}){0,3}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,5}|:)|(?:[a-fA-F\d]{1,4}:){1}(?:(?::[a-fA-F\d]{1,4}){0,4}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,6}|:)|(?::(?:(?::[a-fA-F\d]{1,4}){0,5}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,7}|:)))(?:%[0-9a-zA-Z]{1,})?$)/gm;
+        return ipv46_regex.test(val);
+    },
+
+    validTextOnly: function (val) {
+        return (/^([^0-9]*)$/).test(val);
+    },
+
+    validIdNumber: function (idNumber) {
+        if (!Application.company.get("enableCheckingIDNumber")) {
+            return true;
+        }
+        idNumber = idNumber.toString().trim();
+        if (idNumber == "") {
+            return true;
+        }
+        if (!+idNumber || idNumber.length > 9) {
+            return false;
+        }
+        const checkDigit = parseInt(idNumber.slice(-1));
+        let numbersWithoutCheckDigit = idNumber.substring(0, idNumber.length - 1);
+        const countToPadding = 8 - numbersWithoutCheckDigit.length;
+        const padding = "0".repeat(countToPadding);
+        numbersWithoutCheckDigit = padding + numbersWithoutCheckDigit;
+        const numArr = numbersWithoutCheckDigit.split("");
+        const arrAlgorithm = [1, 2, 1, 2, 1, 2, 1, 2];
+        let sum = 0;
+        for (var i = 0; i < numArr.length; i++) {
+            let temp = numArr[i] * arrAlgorithm[i];
+            if (temp > 9) {
+                temp = temp.toString().split("").reduce(function (total, num) {
+                    return parseInt(total) + parseInt(num);
+                });
+            }
+            sum += temp;
+        }
+
+        if (((sum + checkDigit) % 10) == 0) {
+            return true;
+        }
+        return false;
+    },
+
+    validateDeductions: function (val) {
+        return val.charAt(0) == 9 && val.length == 9;
+    },
+
+
+    isFirstDateSmallerOrEqualToSecond: function(date1, date2){
+        if(this.validDate(date1) && this.validDate(date2)){
+            return ( this.getDateObjectFromString(date1) <= this.getDateObjectFromString(date2) );
+        }
+        return true;
+    },
+
+    getDateObjectFromString: function(dateStr){
+        var indexes = Utils.getYMDIndexesFromCompanyFormat();
+        var res = dateStr.split("/");
+
+        for (let i = 0; i < res.length; i++) {
+            res[i] = parseInt(res[i], 10);
+        }
+
+        if (res.length != 3 || !res[0] || !res[1] || !res[2]) {
+            return false;
+        }
+
+        return new Date(res[indexes.yearIndex], res[indexes.monthIndex] - 1, res[indexes.dayIndex]);
+    },
+    isValidDateString : function (dateString){
+        return moment(dateString, ["YYYY-MM-DD", "DD/MM/YYYY", "MM-DD-YYYY"], true).isValid();
+    }
+};
+
+jQuery.fn.scrollMinimal = function(params) {
+    const settings = {
+        smooth: false,
+        marginTop: params?.marginTop || -200
+    }
+    const cTop = this.offset().top - settings.marginTop;
+    const cHeight = this.outerHeight(true);
+    const windowTop = $(window).scrollTop() + 475;
+    const visibleHeight = $(window).height();
+    const viewportBottom = windowTop + visibleHeight - 475;
+    const elBottom = cTop + cHeight;
+
+    const isInViewPort = (elBottom >= windowTop) && (cTop <= viewportBottom);
+
+    if (!isInViewPort) $(window).scrollTop( cTop - visibleHeight + cHeight );
+};
+
+function nl2br (str, is_xhtml) {
+    // Converts newlines to HTML line breaks
+    //
+    // version: 1109.2015
+    // discuss at: http://phpjs.org/functions/nl2br    // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   improved by: Philip Peterson
+    // +   improved by: Onno Marsman
+    // +   improved by: Atli Þór
+    // +   bugfixed by: Onno Marsman    // +      input by: Brett Zamir (http://brett-zamir.me)
+    // +   bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   improved by: Brett Zamir (http://brett-zamir.me)
+    // +   improved by: Maximusya
+    // *     example 1: nl2br('Kevin\nvan\nZonneveld');    // *     returns 1: 'Kevin\nvan\nZonneveld'
+    // *     example 2: nl2br("\nOne\nTwo\n\nThree\n", false);
+    // *     returns 2: '<br>\nOne<br>\nTwo<br>\n<br>\nThree<br>\n'
+    // *     example 3: nl2br("\nOne\nTwo\n\nThree\n", true);
+    // *     returns 3: '\nOne\nTwo\n\nThree\n'    var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '' : '<br>';
+    var breakTag = '<br />';
+
+    return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
+}
+
+function round (value, precision, mode) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: Philip Peterson
+    // +    revised by: Onno Marsman
+    // +      input by: Greenseed
+    // +    revised by: T.Wild
+    // +      input by: meo
+    // +      input by: William
+    // +   bugfixed by: Brett Zamir (http://brett-zamir.me)
+    // +      input by: Josep Sanz (http://www.ws3.es/)
+    // +    revised by: Rafał Kukawski (http://blog.kukawski.pl/)
+    // %        note 1: Great work. Ideas for improvement:
+    // %        note 1:  - code more compliant with developer guidelines
+    // %        note 1:  - for implementing PHP constant arguments look at
+    // %        note 1:  the pathinfo() function, it offers the greatest
+    // %        note 1:  flexibility & compatibility possible
+    // *     example 1: round(1241757, -3);
+    // *     returns 1: 1242000
+    // *     example 2: round(3.6);
+    // *     returns 2: 4
+    // *     example 3: round(2.835, 2);
+    // *     returns 3: 2.84
+    // *     example 4: round(1.1749999999999, 2);
+    // *     returns 4: 1.17
+    // *     example 5: round(58551.799999999996, 2);
+    // *     returns 5: 58551.8
+    var m, f, isHalf, sgn; // helper variables
+    precision |= 0; // making sure precision is integer
+    m = Math.pow(10, precision);
+    value *= m;
+    sgn = (value > 0) | -(value < 0); // sign of the number
+    isHalf = value % 1 === 0.5 * sgn;
+    f = Math.floor(value);
+
+    if (isHalf) {
+        switch (mode) {
+            case 'PHP_ROUND_HALF_DOWN':
+                value = f + (sgn < 0); // rounds .5 toward zero
+                break;
+            case 'PHP_ROUND_HALF_EVEN':
+                value = f + (f % 2 * sgn); // rouds .5 towards the next even integer
+                break;
+            case 'PHP_ROUND_HALF_ODD':
+                value = f + !(f % 2); // rounds .5 towards the next odd integer
+                break;
+            default:
+                value = f + (sgn > 0); // rounds .5 away from zero
+        }
+    }
+
+    return (isHalf ? value : Math.round(value)) / m;
+}
+
+var Utils = {
+    hoursToTimeWithSeconds: function(val) {
+        val = Math.floor(parseFloat(val));
+        var hour = Math.floor(val / (60 * 60));
+        var minutes = Math.floor((val - hour * 60 * 60) / 60);
+        var seconds = val - minutes * 60 - hour * 60 * 60;
+        var str = "";
+        str += (hour < 10) ? "0" + hour + ":" : hour + ":";
+        str += (minutes < 10) ? "0" + minutes + ":" : minutes + ":";
+        str += (seconds < 10) ? "0" + seconds + "" : seconds + "";
+        return str;
+    },
+
+    hoursToTime: function(val) {
+        if (val == undefined || val === null) {
+            val = 0;
+        }
+        val = parseFloat(val);
+        var originalVal = val;
+        if(val < 0) {
+            val = Math.abs(val);
+        }
+        var hour = Math.floor(val);
+        var minutes = round((val - hour) * 60);
+        if (minutes ==60 )
+            minutes = 59;
+        var str = "";
+        str += (originalVal > 0 && hour < 10) ? "0" + hour + ":" : hour + ":";
+        str += (minutes < 10) ? "0" + minutes + "" : minutes + "";
+        if(originalVal < 0) {
+            str = str + "-";
+        }
+        return str;
+    },
+
+    secondsToTime: function(val) {
+        if (!val) {
+            return "00:00";
+        }
+        val = parseInt(val, 10);
+
+        var hour = Math.floor(val / 3600);
+        var m = val / 3600 - hour;
+        var minutes = Math.round(m*60);
+        if (minutes ==60 )
+            minutes = 59;
+        /*
+        var totalMinutes = Math.floor(val / 60);
+        var hour = Math.floor(totalMinutes / 60);
+        var minutes = totalMinutes % 60;
+        */
+        var str = "";
+        str += (hour < 10) ? "0" + hour + ":" : hour + ":";
+        str += (minutes < 10) ? "0" + minutes + "" : minutes + "";
+        return str;
+    },
+
+    addDailyInfo: function(o, s) {
+        for (var i in s) {
+            var r = s[i];
+            var ex = null;
+            for (var j in o) {
+                if (o[j].rate == r.rate) {
+                    ex = o[j];
+                    break;
+                }
+            }
+            if (ex == null) {
+                o.push({rate: r.rate, time: r.time, hours: r.hours})
+            }
+            else {
+                ex.hours += r.hours;
+            }
+        }
+    },
+
+    timestampToTime: function(ts) {
+        let dt = new Date(ts*1000);
+
+        let hour = dt.getHours();
+        if (hour < 10) {
+            hour = "0" + hour;
+        }
+
+        let minute = dt.getMinutes();
+        if (minute < 10) {
+            minute = "0" + minute;
+        }
+        return `${hour} : ${minute}`;
+    },
+
+    timeToSeconds:function(time)
+    {
+        var time = time.split(":");
+        var seconds = time[0]*3600 + time[1]*60;
+        return seconds;
+    },
+    hourTimeToSeconds:function(time)
+    {
+        let timeSplit = time.split(":");
+        return timeSplit[0] * 3600 + timeSplit[1] * 60 + timeSplit[2] * 1;
+    },
+    timestampToDecimalTime: function(ts) {
+        var dt = new Date(ts);
+
+        var hour = dt.getUTCHours();
+        var minute = dt.getUTCMinutes();
+
+        return hour + (minute / 60);
+    },
+
+    timeToDecimal: function(time){
+        const seconds = this.timeToSeconds(time);
+        return this.timestampToDecimalTime(seconds*1000);
+    },
+
+    getRealFormatOfCompany: function(fullYearFormat){
+        fullYearFormat = typeof fullYearFormat !== "undefined" ? fullYearFormat : false;
+        var format = Application.company.get("dateFormat");
+        var arrFormat = format.split("");
+        var lastChar = null;
+        var realFormat = "";
+        for(var i in arrFormat){
+            if(lastChar !== null && arrFormat[i] != lastChar){
+                realFormat += "/";
+            }
+            realFormat += arrFormat[i];
+            lastChar = arrFormat[i];
+        }
+        if(fullYearFormat && realFormat.indexOf("YYYY") == -1){
+            realFormat = realFormat.replace("YY", "YYYY");
+        }
+        return realFormat;
+    },
+
+    getYMDIndexesFromCompanyFormat: function(){
+        var realFormat = this.getRealFormatOfCompany();
+        realFormat = realFormat.toLowerCase();
+        var arrFormat = realFormat.split("/");
+        var dayIndex = arrFormat.indexOf("dd");
+        var monthIndex = arrFormat.indexOf("mm");
+        var yearIndex = arrFormat.indexOf("yyyy");
+        if(yearIndex == -1) {
+            yearIndex = arrFormat.indexOf("yy");
+        }
+        return {
+            dayIndex: dayIndex,
+            monthIndex: monthIndex,
+            yearIndex: yearIndex,
+        }
+    },
+
+    getFullHourOfNumByHourFormatCompany: function(hourNum, isHalfHour){
+        isHalfHour = typeof isHalfHour === "undefined" ? false : isHalfHour;
+        var hourFormat = Application.company.get("hourFormat");
+        var hour = (hourNum < 10) ? "0" : "";
+        if(hourFormat === 12){
+            if((hourNum > 12)){
+                hour =  hourNum % 12;
+            } else if(hourNum == 0){
+                hour = 12;
+            } else{
+                hour = hourNum
+            }
+        }else{
+            hour += hourNum;
+        }
+        hour += isHalfHour ? ":30" : ":00";
+        if(hourFormat === 12){
+            hour += hourNum < 12 ? "AM" : "PM";
+        }
+        return hour;
+    },
+
+    organizerCheckString: function(ts) {
+        var dt = new Date(ts);
+        var date = dt.getUTCDate();
+        if (date < 10) {
+            date = "0" + date;
+        }
+        var month = dt.getUTCMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var year = dt.getUTCFullYear() - 2000;
+        var hour = dt.getUTCHours();
+        if (hour < 10) {
+            hour = "0" + hour;
+        }
+        var minute = dt.getUTCMinutes();
+        if (minute < 10) {
+            minute = "0" + minute;
+        }
+        return date + "." + month + "." + year + " " + tpl.hour + " " + hour + ":" + minute;
+    },
+
+    markSortedTableHeader: function(th) {
+        th.parents("table:first").find("th").removeClass("sorted-by");
+        th.addClass("sorted-by");
+        th.prev("th.right").addClass("sorted-by");
+        th.next("th.left").addClass("sorted-by");
+    },
+
+    getMeta: function(el) {
+        if (el && el.jquery) {
+            return el.metadata({type: "attr", name: "json"});
+        }
+        return null;
+    },
+
+    timestampToDate: function(timestamp, returnFullYear) {
+        returnFullYear = typeof returnFullYear == "undefined" ? false : returnFullYear;
+        if( timestamp === null ) {
+            return "";
+        }
+
+        // multiplied by 1000 so that the argument is in milliseconds, not seconds.
+        var date = new Date(timestamp * 1000);
+        var month = date.getMonth();
+        month += 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+
+        var day = date.getDate();
+        if (day < 10) {
+            day = "0" + day;
+        }
+
+        var formatOfCompany =  Utils.getRealFormatOfCompany();
+        formatOfCompany = formatOfCompany.replace("DD", day);
+        formatOfCompany = formatOfCompany.replace("MM", month);
+        if(formatOfCompany.indexOf("YYYY") != -1 || returnFullYear){
+            formatOfCompany = formatOfCompany.replace("YYYY", date.getFullYear());
+            if(returnFullYear){
+                formatOfCompany = formatOfCompany.replace("YY", date.getFullYear());
+            }
+        }else{
+            formatOfCompany = formatOfCompany.replace("YY", date.getFullYear().toString().substr(-2));
+        }
+        return formatOfCompany;
+    },
+
+    changeDirectionToInput: function(element, char){
+        if ((char >= 97 && char <= 122) || (char >= 65 && char <= 90)) {
+            element.css("text-align", "left");
+            element.css("direction", "ltr");
+        } else if (char >= 1488 && char <= 1514) {
+            element.css("text-align", "right");
+            element.css("direction", "rtl");
+        }
+    },
+
+    daysInMonth: function(month, year) {
+        return new Date(year, month, 0).getDate();
+    },
+
+    initMultiselect: function (el, isMultiple, closeOnSelect, showPillBox, val="", placeholder = tpl.multyselect.clickToSelect) {
+        el.select2({
+            dir: Application.user.get("userLanguage") == "Hebrew" ? "rtl" : "ltr",
+            closeOnSelect,
+            placeholder,
+            dropdownAutoWidth : true,
+            templateResult: function (data) {
+                if (!data.element) {
+                    return data.text;
+                }
+
+                const $element = $(data.element);
+
+                const $wrapper = $('<span></span>');
+                $wrapper.addClass($element[0].className);
+
+                $wrapper.text(data.text);
+
+                return $wrapper;
+            }
+        });
+
+        const arrowSvg = `<svg className="miniArrow"><use xlink:href="#miniArrow"></use></svg>`;
+        el.siblings("span.select2").find(".select2-selection__arrow").html(arrowSvg)
+
+        if(isMultiple) {
+            el.on("select2:open", function (e) {
+                var select = $(this);
+                $("span.select2-dropdown span.tools").remove();
+                $("span.select2-dropdown span.select2-results").before("<span class='tools'><span class='checkAll'>" + tpl.multyselect.checkAll + "</span> <span class='unCheckAll'>" + tpl.multyselect.uncheckAll + "</span></span>");
+                $("span.select2-dropdown span.tools span.checkAll").unbind("click").click(function () {
+                    var $select = select;
+                    $select.find("option").each(function () {
+                        $(this).prop("selected", "selected");
+                    });
+                    $select.trigger("change");
+                    $select.select2("close").select2("open");
+                    $select.parent().find("input.select2-search__field").trigger("focusout");
+                });
+                $("span.select2-dropdown span.tools span.unCheckAll").unbind("click").click(function () {
+                    var $select = select;
+                    $select.find("option").each(function () {
+                        $(this).prop("selected", "");
+                    });
+                    $select.trigger("change");
+                    $select.select2("close").select2("open");
+                    $select.parent().find("input.select2-search__field").trigger("focusout");
+                });
+            });
+        }
+
+        if(!showPillBox){
+            el.on("change.select2", function (e) {
+                var select = $(this);
+                var len = select.val() ? select.val().length : 0;
+                var checked = len ? true : false;
+                select.parents("div.wrapperMultipleSelect").find("input[type=checkbox], input[type=radio]").prop('checked', checked);
+                if(len) {
+                    select.parent().find("span.select2-selection.select2-selection--multiple ul li.select2-search input.select2-search__field").css("width","0");
+                    select.parent().find("span.select2-selection.select2-selection--multiple ul li").not("li.select2-search").remove();
+                    select.parent().find("span.select2-selection.select2-selection--multiple ul").append("<li class='countSelected'>" + len + " " + tpl.multyselect.selected + "</li>");
+                }
+            });
+
+            $("body").on("focusin", ".select2-search__field", function (e) {
+                $(e.target).parents("ul").find("li.countSelected").hide();
+            });
+
+            $("body").on("focusout", ".select2-search__field", function (e) {
+                $("li.countSelected").show();
+            });
+
+        }
+        el.val(val).trigger("change.select2");
+    },
+
+    getRestDaysForCompany: function(){
+        var companyRestDays = parseInt(Application.company.get("restDays"));
+        var days;
+        switch (companyRestDays) {
+            case 1:
+                days = [5,6];
+                break;
+            case 2:
+                days = [6,0];
+                break;
+            default:
+                days = false;
+        }
+
+        return days;
+    },
+
+    exportMultipleFiles: function(fileIds, filesCount){
+        var self = this;
+        if (filesCount < 0){
+            return;
+        }
+        setTimeout(function () {
+            location.href = "e.php?fid=" + fileIds[filesCount];
+            self.exportMultipleFiles(fileIds, --filesCount);
+        }, 1000);
+    },
+
+    /**
+     * function return how match time pass from date until today or until specific date get from params
+     * @param fromDateStr - string data calc from this date
+     * @param isCalculateWhichAgeWillBe - if true return age will be in current year
+     * @param untilSpecificDate - string date or undefined if is string date calc time pass from data until this date
+     * @returns {{months: number, years: number}}
+     */
+    calcTimePassed: function(fromDateStr, isCalculateWhichAgeWillBe, untilSpecificDate){
+        if(!fromDateStr){
+            return;
+        }
+        var obj = this.convertDateStrToYMD(fromDateStr);
+        if(!obj){
+            return;
+        }
+        if(obj.y < 1000){
+            return;
+        }
+        var fromDate = new Date(obj.y, obj.m, obj.d);
+        var d = obj.d;
+        var m = obj.m;
+
+        var untilDate = new Date();
+        if(typeof untilSpecificDate != "undefined"){
+            var toObj = this.convertDateStrToYMD(untilSpecificDate);
+            if(!toObj){
+                return;
+            }
+            var to = new Date(toObj.y, toObj.m, toObj.d);
+            if(to.getTime() < untilDate.getTime()) {
+                untilDate = to;
+            }
+        }
+
+        if(fromDate.getTime() > untilDate.getTime()){
+            return;
+        }
+        var yearsPast = untilDate.getFullYear() - fromDate.getFullYear();
+
+        if(typeof isCalculateWhichAgeWillBe !== "undefined" && isCalculateWhichAgeWillBe){
+            var year = untilDate.getFullYear();
+            if(untilDate.getMonth() == 11 && m == 0){
+                year++;
+            }
+            var upcomingBirthday = new Date(year, m, d);
+
+            // if we want to calculate which age will be and date is in on the future add one year (age will be)
+            if((upcomingBirthday.getTime() - untilDate.getTime()) > 0 ){
+                yearsPast++;
+            }
+        }
+
+        var monthsPast = untilDate.getMonth() - fromDate.getMonth();
+
+        if (monthsPast < 0 || (monthsPast === 0 && untilDate.getDate() < fromDate.getDate())) {
+            yearsPast--;
+            monthsPast += 11; // because month start from 0
+        }else if(untilDate.getDate() < fromDate.getDate()){
+            monthsPast--;
+        }
+
+        return {years: yearsPast, months: monthsPast};
+    },
+
+    convertDateStrToYMD: function(dateStr, realMonthNumber, separator){
+        realMonthNumber = typeof realMonthNumber == "undefined" ? false : realMonthNumber;
+        separator = typeof separator === "undefined" ? "/" : separator;
+        var arr = dateStr.split(separator);
+        if(arr.length !== 3){
+            return;
+        }
+
+        var indexes = Utils.getYMDIndexesFromCompanyFormat();
+        var d = arr[indexes.dayIndex];
+        var m = arr[indexes.monthIndex] - 1;
+        var y = arr[indexes.yearIndex];
+
+        if(!d || (m < 0 || (!m && m !==0)) || !y){
+            return null;
+        }
+        if(realMonthNumber){
+            m++;
+            if(m < 10){
+                m = "0" + m;
+            }
+        }
+        return {d, m, y};
+    },
+
+    convertDateStrToDbFormat: function (dateStr, separator){
+        if (!dateStr) return false;
+        separator = this.getSeparator(dateStr);
+        const obj = Utils.convertDateStrToYMD(dateStr, true, separator);
+        const date = new Date(`${obj.m}/${obj.d}/${obj.y}`);
+        return `${obj.d}${separator}${obj.m}${separator}${date.getFullYear()}`;
+    },
+
+    getSeparator: function(dateStr) {
+        const separatorRegex = /[./-]/;
+
+        const match = dateStr.match(separatorRegex);
+        if (match) {
+            return match[0];
+        } else {
+            return "/";
+        }
+    },
+
+    convertDateStrToCompanyFormat: function (dateStr){
+        var dateObj = this.convertDateStrToYMD(dateStr, true);
+        var format = this.getRealFormatOfCompany().toLowerCase();
+        if(format.indexOf("yyyy") != -1){
+            format = format.replace("yyyy", dateObj.y);
+        }else{
+            format = format.replace("yy", dateObj.y.toString().substr(-2));
+        }
+        format = format.replace("mm", dateObj.m);
+        format = format.replace("dd", dateObj.d);
+        return format;
+    },
+
+    convertDmyToCompanyFormat: function (dateStr, separator){
+        separator = typeof separator == "undefined" ? "/" : separator;
+        var dateArr = dateStr.split(separator);
+        if(dateArr.length !== 3){
+            return;
+        }
+        var d = dateArr[0];
+        var m = dateArr[1];
+        var y = dateArr[2];
+
+        var indexes = Utils.getYMDIndexesFromCompanyFormat();
+
+        dateArr = [];
+        dateArr[indexes.dayIndex] = d;
+        dateArr[indexes.monthIndex] = m;
+        dateArr[indexes.yearIndex] = y;
+        return dateArr.join("-");
+    },
+
+    getTodayDateInCompanyFormat: function(){
+        const date = new Date();
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+        let year = date.getFullYear();
+        const today = `${day}/${month}/${year}`;
+        return Utils.convertDmyToCompanyFormat(today);
+    },
+
+    countDecimals: function(value) {
+        let text = value.toString()
+        // verify if number 0.000005 is represented as "5e-6"
+        if (text.indexOf('e-') > -1) {
+            let [base, trail] = text.split('e-');
+            let deg = parseInt(trail, 10);
+            return deg;
+        }
+        // count decimals for number in representation like "0.123456"
+        if (Math.floor(value) !== value) {
+            return value.toString().split(".")[1].length || 0;
+        }
+        return 0;
+    },
+
+    getCountOfSmsByLength: function(length){
+        var number;
+
+        if(length <= 70){
+            number = 1;
+        } else if(length >= 71 && length <= 134){
+            number = 2;
+        } else if(length >= 135 && length <= 201){
+            number = 3;
+        } else if(length >= 202 && length <= 268){
+            number = 4;
+        } else if(length >= 269 && length <= 335){
+            number = 5;
+        } else if(length >= 336 && length <= 402){
+            number = 6;
+        } else if(length >= 403 && length <= 469){
+            number = 7;
+        } else if(length >= 470 && length <= 536){
+            number = 8;
+        } else if(length >= 537 && length <= 603){
+            number = 9;
+        } else if(length >= 604 && length <= 670){
+            number = 10;
+        } else if(length >= 671 && length <= 737){
+            number = 11;
+        } else if(length >= 738 && length <= 804){
+            number = 12;
+        } else if(length >= 805 && length <= 871){
+            number = 13;
+        } else if(length >= 872 && length <= 938){
+            number = 14;
+        }else if(length >= 939 && length <= 1000){
+            number = 15;
+        } else{
+            length = length - 1000;
+            number = 15 + Math.ceil(length / 61);
+        }
+
+        return number;
+
+    },
+
+    fillDepartments: function(el, isSingle=false, singleSelectedId=null, includeInactive=false,
+                              width=166, refresh=false, naToZero=false, departments=null, multiSelectedIds = [])
+    {
+        var self = this;
+        if(Application.user.isEmployee()){
+            return;
+        }
+
+        if(!naToZero && singleSelectedId != null && singleSelectedId == 0){
+            singleSelectedId = "na";
+        }
+
+        var timeout = 0;
+        this.departmentStructure = departments?.structure() || Application.departments.departmentStructure;
+        this.departments = departments || Application.departments;
+        if(this.departmentStructure == null) {
+            timeout = 500;
+        }
+        setTimeout(function () {
+            let departmentOption = "";
+            const moderatedIds = Application.user.getModeratedDepartmentsIds();
+
+            for(let i=0; i < self.departmentStructure.get("childs").length; i++) {
+                let did = self.departmentStructure.get("childs")[i];
+
+                if(!includeInactive && did == "inactive") continue;
+                if(Application.companyHasBrigades && did == 'na') continue;
+
+                let dname = self.departments.get(did).get("name");
+                let didToValue = (naToZero && did == "na") ? 0 : did;
+                let disabled = (Application.user.isManager() || (Application.user.isModerator() && moderatedIds.includes(did.toString()))) ? "" : "disabled='disabled'";
+                let option = "<option "+disabled+" value="+didToValue+">"+dname+"</option>";
+                if(did == "na"){
+                    departmentOption = option + departmentOption;
+                }else{
+                    departmentOption += option;
+                }
+                let level = 0;
+                departmentOption = self.printDepartmentChild(departmentOption, did, level, dname, moderatedIds);
+            }
+            if(isSingle){
+                el.empty().append(departmentOption);
+                Utils.initMultiselect(el, false, true, false, null, tpl.chooseDepartment);
+                if(singleSelectedId) {
+                    el.val(singleSelectedId).trigger("change");
+                }
+            }else {
+                el.empty().append(departmentOption);
+                if(refresh){
+                    el.multiselect("refresh");
+                } else{
+                    el.val(multiSelectedIds);
+                    el.multiselect({minWidth: width}).multiselectfilter();
+                }
+            }
+        }, timeout);
+
+        var oldValues = [];
+        el.change(function(){
+            if(!isSingle) {
+                var values = $(this).val();
+
+                if (!values) {
+                    oldValues = [];
+                } else if (values.length < oldValues.length) {
+                    oldValues = values;
+                } else {
+                    for (var i = 0; i < values.length; i++) {
+                        if (!oldValues || !oldValues.includes(values[i])) {
+                            self.markDepartmentsChilds(el, values[i], values);
+                        }
+                    }
+
+                    oldValues = values;
+                    el.multiselect("refresh");
+                }
+            }
+        });
+    },
+
+    markDepartmentsChilds: function(el, did, values){
+        for (var i = 0; i < this.departments.get(did).get("childs").length; i++) {
+            var departmentId = this.departments.get(did).get("childs")[i].toString();
+            if (!values || !values.includes(departmentId)) {
+                values.push(departmentId);
+                el.find("option[value='" + departmentId + "']").attr("selected", true);
+
+                this.markDepartmentsChilds(el, departmentId, values);
+            }
+        }
+    },
+
+    printDepartmentChild :function(options, did,level,parentName, moderatedIds){
+        if(this.departments.get(did).get("childs").length>0  )
+            level+=1;
+
+        for(var i = 0; i < this.departments.get(did).get("childs").length; i++){
+            var id = this.departments.get(did).get("childs")[i];
+
+            if(typeof this.departments.get(id) == "undefined"){
+                continue;
+            }
+            var disabled = (Application.user.isManager() || (Application.user.isModerator() && moderatedIds.includes(id.toString()))) ? "" : "disabled='disabled'";
+            var name = parentName + " - " + this.departments.get(id).get("name");
+            var separator = "";
+            for(var j=0;j<level;j++) {
+                separator += "&#9644;";
+            }
+            options += "<option "+disabled+" value="+id+">"+separator+" "+name+"</option>";
+            options = this.printDepartmentChild(options, id, level, name, moderatedIds);
+        }
+        return options;
+    },
+
+    getDepartmentIds: function(el){
+        const departments = [];
+        el.find(" :selected").each(function(i, selected){
+            let val = $(selected).val() == "na" ? $(selected).val() : $(selected).val();
+            departments[i] = val;
+        });
+        return departments;
+    },
+
+    getDepartmentName: function(user) {
+        let departmentName = null;
+        if (user.get("activeState") != 1) {
+            departmentName = tpl.inactiveEmployees;
+        } else if (user.get("departmentId") == 0) {
+            departmentName = tpl.nonAssociatedEmployees;
+        } else {
+            const department = Application.departments.get(user.get("departmentId"));
+            if (department) {
+                departmentName = department.get("name");
+            } else {
+                departmentName = tpl.nonAssociatedEmployees;
+            }
+        }
+        return departmentName;
+    },
+
+    applyMeckanoResButton: function (el, isSuccess, customeTextSaveMode, cb){
+        var btn = el.find("a.btnWithLoader");
+        isSuccess = typeof isSuccess != "undefined" ? isSuccess : true;
+        customeTextSaveMode = typeof customeTextSaveMode != "undefined" ? customeTextSaveMode : null;
+        var text = isSuccess ? tpl.buttons.success : tpl.buttons.error;
+        btn.html(text);
+
+        btn.removeClass("showLoader");
+        btn.addClass("validate", 450, callback );
+        if(!isSuccess){
+            btn.addClass("error");
+        }
+
+        function callback() {
+            setTimeout(function() {
+                var text = customeTextSaveMode ? customeTextSaveMode : tpl.buttons.saveChanges;
+                btn.removeClass("validate").removeClass(("error")).html(text);
+                if(cb) cb();
+            }, 1250 );
+        }
+    },
+
+    convertStrHourFrom24To12: function(val, upperCase){
+        if(typeof upperCase === "undefined"){
+            upperCase = true;
+        }
+
+        var arrSplit = val.split(":");
+        if(parseInt(arrSplit[0]) < 12){
+            var typeHour = upperCase ? "AM" : "am";
+            if(parseInt(arrSplit[0]) == 0){
+                val = "12:" + arrSplit[1] + typeHour;
+            } else{
+                val = arrSplit[0] + ":" + arrSplit[1] + typeHour;
+            }
+        } else{
+            var typeHour = upperCase ? "PM" : "pm";
+            if(parseInt(arrSplit[0]) == 12){
+                val = arrSplit[0] + ":" + arrSplit[1] + typeHour;
+            } else{
+                val = (parseInt(arrSplit[0]) - 12) + ":" + arrSplit[1] + typeHour;
+            }
+        }
+
+        return val;
+    },
+
+    convertStrHourFrom12To24: function(val){
+        var typeHour = val.substring(val.length - 2);
+        val = val.substring(0, 5);
+
+        if(typeHour.toLowerCase() == "pm"){
+            var arrSplit = val.split(":");
+            val = (parseInt(arrSplit[0]) + 12) + ":" + arrSplit[1].substring(0, 2);
+        }
+
+        return val;
+    },
+
+    lockIconHover: function(el) {
+        el.find("a.lock-icon").unbind("hover");
+        if (el.find("a.lock-icon").hasClass('report-unlock')) {
+            el.find("svg.lockSvg use").attr("href", "#lockClose");
+
+            el.find("a.lock-icon.report-unlock").hover(function(){
+                el.find("svg.lockSvg use").attr("href", "#lockOpen");
+            },function(){
+                el.find("svg.lockSvg use").attr("href", "#lockClose");
+            });
+        }else if(el.find("a.lock-icon").hasClass('unlock')){
+
+            el.find("svg.lockSvg use").attr("href", "#lockClose");
+
+            el.find("a.lock-icon.unlock").hover(function(){
+                el.find("svg.lockSvg use").attr("href", "#lockOpen");
+            },function(){
+                el.find("svg.lockSvg use").attr("href", "#lockClose");
+            });
+
+        }else if (el.find("a.lock-icon").hasClass('lock')) {
+
+            el.find("svg.lockSvg use").attr("href", "#lockOpen");
+
+            el.find("a.lock-icon.lock").hover(function(){
+                el.find("svg.lockSvg use").attr("href", "#lockClose");
+            }, function(){
+                el.find("svg.lockSvg use").attr("href", "#lockOpen");
+            });
+        }
+    },
+
+    companySummaryTimeFormat: function(val, isSeconds=false){
+        if(val == undefined || val === null){
+            return 0;
+        }
+        if(Application.company.get('summaryTimeFormat') == 0) {
+            return isSeconds ? Utils.secondsToTime(val) : Utils.hoursToTime(val);
+        }else{
+            return ( isSeconds ? (parseFloat(val) / 3600) : parseFloat(val) ).toFixed(2);
+        }
+    },
+
+    reportRowMissingsToDecimal: function(rows, report){
+        if(Application.company.get("summaryTimeFormat") == 1) {
+            rows.forEach(function (row) {
+                let missings = [];
+                const separationMissings = row.attributes.rates_with_overtime_separation;
+                if(report == "employee"){
+                    missings = row.attributes.rates_with_hl;
+                }else if(report == "summary"){
+                    missings = row.attributes.rates;
+                }
+                missings.forEach(function (rate) {
+                    rate.time = rate.hours.toFixed(2);
+                });
+                if(separationMissings){
+                    separationMissings.forEach(function (rate) {
+                        rate.time = rate.hours.toFixed(2);
+                    });
+                }
+            });
+        }
+    },
+
+    getNextStartEndInCompanyFormat: function(start, end, isLeft){
+        var startObj = Utils.convertDateStrToYMD(start, true, "-");
+        var endObj = Utils.convertDateStrToYMD(end, true, "-");
+
+        var date = new Date(startObj.y, (isLeft ? startObj.m : startObj.m - 2), startObj.d);
+        var newFirstDate = Utils.convertDmyToCompanyFormat(date.getDate() + '/' + (date.getMonth() + 1) + '/' +  date.getFullYear(), '/');
+
+        if( parseInt(startObj.d) != 1 ) {
+            var lastDay = new Date(date.getFullYear(), date.getMonth() + 2, 0);
+            var newLastDate = Utils.convertDmyToCompanyFormat(endObj.d + '/' + (lastDay.getMonth() + 1) + '/' +  lastDay.getFullYear(), '/')
+        }
+        else {
+            var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            var newLastDate = Utils.convertDmyToCompanyFormat(lastDay.getDate() + '/' + (lastDay.getMonth() + 1) + '/' +  lastDay.getFullYear(), '/')
+        }
+
+        return {
+            start: newFirstDate,
+            end: newLastDate
+        };
+    },
+
+    getNextWeekStartEndInCompanyFormat: function(start, end, nextBtnClicked){
+        var y, m, d, newFirstDate, newLastDate, daysInPrevMonth, offset = 7;
+        var startObj = Utils.convertDateStrToYMD(start, true, "-");
+        var endObj = Utils.convertDateStrToYMD(end, true, "-");
+        var daysInCurrMonth = new Date(startObj.y, startObj.m, 0).getDate();
+
+        endObj.y = parseInt(endObj.y);
+        endObj.m = parseInt(endObj.m);
+        endObj.d = parseInt(endObj.d);
+
+        startObj.y = parseInt(startObj.y);
+        startObj.m = parseInt(startObj.m);
+        startObj.d = parseInt(startObj.d);
+
+        if(!nextBtnClicked){
+            if(startObj.d - offset <= 0){
+                y = startObj.m == 1 ? startObj.y - 1 : startObj.y;
+                m = startObj.m == 1 ?  12 : startObj.m - 1;
+                daysInPrevMonth = new Date(y, m, 0).getDate();
+                d = startObj.d - offset + daysInPrevMonth;
+                newFirstDate = Utils.convertDmyToCompanyFormat(this.strPadLeft(d) + '/' + this.strPadLeft(m) + '/' +  y, '/');
+            }else{
+                newFirstDate = Utils.convertDmyToCompanyFormat(this.strPadLeft(startObj.d - offset) + '/' + this.strPadLeft(startObj.m) + '/' +  this.strPadLeft(startObj.y), '/');
+            }
+
+            if(endObj.d - offset <= 0){
+                y = endObj.m == 1 ? endObj.y - 1 : endObj.y;
+                m = endObj.m == 1 ?  12 : endObj.m - 1;
+                daysInPrevMonth = new Date(y, m, 0).getDate();
+                newLastDate = Utils.convertDmyToCompanyFormat(this.strPadLeft(endObj.d - offset + daysInPrevMonth) + '/' + this.strPadLeft(m) + '/' +  y, '/');
+            }else{
+                newLastDate = Utils.convertDmyToCompanyFormat(this.strPadLeft(endObj.d - offset) + '/' + this.strPadLeft(endObj.m) + '/' +  endObj.y, '/');
+            }
+        }else{
+            if (startObj.d + offset > daysInCurrMonth) {
+                y = startObj.m == 12 ? startObj.y + 1 : startObj.y;
+                m = startObj.m == 12 ?  1 : startObj.m + 1;
+                d = startObj.d + offset - daysInCurrMonth;
+
+                newFirstDate = Utils.convertDmyToCompanyFormat(this.strPadLeft(d) + '/' + this.strPadLeft(m) + '/' + y, '/');
+            } else {
+                newFirstDate = Utils.convertDmyToCompanyFormat(this.strPadLeft(startObj.d + offset) + '/' + this.strPadLeft(startObj.m) + '/' + startObj.y, '/');
+            }
+
+            if (endObj.d + offset > daysInCurrMonth) {
+                y = endObj.m == 12 ? endObj.y + 1 : endObj.y;
+                m = endObj.m == 12 ?  1 : endObj.m + 1;
+                d = (endObj.d + offset) - daysInCurrMonth;
+                newLastDate = Utils.convertDmyToCompanyFormat(this.strPadLeft(d) + '/' + this.strPadLeft(m) + '/' + y, '/');
+            } else {
+                newLastDate = Utils.convertDmyToCompanyFormat(this.strPadLeft(endObj.d + offset) + '/' + this.strPadLeft(endObj.m) + '/' + endObj.y, '/');
+            }
+        }
+
+        return {
+            start: newFirstDate,
+            end: newLastDate
+        };
+    },
+
+    strPadLeft: function(val, length=2, pad="0"){
+        if(typeof val == "number"){
+            val = val.toString();
+        }
+        return val.padStart(length, pad);
+    },
+
+    getLocaleDateDayStr: function (ts) {
+        const realTs = ts ? ts * 1000 : Date.now();
+        // define offset per date
+        const _date = new Date(realTs);
+        const dateString = _date.toDateString();
+        const momentDate = moment(dateString);
+        const offsetInMinutes = momentDate.utcOffset();
+        // convert to date string
+        const date = new Date(realTs + offsetInMinutes * 60000);
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const locale = Application.user.get("userLanguage") === "Hebrew" ? "he-il" : "en-us";
+        const fullDate = date.toLocaleDateString(locale, options);
+
+        return fullDate;
+    },
+
+    renderReportDateSelector: function(config={}){
+        if(!config) {
+            console.error("Configuration object is missing in Utils.renderReportDateSelector(config)");
+        }
+        var element = config.element || null;
+        var btnTxt = config.btnTxt || null;
+        var context = config.context || null;
+
+        if(!element || !context) {
+            console.error("Must pass 'context' and 'element' in configuration object of Utils.renderReportDateSelector(config)");
+        }
+
+        var endObj = Utils.convertDateStrToYMD(Application.defaultEnd, true, "-");
+
+        if(Application.company.get("workMonthStart") == 1){
+            var lastDay = Utils.daysInMonth(endObj.m, endObj.y);
+        } else{
+            var lastDay = Application.company.get("workMonthStart") - 1;
+        }
+
+        var startObj = Utils.convertDateStrToYMD(Application.defaultStart, true, "-");
+
+        if((Application.company.get("daysDisplay") == Company.BY_TWO_WEEKS || Application.company.get("daysDisplay") == Company.BY_WEEK)){
+            config.byWeek = true;
+        }
+
+        $.extend(context, config);
+        context.dateSelector = new ReportDateSelector(element, context, Application.getDefaultEnd(), {btnText: btnTxt});
+        var onArrowClicked = function(isNext){
+            if(Application.company.get("daysDisplay") == Company.BY_MONTH){
+                var datesObj =  Utils.getNextStartEndInCompanyFormat(Application.defaultStart, Application.defaultEnd, isNext);
+            }else if(Application.company.get("daysDisplay") == Company.BY_TWO_WEEKS || Application.company.get("daysDisplay") == Company.BY_WEEK){
+                var datesObj = Utils.getNextWeekStartEndInCompanyFormat(Application.defaultStart, Application.defaultEnd, isNext);
+            }
+
+            Application.defaultStart = datesObj.start;
+            Application.defaultEnd = datesObj.end;
+            context.start = datesObj.start;
+            context.end = datesObj.end;
+            context.dateSelector.datepicker.setStartDate(datesObj.start);
+            context.dateSelector.datepicker.setEndDate(datesObj.end);
+
+            context.el.find("span.error-over-message-text").hide();
+            if(config.hasOwnProperty("callback") && $.isFunction(config.callback)){
+                config.callback(datesObj.start, datesObj.end, context.userId);
+            }
+        }
+
+        context.el.find("img.arrowRightImg").click(function(){ onArrowClicked(false) });
+        context.el.find("img.arrowLeftImg").click(function(){ onArrowClicked(true) });
+    },
+
+    animationTab: function(el, e, sizeScroll = 0) {
+        el.find("div.inner-menu div.menu-slider").first()
+            .css({
+                "left": $(e.currentTarget).position().left + sizeScroll + "px",
+                "width": $(e.currentTarget).width() + "px",
+                "display": "block"
+            });
+        el.find("div.inner-menu ul li").removeClass("active");
+        $(e.currentTarget).addClass("active");
+    },
+    /*
+    * param $textEl: <p> element containing the text to animate
+    * the container of $textEl must have width and position relative
+    * $textEl must have position absolute
+    * */
+    animateText: function($textEl){
+        let direction = "left";
+        if(Application.user.get("userLanguage") == 'English'){
+            direction = "right";
+        }
+
+        let newText = "";
+        const userName = $textEl.text();
+        const space = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp";
+        for(let i = 1; i < 25; i++){
+            newText += `${userName}${space}`;
+        }
+
+        $textEl.on('mouseenter', e => {
+            $textEl.html(newText);
+            $textEl.bind('scroll-text', () => {
+                var ob = $(e.currentTarget);
+                var tw = ob.width();
+                var ww = ob.parent().width();
+                ob.css({ [direction]: -tw + ww })
+                  .animate({ [direction]: ww }, tw * ww / 2.5, 'linear', () => {
+                      ob.trigger('scroll-text');
+                });
+            }).trigger('scroll-text');
+        });
+
+        $textEl.on('mouseleave', e => {
+            $(e.currentTarget)
+                .stop()
+                .text(userName)
+                .unbind('scroll-text')
+                .css({"right": "unset","left": "unset"});
+        });
+    },
+
+    isScientistCompany: function () {
+        return Application.company.get('powerUps') && !!Application.company.get('powerUps').scientistReport;
+    },
+
+    isScientistUser: function () {
+        return Utils.isScientistCompany() && Application.user.get('credentials').innovationAuthority;
+    },
+
+    isApprovedIp: function () {
+        var companyLocations = Application.company.get("locations");
+        var companyLocationsId = companyLocations.map(loc => {
+            return loc.data;
+        })
+
+        return companyLocationsId.includes(Application.currentIp);
+    },
+
+    isValidReportRange: function (start, end, monthsRange = 12) {
+        const startTs = Application.restDateTimestamp(start, false);
+        const endTs = Application.restDateTimestamp(end, false);
+        const maxEndDate = new Date(startTs * 1000);
+        maxEndDate.setMonth(maxEndDate.getMonth() + monthsRange);
+        return endTs <= maxEndDate.getTime();
+    },
+
+    isToday: function (timestamp) {
+        let dateNow = new Date().setHours(0, 0, 0, 0);
+        let dateBaseTimestamp = new Date(timestamp * 1000 + (Application.userTime.getTimezoneOffset() * 60000)).setHours(0, 0, 0, 0);
+        return dateNow === dateBaseTimestamp;
+    },
+
+    isInLastFewHours(timestamp, hoursToCheck = 24) {
+        let today = new Date();
+        let now = today.getTime()
+        let offset = today.getTimezoneOffset() * 60 * 1000;
+        let nowMinusOffset = now - offset;
+        let timeToCheck = nowMinusOffset - hoursToCheck * 60 * 60 * 1000;
+
+        return (timestamp * 1000) < timeToCheck;
+    },
+
+    handleClickOutside(container, callback) {
+        setTimeout(()=>{
+            $(document).on('click', function(event) {
+                if (!$(event.target).closest(container).length && !$(event.target).is(container)) {
+                    callback();
+                    $(document).unbind("click");
+                }
+            })
+        },0)
+    },
+
+    initBrigadesSelect: function(brigadesSelect, callback){
+        if(Application.companyHasBrigades){
+            const self = this;
+            let options = "";
+            Application.brigades.models.forEach((model, i) => {
+                options += `<option value='${model.get('id')}'>${model.get('name')}</option>`;
+            });
+            brigadesSelect.html(options);
+            Utils.initMultiselect(brigadesSelect, false, true, true, Application.brigadeId);
+
+            brigadesSelect.change(function(e){
+                if(_.isFunction(callback)){
+                    callback();
+                }
+            });
+        }
+    },
+
+    aes_encrypt: function (str_to_encrypt){
+        const key = CryptoJS.enc.Hex.parse("0123456789abcdef0123456789abcdef");
+        const iv = CryptoJS.enc.Hex.parse("abcdef9876543210abcdef9876543210");
+
+        return CryptoJS.AES.encrypt(str_to_encrypt,key, {iv, padding: CryptoJS.pad.ZeroPadding}).toString();
+    },
+  
+    decodeHtmlEntities : function (text) {
+        if(!text)return;
+        // Regular expression to match HTML entities
+        var regex = /&(?:lt|gt|amp|quot|apos);/g;
+
+        // Function to replace the matched entity with its corresponding character
+        function replaceEntity(match) {
+            switch(match) {
+                case '&lt;': return '<';
+                case '&gt;': return '>';
+                case '&amp;': return '&';
+                case '&quot;': return '"';
+                case '&apos;': return "'";
+                default: return match;
+            }
+        }
+
+        // Replace all matched entities in the text
+        return text.replace(regex, replaceEntity);
+    },
+      
+    debounce: function (func, delay) {
+        let timeout;
+
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                func(args);
+            }, delay);
+        };
+    },
+
+    getBankHoursAbsenceIds: function(absences = Application.absencePolicies?.models) {
+        return absences?.reduce( (acc, { attributes }) => {
+            const policyType = attributes.type;
+            if (policyType !== 1 || attributes.archived || attributes.disabled) return acc;
+            const policy = JSON.parse(attributes.policy);
+            policy.forEach(({IDs}) => acc = [...new Set([...acc, ...IDs])] );
+            return acc
+        }, []);
+    },
+
+    truncateString: function(str,chars = 12) {
+        if (str && str.length > 12) {
+            return str.substring(0, chars) + '...';
+        }
+        return str;
+    },
+
+    filterMissingsByWatchPermissions: function(missings, user){
+        /*
+        *  Lidor, the PM, advised removing components that are working correctly.
+        *  Therefore, I've left them commented out in the code for future generations.
+        * ===========================================================
+        * 2 Timothy 3:1-5
+        * "But know this: in the last days, difficult times will come.
+        * For people will be self-loving, lovers of pleasure, proud, and arrogant."
+        * */
+        return missings.filter(missing => {
+            // const onlyForManager = missing?.permissionsEventUpdate?.manager;
+            // if(onlyForManager && Application.user.isManager() === false){
+            //     return false;
+            // }
+
+            let result = false;
+            // const employeeIds = missing?.permissionsEventUpdate?.employeeIds;
+            const updatedForIds = missing?.permissionsEventUpdate?.updatedForIds;
+            // const departmentIds = missing?.permissionsEventUpdate?.departmentIds;
+            // const employeeTypeIds = missing?.permissionsEventUpdate?.employeeTypeIds;
+            // const calendarEventsIds = missing?.permissionsEventUpdate?.calendarEventsIds;
+            const updatedForContractIds = missing?.permissionsEventUpdate?.updatedForContractIds;
+
+            if(
+                // (!_.isArray(employeeIds) || employeeIds.length === 0)  &&
+                (!_.isArray(updatedForIds) || updatedForIds.length === 0) &&
+                // (!_.isArray(departmentIds) || departmentIds.length === 0) &&
+                // (!_.isArray(employeeTypeIds) || employeeTypeIds.length === 0) &&
+                // (!_.isArray(calendarEventsIds) || calendarEventsIds.length === 0) &&
+                (!_.isArray(updatedForContractIds) || updatedForContractIds.length === 0)
+            ){
+                return true;
+            }
+
+            // if(_.isArray(departmentIds) && _.include(departmentIds, ''+user?.get('departmentId'))){
+            //     result = true;
+            // }
+
+            // if(_.isArray(employeeIds) && _.include(employeeIds, ''+user?.get('id'))){
+            //     result = true;
+            // }
+
+            // if(_.isArray(employeeTypeIds) && _.isNumber(user?.get('status')) && _.include(employeeTypeIds, ''+Application?.statuses?.models[user?.get('status')]?.get('id'))){
+            //     result = true;
+            // }
+
+            // if(_.isArray(calendarEventsIds) && _.include(calendarEventsIds, ''+user?.get('userCalendar'))){
+            //     result = true;
+            // }
+
+            if(_.isArray(updatedForIds) && _.include(updatedForIds, ''+user?.get('id'))){
+                result = true;
+            }
+
+            if(_.isArray(updatedForContractIds) && _.include(updatedForContractIds, ''+user?.get('contractId'))){
+                result = true;
+            }
+
+            return result;
+        });
+    }
+}
+
+var HelpManager = {
+    apply: function(el) {
+        el.find("a.help").click(function() {
+            const element = $(this), metadata = element.metadata({type: "attr", name: "json"});
+            if (!metadata || !metadata.contentId) {
+                return;
+            }
+            helpDialog.show(metadata.contentId);
+        });
+    }
+}
+
+function sscanf (str, format) {
+    // +   original by: Brett Zamir (http://brett-zamir.me)
+    // %        note 1: Since JS does not support scalar reference variables, any additional arguments to the function will
+    // %        note 1: only be allowable here as strings referring to a global variable (which will then be set to the value
+    // %        note 1: found in 'str' corresponding to the appropriate conversion specification in 'format'
+    // %        note 2: I am unclear on how WS is to be handled here because documentation seems to me to contradict PHP behavior
+    // *     example 1: sscanf('SN/2350001', 'SN/%d');
+    // *     returns 1: [2350001]
+    // *     example 2: var myVar; // Will be set by function
+    // *     example 2: sscanf('SN/2350001', 'SN/%d', 'myVar');
+    // *     returns 2: 1
+    // *     example 3: sscanf("10--20", "%2$d--%1$d"); // Must escape '$' in PHP, but not JS
+    // *     returns 3: [20, 10]
+    // SETUP
+    var retArr = [],
+        num = 0,
+        _NWS = /\S/,
+        args = arguments,
+        that = this,
+        digit;
+
+    var _setExtraConversionSpecs = function (offset) {
+        // Since a mismatched character sets us off track from future legitimate finds, we just scan
+        // to the end for any other conversion specifications (besides a percent literal), setting them to null
+        // sscanf seems to disallow all conversion specification components (of sprintf) except for type specifiers
+        //var matches = format.match(/%[+-]?([ 0]|'.)?-?\d*(\.\d+)?[bcdeufFosxX]/g); // Do not allow % in last char. class
+        var matches = format.slice(offset).match(/%[cdeEufgosxX]/g); // Do not allow % in last char. class;
+        // b, F,G give errors in PHP, but 'g', though also disallowed, doesn't
+        if (matches) {
+            var lgth = matches.length;
+            while (lgth--) {
+                retArr.push(null);
+            }
+        }
+        return _finish();
+    };
+
+    var _finish = function () {
+        if (args.length === 2) {
+            return retArr;
+        }
+        for (var i = 0; i < retArr.length; ++i) {
+            that.window[args[i + 2]] = retArr[i];
+        }
+        return i;
+    };
+
+    var _addNext = function (j, regex, cb) {
+        if (assign) {
+            var remaining = str.slice(j);
+            var check = width ? remaining.substr(0, width) : remaining;
+            var match = regex.exec(check);
+            var testNull = retArr[digit !== undefined ? digit : retArr.length] = match ? (cb ? cb.apply(null, match) : match[0]) : null;
+            if (testNull === null) {
+                throw 'No match in string';
+            }
+            return j + match[0].length;
+        }
+        return j;
+    };
+
+    if (arguments.length < 2) {
+        throw 'Not enough arguments passed to sscanf';
+    }
+
+    // PROCESS
+    for (var i = 0, j = 0; i < format.length; i++) {
+
+        var width = 0,
+            assign = true;
+
+        if (format.charAt(i) === '%') {
+            if (format.charAt(i + 1) === '%') {
+                if (str.charAt(j) === '%') { // a matched percent literal
+                    ++i, ++j; // skip beyond duplicated percent
+                    continue;
+                }
+                // Format indicated a percent literal, but not actually present
+                return _setExtraConversionSpecs(i + 2);
+            }
+
+            // CHARACTER FOLLOWING PERCENT IS NOT A PERCENT
+
+            var prePattern = new RegExp('^(?:(\\d+)\\$)?(\\*)?(\\d*)([hlL]?)', 'g'); // We need 'g' set to get lastIndex
+
+            var preConvs = prePattern.exec(format.slice(i + 1));
+
+            var tmpDigit = digit;
+            if (tmpDigit && preConvs[1] === undefined) {
+                throw 'All groups in sscanf() must be expressed as numeric if any have already been used';
+            }
+            digit = preConvs[1] ? parseInt(preConvs[1], 10) - 1 : undefined;
+
+            assign = !preConvs[2];
+            width = parseInt(preConvs[3], 10);
+            var sizeCode = preConvs[4];
+            i += prePattern.lastIndex;
+
+            // Fix: Does PHP do anything with these? Seems not to matter
+            if (sizeCode) { // This would need to be processed later
+                switch (sizeCode) {
+                    case 'h':
+                    // Treats subsequent as short int (for d,i,n) or unsigned short int (for o,u,x)
+                    case 'l':
+                    // Treats subsequent as long int (for d,i,n), or unsigned long int (for o,u,x);
+                    //    or as double (for e,f,g) instead of float or wchar_t instead of char
+                    case 'L':
+                        // Treats subsequent as long double (for e,f,g)
+                        break;
+                    default:
+                        throw 'Unexpected size specifier in sscanf()!';
+                        break;
+                }
+            }
+            // PROCESS CHARACTER
+            try {
+                switch (format.charAt(i + 1)) {
+                    // For detailed explanations, see http://web.archive.org/web/20031128125047/http://www.uwm.edu/cgi-bin/IMT/wwwman?topic=scanf%283%29&msection=
+                    // Also http://www.mathworks.com/access/helpdesk/help/techdoc/ref/sscanf.html
+                    // p, S, C arguments in C function not available
+                    // DOCUMENTED UNDER SSCANF
+                    case 'F':
+                        // Not supported in PHP sscanf; the argument is treated as a float, and
+                        //  presented as a floating-point number (non-locale aware)
+                        // sscanf doesn't support locales, so no need for two (see %f)
+                        break;
+                    case 'g':
+                        // Not supported in PHP sscanf; shorter of %e and %f
+                        // Irrelevant to input conversion
+                        break;
+                    case 'G':
+                        // Not supported in PHP sscanf; shorter of %E and %f
+                        // Irrelevant to input conversion
+                        break;
+                    case 'b':
+                        // Not supported in PHP sscanf; the argument is treated as an integer, and presented as a binary number
+                        // Not supported - couldn't distinguish from other integers
+                        break;
+                    case 'i':
+                        // Integer with base detection (Equivalent of 'd', but base 0 instead of 10)
+                        j = _addNext(j, /([+-])?(?:(?:0x([\da-fA-F]+))|(?:0([0-7]+))|(\d+))/, function (num, sign, hex, oct, dec) {
+                            return hex ? parseInt(num, 16) : oct ? parseInt(num, 8) : parseInt(num, 10);
+                        });
+                        break;
+                    case 'n':
+                        // Number of characters processed so far
+                        retArr[digit !== undefined ? digit : retArr.length - 1] = j;
+                        break;
+                    // DOCUMENTED UNDER SPRINTF
+                    case 'c':
+                        // Get character; suppresses skipping over whitespace! (but shouldn't be whitespace in format anyways, so no difference here)
+                        // Non-greedy match
+                        j = _addNext(j, new RegExp('.{1,' + (width || 1) + '}'));
+                        break;
+                    case 'D':
+                    // sscanf documented decimal number; equivalent of 'd';
+                    case 'd':
+                        // Optionally signed decimal integer
+                        j = _addNext(j, /([+-])?(?:0*)(\d+)/, function (num, sign, dec) {
+                            // Ignores initial zeroes, unlike %i and parseInt()
+                            var decInt = parseInt((sign || '') + dec, 10);
+                            if (decInt < 0) { // PHP also won't allow less than -2147483648
+                                return decInt < -2147483648 ? -2147483648 : decInt; // integer overflow with negative
+                            } else { // PHP also won't allow greater than -2147483647
+                                return decInt < 2147483647 ? decInt : 2147483647;
+                            }
+                        });
+                        break;
+                    case 'f':
+                    // Although sscanf doesn't support locales, this is used instead of '%F'; seems to be same as %e
+                    case 'E':
+                    // These don't discriminate here as both allow exponential float of either case
+                    case 'e':
+                        j = _addNext(j, /([+-])?(?:0*)(\d*\.?\d*(?:[eE]?\d+)?)/, function (num, sign, dec) {
+                            if (dec === '.') {
+                                return null;
+                            }
+                            return parseFloat((sign || '') + dec); // Ignores initial zeroes, unlike %i and parseFloat()
+                        });
+                        break;
+                    case 'u':
+                        // unsigned decimal integer
+                        // We won't deal with integer overflows due to signs
+                        j = _addNext(j, /([+-])?(?:0*)(\d+)/, function (num, sign, dec) {
+                            // Ignores initial zeroes, unlike %i and parseInt()
+                            var decInt = parseInt(dec, 10);
+                            if (sign === '-') { // PHP also won't allow greater than 4294967295
+                                return 4294967296 - decInt; // integer overflow with negative
+                            } else {
+                                return decInt < 4294967295 ? decInt : 4294967295;
+                            }
+                        });
+                        break;
+                    case 'o':
+                        // Octal integer // Fix: add overflows as above?
+                        j = _addNext(j, /([+-])?(?:0([0-7]+))/, function (num, sign, oct) {
+                            return parseInt(num, 8);
+                        });
+                        break;
+                    case 's':
+                        // Greedy match
+                        j = _addNext(j, /\S+/);
+                        break;
+                    case 'X':
+                    // Same as 'x'?
+                    case 'x':
+                        // Fix: add overflows as above?
+                        // Initial 0x not necessary here
+                        j = _addNext(j, /([+-])?(?:(?:0x)?([\da-fA-F]+))/, function (num, sign, hex) {
+                            return parseInt(num, 16);
+                        });
+                        break;
+                    case '':
+                        // If no character left in expression
+                        throw 'Missing character after percent mark in sscanf() format argument';
+                    default:
+                        throw 'Unrecognized character after percent mark in sscanf() format argument';
+                }
+            } catch (e) {
+                if (e === 'No match in string') { // Allow us to exit
+                    return _setExtraConversionSpecs(i + 2);
+                }
+            }++i; // Calculate skipping beyond initial percent too
+        } else if (format.charAt(i) !== str.charAt(j)) {
+            // Fix: Double-check i whitespace ignored in string and/or formats
+            _NWS.lastIndex = 0;
+            if ((_NWS).test(str.charAt(j)) || str.charAt(j) === '') { // Whitespace doesn't need to be an exact match)
+                return _setExtraConversionSpecs(i + 1);
+            } else {
+                // Adjust strings when encounter non-matching whitespace, so they align in future checks above
+                str = str.slice(0, j) + str.slice(j + 1); // Ok to replace with j++;?
+                i--;
+            }
+        } else {
+            j++;
+        }
+    }
+
+    // POST-PROCESSING
+    return _finish();
+}

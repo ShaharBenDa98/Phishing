@@ -1,0 +1,36 @@
+@media only screen and (min-width:1400px) and (max-width: 1499px){}
+@media only screen and (min-width:1200px) and (max-width: 1399px){}
+@media only screen and (min-width:1200px){}
+@media only screen and (min-width:992px) and (max-width: 1199px){}
+
+
+@media only screen and (min-width:992px){
+	.loginFooter{position: absolute;bottom:0;right:0;width: 100%;}
+	.centerdTxt{position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);}
+	.appLinks{position: absolute;bottom: 15px;right: 50%;transform: translateX(50%);}
+	.wrapper,.bgWrap,.container-fluid,.container-fluid>.row{height: 100%;}
+	.container-fluid>.row>div[class^='col-']{min-height: 100%;}
+	html, body{height: 100%;}
+	.register .bgWrap {height: 100vh; position: fixed; inset-inline-end: 0; width: 41.666667%;}
+}
+@media only screen and (min-width:768px){
+	.innerErrorPage{padding: 50px 25px;}
+}
+@media only screen and (min-width:768px) and (max-width:991px){}
+
+@media only screen and (max-width:991px){
+	.appLinks, .loginFooter{margin-top: 40px;}
+}
+@media only screen and (max-width:767px){
+	html, body{font-size: 14px;}
+	.innerErrorPage h1{font-size: 1.7rem;}
+	.innerErrorPage h2{font-size: 1.3rem;}
+	.errorWrap .wrapper,.errorWrap .container-fluid,.errorWrap .container-fluid>.row, .innerErrorPage{height: 100%;}
+	html,  body.errorWrap{height: 100%;}
+}
+@media only screen and (max-width:599px){}
+@media only screen and (max-width:479px){}
+@media only screen and (max-width:360px){}
+@media only screen and (max-height:750px){
+	.loginFooter{position: static;}
+}

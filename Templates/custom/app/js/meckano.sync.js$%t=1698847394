@@ -1,0 +1,88 @@
+Backbone.sync = function(method, model, options) {
+
+    // pace runs the line at the top of the page for each call to the server
+    if (typeof Pace !== "undefined") {
+        Pace.restart();
+    }
+
+    var resp;
+    var params = {};
+    switch (method) {
+        case "read":
+            if (model.readParams != undefined) {
+                params = model.readParams();
+            }
+            break;
+
+        case "create":
+            if (model.createParams != undefined) {
+                parmas = model.createParams();
+            }
+            $.extend(params, model.attributes);
+            break;
+
+        case "update":
+            if (model.updateParams != undefined) {
+                params = model.updateParams();
+            }
+            $.extend(params, model.attributes);
+            break;
+
+        case "delete":
+            if (model.deleteParams != undefined) {
+                params = model.updateParams;
+            }
+            break;
+    }
+
+    if (Application.user) {
+        $.extend(params, {actionsToken: Application.user.get("actionsToken")});
+    }
+
+    var url = "";
+    if(model.params && model.params.dominToExportReport){
+        url = model.params.dominToExportReport;
+    }
+    url += Application.api + model.url();
+
+    var request = {_method: method, data: JSON.stringify(params)};
+    var $dfr = $.post(url, request);
+    $dfr.done( function(data) {
+        var obj = JSON.parse(data);
+        if(obj.code == 401){
+            if(Application.user.attributes.userLanguage == "English"){
+                top.location.href = "../login.php?l=en";
+            }else {
+                top.location.href = "../login.php#login";
+            }
+            return;
+        }
+        if (obj.status == 0) {
+            if (options.mb) {
+                Application.messageBar.showSuccess(options.mbSuccess, options.mbUndo);
+            }
+            if (options.success != undefined) {
+                options.success(obj.data);
+            }
+        }
+        else {
+            if (options.mb) {
+                Application.messageBar.showError(options.mbError, options.mbUndo);
+            }
+            //not a transport error, but still an error
+            if (options.detailedError) {
+                options.detailedError(obj);
+            }
+            if (options.error != undefined) {
+                options.error(obj.code);
+            }
+            else {
+                //use global error handler to show some error indication
+            }
+        }
+    });
+
+    $dfr.fail(function(data){
+        //@todo: show communication error
+    });
+};

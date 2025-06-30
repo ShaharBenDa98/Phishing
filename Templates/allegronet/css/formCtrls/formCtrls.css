@@ -1,0 +1,224 @@
+FIELDSET
+{
+	border: 1px solid #a2a2a2;
+}
+LEGEND
+{
+	padding: 0px 5px 0px 5px;
+	font-weight: bold;
+}
+INPUT,
+SELECT,
+BUTTON,
+TEXTAREA
+{
+	/*vertical-align: middle;*/
+	vertical-align: top;
+}
+TEXTAREA
+{
+	overflow: auto;
+	border: 1px solid #a2a2a2;
+	padding: 2px;
+}
+TEXTAREA.Maxed
+{
+	_border-bottom-width: 2px;
+}
+INPUT
+{
+	_border:expression(this.type=='text'||this.type=='password'?"1px solid #a2a2a2":"auto");
+	_height: expression(this.type=='text'||this.type=='password'?"21px":"auto");
+}
+INPUT[type="text"],
+INPUT[type="password"]
+{
+	border: 1px solid #a2a2a2;
+	height: 21px;
+	padding: 3px 2px 0px 2px;
+}
+INPUT[type="radio"],
+INPUT[type="checkbox"]
+{
+	
+}
+.Disabled INPUT
+{
+  color: #adacac;
+}
+
+.FormLayoutTable
+{
+	
+}
+.FormLayoutTable .ButtonRow
+{
+	/*padding-bottom: 20px;*/
+}
+.FormRow
+{
+	height: 1px;
+	/*padding: 0px 25px 5px 10px;*/
+	/*padding: 10px 5px 0px 18px;*/
+	padding: 9px 0px 0px 0px;
+	/*border: 1px solid blue;*/
+}
+.Form_Ctrl
+{
+	/*display: inline;*/
+	margin-right: 62px;
+	float: left;
+	_width: expression(this.FullWidth=='true'?"100%":"");
+	_margin-right: expression(this.FullWidth=='true'?"0px":"");
+}
+.RTL
+.Form_Ctrl
+{
+	margin-right: 0px;
+	margin-left: 62px;
+	float: right;
+	_margin-left: expression(this.FullWidth=='true'?"0px":"");
+}
+.RightAlign
+.Form_Ctrl
+{
+	float: right;
+	margin-right: 0px;
+}
+.RTL
+.RightAlign
+.Form_Ctrl
+{
+	float: Left;
+	margin-left: 0px;
+}
+.Form_Ctrl[FullWidth='true']
+{
+	display: table;
+	margin-right: 0px;
+	width: 100%;
+}
+.RTL
+.Form_Ctrl[FullWidth='true']
+{
+	margin-Left: 0px;
+}
+.Form_Ctrl_Label
+{
+	height: 17px;
+	padding-right: 5px;
+}
+.RTL
+.Form_Ctrl_Label
+{
+	padding-left: 0px;
+}
+.Form_Ctrl_Label,
+.Form_Ctrl_Label *
+{
+	color: #7A7B7F;
+	font-weight: bold;
+	line-height: 17px;
+	font-size: 13px;
+    padding-right: 0px;
+}
+.Form_Ctrl_LabelHeader {
+  color: #7A7B7F;
+  font-weight: bold;
+  line-height: 17px;
+  font-size: 15px;
+    padding-right: 0px;
+}
+/*.Form_Ctrl_Label
+SELECT
+{
+    padding-right: 0px;
+}
+.RTL
+.Form_Ctrl_Label
+SELECT
+{
+    padding-left: 0px;
+} */
+
+.Form_Ctrl
+INPUT
+{
+	_border:expression(this.type=='text'||this.type=='password'?"1px solid #a2a2a2":"");
+	_height: expression(this.type=='text'||this.type=='password'?"21px":"");
+	_width: expression(this.type=='text'||this.type=='password'?"140px":"");
+	padding: 3px 2px 0px 2px;
+	/*_margin-left: expression(this.type=='image'?"4px":"");*/
+}
+.Form_Ctrl
+INPUT[type="text"],
+.Form_Ctrl
+INPUT[type="password"]
+{
+	border: 1px solid #a2a2a2;
+	height: 21px;
+	min-width: 140px;
+	width: 100%;
+	padding: 3px 2px 0px 2px;
+}
+.Form_Ctrl
+INPUT[type="image"]
+{
+	margin-bottom: 4px;
+}
+.Form_Ctrl .Input_Image
+{
+	margin: 0px 12px 0px 3px;
+}
+.Form_Ctrl
+SELECT
+{
+	height: 21px;
+	padding-top: 2px;
+    padding-right: 0px;
+    /*font-size: 14px;*/
+}
+.Form_Ctrl_Fields
+{
+	vertical-align: top;
+	
+}
+.Form_Ctrl .FieldBox
+{
+	padding-top: 3px;
+	_padding-top: 1px;
+	height: 32px;
+	_height: 1px;
+	display: table-cell;
+    padding-right: 2px;
+}
+.RTL
+.Form_Ctrl .FieldBox
+{
+/*    padding-right: 0px;*/
+    padding-left: 2px;
+}
+
+.Form_Ctrl .FieldBox .Button3Parts
+{
+	margin: 3px 0px 0px 2px;
+	_margin-top: 2px;
+	display: block;
+}
+.RTL
+.Form_Ctrl .FieldBox .Button3Parts
+{
+	/*margin: 3px 2px 0px 0px;
+	_margin-top: 2px;*/
+}
+.Form_Ctrl .FieldBox .Button3Parts .ButtonLabel
+{
+	width: 20px;
+	
+}
+
+.RedLabel{
+    color:red;
+    font-size:17px;
+}
+
